@@ -7,7 +7,7 @@ using namespace std;
 
 class Map;
 class Territory;
-class Edge;
+class Continent;
 
 class Map
 {
@@ -18,7 +18,7 @@ private:
 public:
     Map(string id);
 
-    void addTerritory(string id, Continent continent, string currentPlayer, int armies);
+    void addTerritory(string id, Continent *continent, string currentPlayer, int armies);
     void addConnection(Territory *a1, Territory *a2);
     void validate();
     void print();
@@ -47,7 +47,7 @@ private:
     set<Territory *> *adj;
 
 public:
-    Territory(string id, Continent continent, string currentPlayer, int armies);
+    Territory(string id, Continent *continent, string currentPlayer, int armies);
 
     set<Territory *> *getAdj()
     {

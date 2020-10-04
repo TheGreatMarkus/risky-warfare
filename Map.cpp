@@ -10,7 +10,7 @@ Map::Map(string id_)
     territories = new set<Territory *>();
 }
 
-void Map::addTerritory(string id, Continent continent, string currentPlayer, int armies)
+void Map::addTerritory(string id, Continent *continent, string currentPlayer, int armies)
 {
     Territory *newTerritory = new Territory(id, continent, currentPlayer, armies);
     territories->insert(newTerritory);
@@ -64,9 +64,9 @@ Map::~Map()
     cout << "Map destroyed!" << endl;
 }
 
-Territory::Territory(string id_, Continent continent_, string currentPlayer_, int armies_)
+Territory::Territory(string id_, Continent *continent_, string currentPlayer_, int armies_)
     : id{new string(id_)},
-      continent{new Continent(continent_)},
+      continent{continent_},
       currentPlayer{new string(currentPlayer_)},
       armies{new int(armies_)}
 
