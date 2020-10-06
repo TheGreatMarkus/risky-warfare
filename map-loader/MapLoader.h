@@ -1,4 +1,6 @@
-#include "Map.h"
+#pragma once
+
+#include "../map/Map.h"
 #include <string>
 
 using namespace std;

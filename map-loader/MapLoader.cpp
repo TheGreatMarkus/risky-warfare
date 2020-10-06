@@ -5,8 +5,6 @@
 #include <vector>
 #include <sstream>
 
-using namespace std;
-
 namespace
 {
     string cleanLine(string line)
@@ -62,9 +60,10 @@ void MapLoader::readMapFile(string fileName)
     ifstream mapFile(fileName);
     string line;
 
-    Map map(fileName);
-    vector<Continent *> continents{};
-    vector<Territory *> territories{};
+    Map *map = new Map(fileName);
+
+    vector<Continent *> *continents = map->getContinents();
+    vector<Territory *> *territories = map->getTerritories();
 
     while (getline(mapFile, line))
     {
@@ -104,17 +103,24 @@ void MapLoader::readMapFile(string fileName)
         vector<string> tokens = strSplit(line, " ");
         if (currentSection == Section::continents)
         {
-            continents.push_back(new Continent{tokens[0], stoi(tokens[1])});
+            continents->push_back(new Continent{tokens[0], stoi(tokens[1])});
         }
         else if (currentSection == Section::countries)
         {
-            map.addTerritory(tokens[1], continents[stoi(tokens[2])], "", 0);
+            map->addTerritory(stoi(tokens[0]), tokens[1], continents->at(stoi(tokens[2]) - 1), "", 0);
         }
         else if (currentSection == Section::borders)
         {
+            int terr1Id = stoi(tokens.at(0));
+            for (int i = 1; i < tokens.size(); i++)
+            {
+                int terr2Id = stoi(tokens.at(i));
+                map->addConnection(terr1Id, terr2Id);
+            }
         }
         cout << line << endl;
     }
+    map->print();
 }
 
 MapLoader::~MapLoader()
