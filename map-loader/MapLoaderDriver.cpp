@@ -3,7 +3,7 @@
 
 int main()
 {
-    MapLoader::readMapFile("example.map");
+    readMapFile("example.map");
 
     return 0;
 }

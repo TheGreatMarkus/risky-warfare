@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include "../player/Player.h"
+
+using std::cout;
+using std::endl;
+using std::ifstream;
 
 namespace
 {
@@ -41,11 +46,7 @@ namespace
 
 } // namespace
 
-MapLoader::MapLoader(/* args */)
-{
-}
-
-void MapLoader::readMapFile(string fileName)
+Map *readMapFile(string fileName)
 {
     enum class Section
     {
@@ -62,8 +63,11 @@ void MapLoader::readMapFile(string fileName)
 
     Map *map = new Map(fileName);
 
-    vector<Continent *> *continents = map->getContinents();
-    vector<Territory *> *territories = map->getTerritories();
+    Player *player1 = new Player("asdfs");
+
+    vector<Continent *>
+        continents = map->getContinents();
+    vector<Territory *> territories = map->getTerritories();
 
     while (getline(mapFile, line))
     {
@@ -103,11 +107,11 @@ void MapLoader::readMapFile(string fileName)
         vector<string> tokens = strSplit(line, " ");
         if (currentSection == Section::continents)
         {
-            continents->push_back(new Continent{tokens[0], stoi(tokens[1])});
+            continents.push_back(new Continent{tokens[0], stoi(tokens[1])});
         }
         else if (currentSection == Section::countries)
         {
-            map->addTerritory(stoi(tokens[0]), tokens[1], continents->at(stoi(tokens[2]) - 1), "", 0);
+            map->addTerritory(stoi(tokens[0]), tokens[1], continents.at(stoi(tokens[2]) - 1), player1, 0);
         }
         else if (currentSection == Section::borders)
         {
@@ -120,9 +124,5 @@ void MapLoader::readMapFile(string fileName)
         }
         cout << line << endl;
     }
-    map->print();
-}
-
-MapLoader::~MapLoader()
-{
+    return map;
 }
