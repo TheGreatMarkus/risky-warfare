@@ -22,19 +22,28 @@ private:
     vector<Continent *> continents;
 
 public:
-    Map(string name_);
+    Map(string name);
     Map(const Map &other);
 
-    Map &operator=(Map other);
     friend void swap(Map &first, Map &second);
+    Map &operator=(Map other);
     friend ostream &operator<<(ostream &out, const Map &obj);
 
-    void addTerritory(int id, string name, Continent *continent, Player *currentPlayer, int armies);
+    void addTerritory(
+        int id,
+        string name,
+        int continentId,
+        int playerId,
+        int armies);
+    void addContinent(
+        int id,
+        string name,
+        int armyValue);
     void addConnection(int t1Id, int t2Id);
     bool validate();
     Territory *getTerritoryById(int id);
-    vector<Territory *> &getTerritories();
-    vector<Continent *> &getContinents();
+    vector<Territory *> getTerritories();
+    vector<Continent *> getContinents();
 
     ~Map();
 };
@@ -42,19 +51,21 @@ public:
 class Continent
 {
 private:
+    int id;
     string name;
     int armyValue;
 
 public:
-    Continent(string name_, int armyValue_);
+    Continent(int id, string name, int armyValue);
     Continent(const Continent &other);
 
-    Continent &operator=(Continent other);
     friend void swap(Continent &first, Continent &second);
+    Continent &operator=(Continent other);
     friend ostream &operator<<(ostream &out, const Continent &obj);
 
-    string &getName();
-    int &getArmyValue();
+    int getId();
+    string getName();
+    int getArmyValue();
 
     ~Continent();
 };
@@ -64,22 +75,22 @@ class Territory
 private:
     int id;
     string name;
-    Continent *continent;
-    Player *currentPlayer;
+    int continentId;
+    int playerId;
     int armies;
-    set<Territory *> adj;
+    set<int> adj;
 
 public:
-    Territory(int id, string name, Continent *continent, Player *currentPlayer, int armies);
+    Territory(int id, string name, int continentId, int playerId, int armies);
     Territory(const Territory &other);
 
-    Territory &operator=(Territory other);
     friend void swap(Territory &first, Territory &second);
+    Territory &operator=(Territory other);
     friend ostream &operator<<(ostream &out, const Territory &obj);
 
-    set<Territory *> &getAdj();
-    int &getId();
-    string &getName();
+    set<int> getAdj();
+    int getId();
+    string getName();
 
     ~Territory();
 };

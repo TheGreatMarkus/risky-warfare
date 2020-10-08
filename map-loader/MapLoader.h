@@ -3,4 +3,16 @@
 #include "../map/Map.h"
 #include <string>
 
-Map *readMapFile(string fileName);
+class MapLoader
+{
+
+public:
+    MapLoader();
+
+    MapLoader &operator=(MapLoader other);
+    friend void swap(MapLoader &first, MapLoader &second);
+    friend ostream &operator<<(ostream &out, const MapLoader &obj);
+
+    static MapLoader *readMapFile(string fileName);
+    ~MapLoader();
+};

@@ -15,13 +15,14 @@ class Order;
 class Player
 {
 private:
+    int id;
     string name;
     vector<Territory *> *ownedTerritories;
     Hand *hand;
     vector<Order *> *orders;
 
 public:
-    Player(string name_);
+    Player(int id, string name_);
     Player(const Player &other);
 
     Player &operator=(Player other);

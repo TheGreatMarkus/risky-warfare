@@ -3,8 +3,9 @@
 #include "../cards/Cards.h"
 #include "../orders/Orders.h"
 
-Player::Player(string name_)
-    : name{name_} {}
+Player::Player(int id, string name)
+    : id{id},
+      name{name} {}
 
 Player::Player(const Player &other)
     : name{other.name} {}

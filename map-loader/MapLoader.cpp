@@ -46,6 +46,12 @@ namespace
 
 } // namespace
 
+MapLoader::MapLoader() {}
+
+MapLoader &MapLoader::operator=(MapLoader other)
+{
+}
+
 Map *readMapFile(string fileName)
 {
     enum class Section
