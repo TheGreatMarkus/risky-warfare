@@ -1,14 +1,13 @@
 #include <iostream>
-#include <string>
 #include <vector>
 
 #include "Map.h"
 #include "../player/Player.h"
 
 using std::cout;
+using std::endl;
 
-int main()
-{
+int main() {
     // TODO: Valid map
 
     // TODO: Invalid map: Map not graph
@@ -21,8 +20,8 @@ int main()
     Player player1(0, "player1");
     Player player2(1, "player2");
 
-    newMap.addContinent(0, "cont1", 1);
-    newMap.addContinent(1, "cont2", 1);
+    newMap.addContinent("cont1", 1);
+    newMap.addContinent("cont2", 1);
 
     newMap.addTerritory(1, "t1", 0, 0, 1);
     newMap.addTerritory(2, "t2", 0, 0, 1);
@@ -37,6 +36,8 @@ int main()
     newMap.addConnection(territories.at(2)->getId(), territories.at(3)->getId());
 
     cout << newMap;
+
+    cout << "valid: " << newMap.validate() << endl;
 
     return 0;
 }

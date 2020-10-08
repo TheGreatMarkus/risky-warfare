@@ -2,10 +2,11 @@
 
 #include <vector>
 
-using namespace std;
+using std::vector;
 
 class Deck;
 class Card;
+class Player;
 
 class Deck
 {
@@ -15,7 +16,7 @@ private:
 public:
     Deck(/* args */);
 
-    Card *draw();
+    void draw(Hand *hand);
 
     vector<Card *> *getCards()
     {
@@ -45,7 +46,7 @@ private:
 public:
     Card(/* args */);
 
-    virtual void play();
+    virtual void play(Player *player, Deck *deck);
 
     ~Card();
 };

@@ -71,3 +71,4 @@ DiplomacyCard::DiplomacyCard(/* args */)
 DiplomacyCard::~DiplomacyCard()
 {
 }
+
