@@ -1,74 +1,100 @@
 #include "Cards.h"
 
-Deck::Deck(/* args */)
-{
+//=============================
+// Deck Implementation
+//=============================
+
+Deck::Deck()
+        : cards{vector<Card *>()} {}
+
+Deck::Deck(const Deck &other)
+        : cards{vector<Card *>{}} {
+    // TODO: Copy
 }
 
-Deck::~Deck()
-{
+void swap(Deck &a, Deck &b) {
+    using std::swap;
+
+    swap(a.cards, b.cards);
 }
 
-Hand::Hand(/* args */)
-{
+Deck &Deck::operator=(Deck other) {
+    swap(*this, other);
+    return *this;
 }
 
-Hand::~Hand()
-{
+ostream &operator<<(ostream &out, const Deck &obj) {
+    // TODO
+    out << "";
+    return out;
 }
 
-Card::Card(/* args */)
-{
+void Deck::draw(Hand *hand) {
+    int picked = rand() % cards.size();
+
+    Card *pickedCard = cards.at(picked);
+    cards.erase(cards.begin() + picked);
+
+    hand->addCard(pickedCard);
 }
 
-Card::~Card()
-{
+void Deck::addCard(Card *card) {
+    cards.push_back(card);
 }
 
-SpyCard::SpyCard(/* args */)
-{
+Deck::~Deck() {}
+
+//=============================
+// Hand Implementation
+//=============================
+
+
+
+Hand::Hand() : cards{vector<Card *>()} {}
+
+Hand::Hand(const Hand &other) : cards{vector<Card *>()} {
+    // TODO copy cards in vector
 }
 
-SpyCard::~SpyCard()
-{
+void swap(Hand &a, Hand &b) {
+    using std::swap;
+    swap(a.cards, b.cards);
 }
 
-BombCard::BombCard(/* args */)
-{
+Hand &Hand::operator=(Hand other) {
+    swap(*this, other);
+    return *this;
 }
 
-BombCard::~BombCard()
-{
+ostream &operator<<(ostream &out, const Hand &obj) {
+    // TODO
+    out << "";
+    return out;
 }
 
-ReinforcementCard::ReinforcementCard(/* args */)
-{
+void Hand::addCard(Card *card) {
+    cards.push_back(card);
 }
 
-ReinforcementCard::~ReinforcementCard()
-{
+vector<Card *> Hand::getCards() const {
+    return cards;
 }
 
-BlockadeCard::BlockadeCard(/* args */)
-{
+Hand::~Hand() {}
+
+//=============================
+// Card Implementation
+//=============================
+
+Card::Card() {}
+
+Card::Card(const Card &other) {}
+
+ostream &operator<<(ostream &out, const Card &obj) {
+    out << "";
+    return out;
 }
 
-BlockadeCard::~BlockadeCard()
-{
-}
+Card::~Card() {}
 
-AirliftCard::AirliftCard(/* args */)
-{
-}
-
-AirliftCard::~AirliftCard()
-{
-}
-
-DiplomacyCard::DiplomacyCard(/* args */)
-{
-}
-
-DiplomacyCard::~DiplomacyCard()
-{
-}
 

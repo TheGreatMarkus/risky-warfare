@@ -10,6 +10,8 @@ using std::vector;
 
 class Order;
 class Territory;
+class Map;
+class Player;
 
 class OrdersList {
 private:
@@ -32,14 +34,15 @@ class Order {
 private:
     bool executed;
 public:
-    Order(bool executed);
+    Order();
     Order(const Order &other);
     friend void swap(Order &a, Order &b);
-    Order &operator=(Order other);
     friend ostream &operator<<(ostream &out, Order &obj);
+    // Can't override assignment operator for abstract class
+    // Order &operator=(Order other);
 
-    virtual bool validate() = 0;
-    virtual void execute() = 0;
+    virtual bool validate(Map *map, Player *player) = 0;
+    virtual void execute(Map *map, Player *player) = 0;
     virtual string toString() = 0;
 
     bool getExecuted() const;
@@ -51,19 +54,16 @@ public:
 class DeployOrder : public Order {
 private:
     int armies;
-    int originId;
-    int destId;
+    int territoryId;
 public:
-    DeployOrder(bool executed,
-                int armies,
-                int originId,
-                int destId;
+    DeployOrder(int armies,
+                int territoryId);
     DeployOrder(const DeployOrder &other);
     friend void swap(DeployOrder &a, DeployOrder &b);
     DeployOrder &operator=(DeployOrder other);
 
-    bool validate() override;
-    void execute() override;
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
     string toString() override;
 
     ~DeployOrder();
@@ -71,75 +71,88 @@ public:
 
 class AdvanceOrder : public Order {
 private:
-    /* data */
+    int armies;
+    int originId;
+    int destId;
 public:
-    AdvanceOrder(/* args */);
+    AdvanceOrder(int armies,
+                 int originId,
+                 int destId);
+    AdvanceOrder(const AdvanceOrder &other);
+    friend void swap(AdvanceOrder &a, AdvanceOrder &b);
+    AdvanceOrder &operator=(AdvanceOrder other);
 
-    bool validate();
-
-    void execute();
-
-    string toString();
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
+    string toString() override;
 
     ~AdvanceOrder();
 };
 
 class BombOrder : public Order {
 private:
-    /* data */
+    int territoryId;
 public:
-    BombOrder(/* args */);
+    BombOrder(int territoryId);
+    BombOrder(const BombOrder &other);
+    friend void swap(BombOrder &a, BombOrder &b);
+    BombOrder &operator=(BombOrder other);
 
-    bool validate();
-
-    void execute();
-
-    string toString();
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
+    string toString() override;
 
     ~BombOrder();
 };
 
 class BlockadeOrder : public Order {
 private:
-    /* data */
+    int territoryId;
 public:
-    BlockadeOrder(/* args */);
+    BlockadeOrder(int territoryId);
+    BlockadeOrder(const BlockadeOrder &other);
+    friend void swap(BlockadeOrder &a, BlockadeOrder &b);
+    BlockadeOrder &operator=(BlockadeOrder other);
 
-    bool validate();
-
-    void execute();
-
-    string toString();
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
+    string toString() override;
 
     ~BlockadeOrder();
 };
 
 class AirliftOrder : public Order {
 private:
-    /* data */
+    int armies;
+    int originId;
+    int destId;
 public:
-    AirliftOrder(/* args */);
+    AirliftOrder(int armies,
+                 int originId,
+                 int destId);
+    AirliftOrder(const AirliftOrder &other);
+    friend void swap(AirliftOrder &a, AirliftOrder &b);
+    AirliftOrder &operator=(AirliftOrder other);
 
-    bool validate();
-
-    void execute();
-
-    string toString();
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
+    string toString() override;
 
     ~AirliftOrder();
 };
 
 class NegotiateOrder : public Order {
 private:
-    /* data */
+    int playerId;
 public:
-    NegotiateOrder(/* args */);
+    NegotiateOrder(int playerId);
+    NegotiateOrder(const NegotiateOrder &other);
+    friend void swap(NegotiateOrder &a, NegotiateOrder &b);
+    NegotiateOrder &operator=(NegotiateOrder other);
 
-    bool validate();
-
-    void execute();
-
-    string toString();
+    bool validate(Map *map, Player *player) override;
+    void execute(Map *map, Player *player) override;
+    string toString() override;
 
     ~NegotiateOrder();
 };

@@ -23,7 +23,7 @@ private:
     string name;
     vector<Territory *> territories;
     vector<Continent *> continents;
-    map<Territory *, set<Territory *>> adj;
+    vector<set<int>> adj;
 
 public:
     Map(string name);
@@ -32,15 +32,13 @@ public:
     Map &operator=(Map other);
     friend ostream &operator<<(ostream &out, const Map &obj);
 
-    void addTerritory(int id,
-                      string name,
-                      int continentId,
+    void addTerritory(string terrName,
+                      int continent,
                       int playerId,
                       int armies);
-    void addContinent(string name, int armyValue);
+    void addContinent(string continentName, int armyValue);
     void addConnection(int t1Id, int t2Id);
     bool validate();
-    Territory *getTerritoryById(int id);
     vector<Territory *> getTerritories();
     vector<Continent *> getContinents();
 
@@ -49,18 +47,16 @@ public:
 
 class Continent {
 private:
-    int id;
     string name;
     int armies;
 
 public:
-    Continent(int id, string name, int armyValue);
+    Continent(string name, int armyValue);
     Continent(const Continent &other);
     friend void swap(Continent &a, Continent &b);
     Continent &operator=(Continent other);
     friend ostream &operator<<(ostream &out, const Continent &obj);
 
-    int getId();
     string getName();
     int getArmyValue();
 
@@ -71,16 +67,14 @@ const int NO_PLAYER_ID = -1;
 
 class Territory {
 private:
-    int id;
     string name;
-    int continentId;
+    int continent;
     int playerId;
     int armies;
 
 public:
-    Territory(int id,
-              string name,
-              int continentId,
+    Territory(string name,
+              int continent,
               int playerId,
               int armies);
     Territory(const Territory &other);
@@ -88,8 +82,8 @@ public:
     Territory &operator=(Territory other);
     friend ostream &operator<<(ostream &out, const Territory &obj);
 
-    int getId();
     string getName();
+    int getContinent();
 
     ~Territory();
 };

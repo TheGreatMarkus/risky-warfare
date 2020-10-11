@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 #include "Map.h"
 #include "../player/Player.h"
@@ -9,6 +10,49 @@
 using std::cout;
 using std::endl;
 using std::runtime_error;
+using std::find;
+
+namespace {
+
+
+    template<class T>
+    bool vectorContains(vector<T> v, T element) {
+        return find(v.begin(), v.end(), element) != v.end();
+    }
+
+    vector<int> getTerritoriesByContinent(const vector<Territory *> &territories, const int &continent) {
+        vector<int> list{};
+
+        for (int i = 0; i < territories.size(); ++i) {
+            if (territories.at(i)->getContinent() == continent) {
+                list.push_back(i);
+            }
+        }
+        return list;
+    }
+
+    void dfs(int current, vector<Territory *> &territories, vector<set<int>> &adj, vector<bool> &found) {
+        found[current] = true;
+        for (auto adjId : adj.at(current)) {
+            if (!found[adjId]) {
+                dfs(adjId, territories, adj, found);
+            }
+        }
+    }
+
+    void dfsContinent(int current,
+                      int continent,
+                      vector<Territory *> &territories,
+                      vector<set<int>> &adj,
+                      vector<int> &found) {
+        found.push_back(current);
+        for (auto adjId : adj.at(current)) {
+            if (!vectorContains(found, adjId) && territories.at(adjId)->getContinent() == continent) {
+                dfsContinent(adjId, continent, territories, adj, found);
+            }
+        }
+    }
+}
 
 //=============================
 // Map Implementation
@@ -63,45 +107,59 @@ ostream &operator<<(ostream &out, const Map &obj) {
 }
 
 void Map::addTerritory(
-        int id,
-        string name,
-        int continentId,
+        string terrName,
+        int continent,
         int playerId,
         int armies) {
-    Territory *newTerritory = new Territory(id, name, continentId, playerId, armies);
+    Territory *newTerritory = new Territory(terrName, continent, playerId, armies);
     territories.push_back(newTerritory);
+    adj.push_back(set<int>());
 }
 
 void Map::addContinent(
-        string name,
+        string continentName,
         int armyValue) {
-    Continent *newContinent = new Continent(continents.size() + 1, name, armyValue);
+    Continent *newContinent = new Continent(continentName, armyValue);
     continents.push_back(newContinent);
 }
 
 void Map::addConnection(int t1Id, int t2Id) {
-    Territory *t1 = this->getTerritoryById(t1Id);
-    Territory *t2 = this->getTerritoryById(t2Id);
-
-    adj[t1].insert(t2);
-    adj[t2].insert(t1);
+    adj[t1Id - 1].insert(t2Id - 1);
+    adj[t2Id - 1].insert(t1Id - 1);
 }
 
 bool Map::validate() {
-    // TODO: Validate map is connected graph
+    // TODO: Mine, all territories and continent ids are unique and increment from 1
+
+    if (territories.empty() || continents.empty()) {
+        cout << "INVALID SIZE" << endl;
+    }
+
+    // Validate map is connected graph
+    {
+        vector<bool> found(adj.size());
+
+        dfs(0, territories, adj, found);
+
+        if (vectorContains(found, false)) {
+            cout << "NOT CONNECTED GRAPH" << endl;
+        }
+    }
+
     // TODO: Validate continents are connected subgraphs
+    for (int i = 0; i < continents.size(); ++i) {
+        vector<int> continentTerritories = getTerritoriesByContinent(territories, i);
+        vector<int> found{};
+        dfsContinent(0, i, territories, adj, found);
+        cout << "result: " << found.size() << endl;
+    }
+
     // TODO: Validate each country belongs to one and only one continent.
+
+
     return true;
 }
 
-Territory *Map::getTerritoryById(int id) {
-    for (Territory *territory : territories) {
-        if (territory->getId() == id) {
-            return territory;
-        }
-    }
-    return NULL;
-}
 
 vector<Territory *> Map::getTerritories() {
     return territories;
@@ -127,24 +185,23 @@ Map::~Map() {
     cout << "Map destroyed!" << endl;
 }
 
+
+
 //=============================
 // Continent Implementation
 //=============================
 
-Continent::Continent(int id, string name, int armyValue)
-        : id{id},
-          name{name},
+Continent::Continent(string name, int armyValue)
+        : name{name},
           armies{armyValue} {}
 
 Continent::Continent(const Continent &other)
-        : id{other.id},
-          name{other.name},
+        : name{other.name},
           armies{other.armies} {}
 
 void swap(Continent &a, Continent &b) {
     using std::swap;
 
-    swap(a.id, b.id);
     swap(a.name, b.name);
     swap(a.armies, b.armies);
 }
@@ -155,15 +212,11 @@ Continent &Continent::operator=(Continent other) {
 }
 
 ostream &operator<<(ostream &out, const Continent &obj) {
-    out << "Continent{ id: "
-        << obj.id << ", name: "
-        << obj.name << ", armies: "
-        << obj.armies << " }";
+    out << "Continent{ "
+        << ", name: " << obj.name
+        << ", armies: " << obj.armies
+        << " }";
     return out;
-}
-
-int Continent::getId() {
-    return id;
 }
 
 string Continent::getName() {
@@ -174,25 +227,25 @@ int Continent::getArmyValue() {
     return armies;
 }
 
+
 Continent::~Continent() = default;
 
 //=============================
 // Territory Implementation
 //=============================
 
-Territory::Territory(int id, string name, int continentId, int playerId, int armies)
-        : id{id},
-          name{name},
-          continentId{continentId},
+Territory::Territory(string name, int continent, int playerId, int armies)
+        : name{name},
+          continent{continent},
           playerId{playerId},
           armies{armies} {}
 
 Territory::Territory(const Territory &other)
-        : id{other.id},
-          name{other.name},
-          continentId{other.continentId},
-          playerId{other.playerId},
-          armies{other.armies} {}
+        :
+        name{other.name},
+        continent{other.continent},
+        playerId{other.playerId},
+        armies{other.armies} {}
 
 Territory &Territory::operator=(Territory other) {
     swap(*this, other);
@@ -202,9 +255,8 @@ Territory &Territory::operator=(Territory other) {
 void swap(Territory &a, Territory &b) {
     using std::swap;
 
-    swap(a.id, b.id);
     swap(a.name, b.name);
-    swap(a.continentId, b.continentId);
+    swap(a.continent, b.continent);
     swap(a.playerId, b.playerId);
     swap(a.armies, b.armies);
 }
@@ -212,23 +264,25 @@ void swap(Territory &a, Territory &b) {
 ostream &operator<<(ostream &out, const Territory &obj) {
     out << "Territory{" << endl;
 
-    out << "\tid: " << obj.id << endl;
-    out << "\tname: " << obj.name << endl;
-    out << "\tcontinentId: " << obj.continentId << endl;
-    out << "\tplayerId: " << obj.playerId << endl;
-    out << "\tarmies: " << obj.armies << endl;
+    out << "name: " << obj.name << endl;
+    out << "continentId: " << obj.continent << endl;
+    out << "playerId: " << obj.playerId << endl;
+    out << "armies: " << obj.armies << endl;
 
     out << "}" << endl;
 
     return out;
 }
 
-int Territory::getId() {
-    return id;
-}
 
 string Territory::getName() {
     return name;
 }
 
+int Territory::getContinent() {
+    return continent;
+}
+
 Territory::~Territory() {}
+
+
