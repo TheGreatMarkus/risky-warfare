@@ -19,7 +19,7 @@ namespace {
         vector<int> list{};
 
         for (int i = 0; i < territories.size(); ++i) {
-            if (territories.at(i)->getContinent() == continent) {
+            if (territories[i]->getContinent() == continent) {
                 list.push_back(i);
             }
         }
@@ -28,7 +28,7 @@ namespace {
 
     void dfs(int current, vector<Territory *> &territories, vector<set<int>> &adj, vector<bool> &found) {
         found[current] = true;
-        for (auto adjId : adj.at(current)) {
+        for (auto adjId : adj[current]) {
             if (!found[adjId]) {
                 dfs(adjId, territories, adj, found);
             }
@@ -41,8 +41,8 @@ namespace {
                       vector<set<int>> &adj,
                       vector<int> &found) {
         found.push_back(current);
-        for (auto adjId : adj.at(current)) {
-            if (!vectorContains(found, adjId) && territories.at(adjId)->getContinent() == continent) {
+        for (auto adjId : adj[current]) {
+            if (!vectorContains(found, adjId) && territories[adjId]->getContinent() == continent) {
                 dfsContinent(adjId, continent, territories, adj, found);
             }
         }
@@ -87,7 +87,7 @@ Map &Map::operator=(Map other) {
 
 ostream &operator<<(ostream &out, const Map &obj) {
     out << "Map{" << endl
-        << "name: " << obj.name << endl
+        << "name: \'" << obj.name << "\"" << endl
         << "continents[" << obj.continents.size() << "][" << endl;
 
     for (auto const continent : obj.continents) {
@@ -103,7 +103,7 @@ ostream &operator<<(ostream &out, const Map &obj) {
     out << "adj[" << obj.adj.size() << "][" << endl;
     for (int i = 0; i < obj.adj.size(); ++i) {
         out << "\t" << i << ": { ";
-        for (const int &adjTerritory : obj.adj.at(i)) {
+        for (const int &adjTerritory : obj.adj[i]) {
             out << adjTerritory << " ";
         }
         out << "}" << endl;
@@ -130,15 +130,25 @@ void Map::addContinent(
     continents.push_back(newContinent);
 }
 
-void Map::addConnection(int t1Id, int t2Id) {
-    adj[t1Id - 1].insert(t2Id - 1);
-    adj[t2Id - 1].insert(t1Id - 1);
+void Map::addConnection(int t1, int t2) {
+    if (t1 < adj.size() && t2 < adj.size()) {
+        adj[t1].insert(t2);
+        adj[t2].insert(t1);
+    } else {
+        cout << "INVALID CONNECTION: ( " << t1 << ", " << t2 << " )" << endl;
+    }
+
 }
 
 bool Map::validate() {
     // Validate that map contains territories anc continents.
-    if (territories.empty() || continents.empty()) {
-        cout << "EMPTY TERRITORY OR CONTINENT LIST" << endl;
+    if (continents.empty()) {
+        cout << "INVALID MAP: EMPTY CONTINENT LIST" << endl;
+        return false;
+    }
+
+    if (territories.empty()) {
+        cout << "INVALID MAP: EMPTY TERRITORY LIST" << endl;
         return false;
     }
 
@@ -149,7 +159,13 @@ bool Map::validate() {
         dfs(0, territories, adj, found);
 
         if (vectorContains(found, false)) {
-            cout << "NOT A CONNECTED GRAPH" << endl;
+            cout << "INVALID MAP: NOT A CONNECTED GRAPH. THESE TERRITORIES WEREN'T FOUND DURING THE DFS SEARCH: ( ";
+            for (int i = 0; i < found.size(); ++i) {
+                if (!found[i]) {
+                    cout << i << " ";
+                }
+            }
+            cout << ")" << endl;
             return false;
         }
     }
@@ -157,19 +173,22 @@ bool Map::validate() {
     // Validate each country belongs to one and only one continent.
     for (const auto &territory : territories) {
         if (territory->getContinent() >= continents.size()) {
-            cout << "CONTINENT " << territory->getContinent() << "FOR TERRITORY: " << endl
-                 << *territory << endl << "DOESN'T EXIST!" << endl;
+            cout << "INVALID MAP: " << *territory << " HAS A NON-EXISTENT CONTINENT!" << endl;
             return false;
         }
     }
 
-    // TODO: Validate continents are connected subgraphs
+    // Validate continents are connected sub-graphs
     for (int i = 0; i < continents.size(); ++i) {
         vector<int> continentTerritories = getTerritoriesByContinent(territories, i);
         vector<int> found{};
-        dfsContinent(continentTerritories.at(0), i, territories, adj, found);
+        dfsContinent(continentTerritories[0], i, territories, adj, found);
         if (!compare(continentTerritories, found)) {
-            cout << "CONTINENT " << continents[i]->getName() << " ISN'T A CONNECTED SUBGRAPH" << endl;
+            cout << "INVALID MAP: THE TERRITORIES OF " << *continents[i] << " AREN'T CONNECTED: ( ";
+            for (int continentTerritory : continentTerritories) {
+                cout << continentTerritory << " ";
+            }
+            cout << ")" << endl;
             return false;
         }
     }
@@ -219,8 +238,8 @@ Continent &Continent::operator=(Continent other) {
 
 ostream &operator<<(ostream &out, const Continent &obj) {
     out << "Continent{ "
-        << ", name: " << obj.name
-        << ", armies: " << obj.armies
+        << "name: \"" << obj.name
+        << "\", armies: " << obj.armies
         << " }";
     return out;
 }
@@ -265,11 +284,11 @@ void swap(Territory &a, Territory &b) {
 
 ostream &operator<<(ostream &out, const Territory &obj) {
     out << "Territory{ "
-        << "name: " << obj.name
-        << ", continent: " << obj.continent
+        << "name: \"" << obj.name
+        << "\", continent: " << obj.continent
         << ", playerId: " << obj.playerId
         << ", armies: " << obj.armies
-        << "}";
+        << " }";
 
     return out;
 }

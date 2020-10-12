@@ -54,3 +54,11 @@ void cris_utils::trim(std::string &s) {
     ltrim(s);
     rtrim(s);
 }
+
+// Implementation for isNumber taken from
+// https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c
+bool cris_utils::isNumber(const std::string &str) {
+    std::string::const_iterator it = str.begin();
+    while (it != str.end() && std::isdigit(*it)) ++it;
+    return !str.empty() && it == str.end();
+}

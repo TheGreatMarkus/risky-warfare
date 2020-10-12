@@ -18,7 +18,7 @@ namespace cris_utils {
     bool compare(std::vector<T> &v1, std::vector<T> &v2);
 
     vector<string> strSplit(string str, const string &delim);
-
     void trim(std::string &s);
+    bool isNumber(const string &str);
 
 }

@@ -13,8 +13,14 @@ using std::ifstream;
 
 using cris_utils::strSplit;
 using cris_utils::trim;
+using cris_utils::isNumber;
 using cris_utils::NO_PLAYER_ID;
 
+namespace {
+    void printError(string message, int lineNum) {
+        cout << "ERROR: \"" << message << "\" AT LINE " << lineNum << endl;
+    };
+}
 
 MapLoader::MapLoader() = default;
 
@@ -46,11 +52,13 @@ Map *MapLoader::readMapFile(string fileName) {
     string line;
 
     Map *map = new Map(fileName);
+    int lineNum = 0;
 
     while (getline(mapFile, line)) {
+        lineNum++;
         trim(line);
 
-        if (line.empty() || line.at(0) == ';') {
+        if (line.empty() || line[0] == ';') {
             continue;
         }
 
@@ -78,18 +86,33 @@ Map *MapLoader::readMapFile(string fileName) {
             case Section::files:
             case Section::none:
                 continue;
-                break;
             case Section::continents:
+                if (tokens.size() < 2 || !isNumber(tokens[1])) {
+                    printError("INVALID CONTINENT", lineNum);
+                    return map;
+                }
                 map->addContinent(tokens[0], stoi(tokens[1]));
                 break;
             case Section::countries:
+                if (tokens.size() < 3 || !isNumber(tokens[0]) || !isNumber(tokens[2])) {
+                    printError("INVALID COUNTRY/TERRITORY", lineNum);
+                    return map;
+                }
                 map->addTerritory(tokens[1], stoi(tokens[2]) - 1, NO_PLAYER_ID, 0);
                 break;
             case Section::borders:
-                int terr1Id = stoi(tokens.at(0));
+                if (tokens.size() < 2) {
+                    printError("INVALID BORDERS", lineNum);
+                    return map;
+                }
+                int terr1Id = stoi(tokens[0]);
                 for (int i = 1; i < tokens.size(); i++) {
-                    int terr2Id = stoi(tokens.at(i));
-                    map->addConnection(terr1Id, terr2Id);
+                    if (!isNumber(tokens[i])) {
+                        printError("INVALID BORDERS", lineNum);
+                        return map;
+                    }
+                    int terr2Id = stoi(tokens[i]);
+                    map->addConnection(terr1Id - 1, terr2Id - 1);
                 }
                 break;
         }

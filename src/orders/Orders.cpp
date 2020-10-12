@@ -39,7 +39,7 @@ ostream &operator<<(ostream &out, const OrdersList &obj) {
 
 
 bool OrdersList::moveOrder(int origin, int dest) {
-    Order *tempOrder = orders.at(origin);
+    Order *tempOrder = orders[origin];
 
     try {
         orders.erase(orders.begin() + origin);

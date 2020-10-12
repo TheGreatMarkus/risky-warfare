@@ -20,11 +20,15 @@ int main() {
     // Valid
     Map *usa = MapLoader::readMapFile("usa8regions.map");
     evaluateMap(*usa);
+
+    // Invalid
+    Map *invalid = MapLoader::readMapFile("invalid.map");
+    evaluateMap(*invalid);
     return 0;
 }
 
 void evaluateMap(Map &map) {
     cout << map;
     bool valid = map.validate();
-    cout << "Valid: " << valid << endl;
+    cout << "Valid: " << valid << endl << endl << endl;
 }

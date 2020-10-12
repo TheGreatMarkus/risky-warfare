@@ -32,7 +32,7 @@ ostream &operator<<(ostream &out, const Deck &obj) {
 void Deck::draw(Hand *hand) {
     int picked = rand() % cards.size();
 
-    Card *pickedCard = cards.at(picked);
+    Card *pickedCard = cards[picked];
     cards.erase(cards.begin() + picked);
 
     hand->addCard(pickedCard);
