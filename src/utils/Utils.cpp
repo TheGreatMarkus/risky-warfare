@@ -22,19 +22,35 @@ bool cris_utils::compare(std::vector<T> &v1, std::vector<T> &v2) {
 
 template bool cris_utils::compare(std::vector<int> &v1, std::vector<int> &v2);
 
-vector<string> cris_utils::strSplit(string str, string token) {
+
+// Implementation for strSplit taken from
+// https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+vector<string> cris_utils::strSplit(string str, const string &delimiter) {
     vector<string> result;
-    while (!str.empty()) {
-        int index = str.find(token);
-        if (index != string::npos) {
-            result.push_back(str.substr(0, index));
-            str = str.substr(index + token.size());
-            if (str.empty())
-                result.push_back(str);
-        } else {
-            result.push_back(str);
-            str = "";
-        }
+    size_t pos = 0;
+    while ((pos = str.find(delimiter)) != std::string::npos) {
+        result.push_back(str.substr(0, pos));
+        str.erase(0, pos + delimiter.length());
     }
+    result.push_back(str);
     return result;
+}
+
+// Implementation for trim taken from
+// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+void cris_utils::trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
 }

@@ -5,19 +5,16 @@
 
 #include "MapLoader.h"
 #include "../map/Map.h"
+#include "../utils/Utils.h"
 
 using std::cout;
 using std::endl;
 using std::ifstream;
 
-namespace {
-    string cleanLine(string line) {
-        if (line.at(line.size() - 1) == '\r') {
-            line.erase(line.size() - 1);
-        }
-        return line;
-    }
-} // namespace
+using cris_utils::strSplit;
+using cris_utils::trim;
+using cris_utils::NO_PLAYER_ID;
+
 
 MapLoader::MapLoader() = default;
 
@@ -51,7 +48,7 @@ Map *MapLoader::readMapFile(string fileName) {
     Map *map = new Map(fileName);
 
     while (getline(mapFile, line)) {
-        line = cleanLine(line);
+        trim(line);
 
         if (line.empty() || line.at(0) == ';') {
             continue;
@@ -69,6 +66,7 @@ Map *MapLoader::readMapFile(string fileName) {
             continue;
         } else if (line == "[files]") {
             currentSection = Section::files;
+            continue;
         }
 
         if (currentSection == Section::files) {
@@ -76,18 +74,25 @@ Map *MapLoader::readMapFile(string fileName) {
         }
 
         vector<string> tokens = strSplit(line, " ");
-        if (currentSection == Section::continents) {
-            map->addContinent(tokens[0], stoi(tokens[1]));
-        } else if (currentSection == Section::countries) {
-            map->addTerritory(stoi(tokens[0]), tokens[1], stoi(tokens[2]), -1, 0);
-        } else if (currentSection == Section::borders) {
-            int terr1Id = stoi(tokens.at(0));
-            for (int i = 1; i < tokens.size(); i++) {
-                int terr2Id = stoi(tokens.at(i));
-                map->addConnection(terr1Id, terr2Id);
-            }
+        switch (currentSection) {
+            case Section::files:
+            case Section::none:
+                continue;
+                break;
+            case Section::continents:
+                map->addContinent(tokens[0], stoi(tokens[1]));
+                break;
+            case Section::countries:
+                map->addTerritory(tokens[1], stoi(tokens[2]) - 1, NO_PLAYER_ID, 0);
+                break;
+            case Section::borders:
+                int terr1Id = stoi(tokens.at(0));
+                for (int i = 1; i < tokens.size(); i++) {
+                    int terr2Id = stoi(tokens.at(i));
+                    map->addConnection(terr1Id, terr2Id);
+                }
+                break;
         }
-        cout << line << endl;
     }
     return map;
 }

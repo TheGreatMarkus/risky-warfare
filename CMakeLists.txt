@@ -9,10 +9,13 @@ add_executable(
 )
 
 project(MapLoader)
-add_executable(MapLoader
+add_executable(
+        MapLoader
         src/map-loader/MapLoader.cpp
         src/map-loader/MapLoaderDriver.cpp
-        src/map/Map.cpp)
+        src/map/Map.cpp
+        src/utils/Utils.cpp
+)
 
 project(Orders)
 add_executable(Orders

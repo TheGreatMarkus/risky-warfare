@@ -60,8 +60,6 @@ public:
     ~Continent();
 };
 
-const int NO_PLAYER_ID = -1;
-
 class Territory {
 private:
     string name;
@@ -78,6 +76,7 @@ public:
     friend void swap(Territory &a, Territory &b);
     Territory &operator=(Territory other);
     friend ostream &operator<<(ostream &out, const Territory &obj);
+
 
     const string &getName() const;
     const int &getContinent() const;

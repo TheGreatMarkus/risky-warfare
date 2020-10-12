@@ -6,9 +6,25 @@ using std::cout;
 using std::endl;
 using std::ofstream;
 
-int main() {
-    Map *testMap = MapLoader::readMapFile("example.map");
+void evaluateMap(Map &map);
 
-    cout << (*testMap) << endl;
+int main() {
+    // Valid
+    Map *zertina = MapLoader::readMapFile("zertina.map");
+    evaluateMap(*zertina);
+
+    // Valid
+    Map *canada = MapLoader::readMapFile("canada.map");
+    evaluateMap(*canada);
+
+    // Valid
+    Map *usa = MapLoader::readMapFile("usa8regions.map");
+    evaluateMap(*usa);
     return 0;
+}
+
+void evaluateMap(Map &map) {
+    cout << map;
+    bool valid = map.validate();
+    cout << "Valid: " << valid << endl;
 }
