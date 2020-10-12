@@ -39,8 +39,6 @@ public:
     void addContinent(string continentName, int armyValue);
     void addConnection(int t1Id, int t2Id);
     bool validate();
-    vector<Territory *> getTerritories();
-    vector<Continent *> getContinents();
 
     ~Map();
 };
@@ -57,8 +55,7 @@ public:
     Continent &operator=(Continent other);
     friend ostream &operator<<(ostream &out, const Continent &obj);
 
-    string getName();
-    int getArmyValue();
+    const string &getName() const;
 
     ~Continent();
 };
@@ -82,8 +79,8 @@ public:
     Territory &operator=(Territory other);
     friend ostream &operator<<(ostream &out, const Territory &obj);
 
-    string getName();
-    int getContinent();
+    const string &getName() const;
+    const int &getContinent() const;
 
     ~Territory();
 };

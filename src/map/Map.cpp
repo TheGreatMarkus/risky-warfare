@@ -3,8 +3,7 @@
 #include <algorithm>
 
 #include "Map.h"
-#include "../player/Player.h"
-#include "../orders/Orders.h"
+#include "../utils/Utils.h"
 
 
 using std::cout;
@@ -12,14 +11,10 @@ using std::endl;
 using std::runtime_error;
 using std::find;
 
+using cris_utils::vectorContains;
+using cris_utils::compare;
+
 namespace {
-
-
-    template<class T>
-    bool vectorContains(vector<T> v, T element) {
-        return find(v.begin(), v.end(), element) != v.end();
-    }
-
     vector<int> getTerritoriesByContinent(const vector<Territory *> &territories, const int &continent) {
         vector<int> list{};
 
@@ -92,17 +87,29 @@ Map &Map::operator=(Map other) {
 
 ostream &operator<<(ostream &out, const Map &obj) {
     out << "Map{" << endl
-        << "name: " << obj.name << endl;
-    out << "continents[" << obj.continents.size() << "][" << endl;
+        << "name: " << obj.name << endl
+        << "continents[" << obj.continents.size() << "][" << endl;
+
     for (auto const continent : obj.continents) {
-        out << *continent << endl;
+        out << "\t" << *continent << endl;
     }
+
     out << "]" << endl;
-    out << "territories[" << obj.territories.size() << "][" << endl;
+    out << "territories[" << obj.territories.size() << "] [" << endl;
     for (auto const territory : obj.territories) {
-        out << *territory;
+        out << "\t" << *territory << endl;
     }
-    out << "]" << endl;
+
+    out << "adj[" << obj.adj.size() << "][" << endl;
+    for (int i = 0; i < obj.adj.size(); ++i) {
+        out << "\t" << i << ": { ";
+        for (const int &adjTerritory : obj.adj.at(i)) {
+            out << adjTerritory << " ";
+        }
+        out << "}" << endl;
+    }
+
+    out << "]" << endl << "}" << endl;
     return out;
 }
 
@@ -111,15 +118,15 @@ void Map::addTerritory(
         int continent,
         int playerId,
         int armies) {
-    Territory *newTerritory = new Territory(terrName, continent, playerId, armies);
+    auto *newTerritory = new Territory(terrName, continent, playerId, armies);
     territories.push_back(newTerritory);
-    adj.push_back(set<int>());
+    adj.emplace_back();
 }
 
 void Map::addContinent(
         string continentName,
         int armyValue) {
-    Continent *newContinent = new Continent(continentName, armyValue);
+    auto *newContinent = new Continent(continentName, armyValue);
     continents.push_back(newContinent);
 }
 
@@ -129,20 +136,30 @@ void Map::addConnection(int t1Id, int t2Id) {
 }
 
 bool Map::validate() {
-    // TODO: Mine, all territories and continent ids are unique and increment from 1
-
+    // Validate that map contains territories anc continents.
     if (territories.empty() || continents.empty()) {
-        cout << "INVALID SIZE" << endl;
+        cout << "EMPTY TERRITORY OR CONTINENT LIST" << endl;
+        return false;
     }
 
-    // Validate map is connected graph
+    // Validate map is a connected graph
     {
         vector<bool> found(adj.size());
 
         dfs(0, territories, adj, found);
 
         if (vectorContains(found, false)) {
-            cout << "NOT CONNECTED GRAPH" << endl;
+            cout << "NOT A CONNECTED GRAPH" << endl;
+            return false;
+        }
+    }
+
+    // Validate each country belongs to one and only one continent.
+    for (const auto &territory : territories) {
+        if (territory->getContinent() >= continents.size()) {
+            cout << "CONTINENT " << territory->getContinent() << "FOR TERRITORY: " << endl
+                 << *territory << endl << "DOESN'T EXIST!" << endl;
+            return false;
         }
     }
 
@@ -150,28 +167,19 @@ bool Map::validate() {
     for (int i = 0; i < continents.size(); ++i) {
         vector<int> continentTerritories = getTerritoriesByContinent(territories, i);
         vector<int> found{};
-        dfsContinent(0, i, territories, adj, found);
-        cout << "result: " << found.size() << endl;
+        dfsContinent(continentTerritories.at(0), i, territories, adj, found);
+        if (!compare(continentTerritories, found)) {
+            cout << "CONTINENT " << continents[i]->getName() << " ISN'T A CONNECTED SUBGRAPH" << endl;
+            return false;
+        }
     }
-
-    // TODO: Validate each country belongs to one and only one continent.
 
 
     return true;
 }
 
 
-vector<Territory *> Map::getTerritories() {
-    return territories;
-}
-
-vector<Continent *> Map::getContinents() {
-    return continents;
-}
-
 Map::~Map() {
-    cout << "Destroying Map!" << endl;
-
     for (auto territory : territories) {
         delete territory;
     }
@@ -181,8 +189,6 @@ Map::~Map() {
         delete continent;
     }
     territories.clear();
-
-    cout << "Map destroyed!" << endl;
 }
 
 
@@ -219,12 +225,8 @@ ostream &operator<<(ostream &out, const Continent &obj) {
     return out;
 }
 
-string Continent::getName() {
+const string &Continent::getName() const {
     return name;
-}
-
-int Continent::getArmyValue() {
-    return armies;
 }
 
 
@@ -262,24 +264,22 @@ void swap(Territory &a, Territory &b) {
 }
 
 ostream &operator<<(ostream &out, const Territory &obj) {
-    out << "Territory{" << endl;
-
-    out << "name: " << obj.name << endl;
-    out << "continentId: " << obj.continent << endl;
-    out << "playerId: " << obj.playerId << endl;
-    out << "armies: " << obj.armies << endl;
-
-    out << "}" << endl;
+    out << "Territory{ "
+        << "name: " << obj.name
+        << ", continent: " << obj.continent
+        << ", playerId: " << obj.playerId
+        << ", armies: " << obj.armies
+        << "}";
 
     return out;
 }
 
 
-string Territory::getName() {
+const string &Territory::getName() const {
     return name;
 }
 
-int Territory::getContinent() {
+const int &Territory::getContinent() const {
     return continent;
 }
 

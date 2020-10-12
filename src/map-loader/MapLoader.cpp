@@ -12,30 +12,11 @@ using std::ifstream;
 
 namespace {
     string cleanLine(string line) {
-
         if (line.at(line.size() - 1) == '\r') {
             line.erase(line.size() - 1);
         }
         return line;
     }
-
-    vector<string> strSplit(string str, string token) {
-        vector<string> result;
-        while (!str.empty()) {
-            int index = str.find(token);
-            if (index != string::npos) {
-                result.push_back(str.substr(0, index));
-                str = str.substr(index + token.size());
-                if (str.empty())
-                    result.push_back(str);
-            } else {
-                result.push_back(str);
-                str = "";
-            }
-        }
-        return result;
-    }
-
 } // namespace
 
 MapLoader::MapLoader() = default;

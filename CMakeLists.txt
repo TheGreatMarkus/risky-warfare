@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 
 project("Map")
-add_executable(Map
-        src/map/Map.cpp
+add_executable(
+        Map
         src/map/MapDriver.cpp
-        src/player/Player.cpp
-        src/orders/Orders.cpp
-        src/cards/Cards.cpp)
+        src/map/Map.cpp
+        src/utils/Utils.cpp
+)
 
 project(MapLoader)
 add_executable(MapLoader
@@ -24,4 +24,4 @@ add_executable(Orders
 project(Cards)
 add_executable(Cards
         src/cards/Cards.cpp
-        src/cards/CardsDriver.cpp)
+        src/cards/CardsDriver.cpp src/utils/Utils.cpp src/utils/Utils.h)
