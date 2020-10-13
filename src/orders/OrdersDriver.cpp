@@ -58,11 +58,4 @@ int main() {
     delete map;
     delete player1;
     delete player2;
-
-    delete deployOrder;
-    delete advanceOrder;
-    delete bombOrder;
-    delete blockadeOrder;
-    delete airliftOrder;
-    delete negotiateOrder;
 }

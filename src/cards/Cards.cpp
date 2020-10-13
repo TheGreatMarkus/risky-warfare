@@ -57,7 +57,12 @@ void Deck::addCard(Card *card) {
     cards.push_back(card);
 }
 
-Deck::~Deck() {}
+Deck::~Deck() {
+    for (auto card : cards) {
+        delete card;
+    }
+    cards.clear();
+}
 
 //=============================
 // Hand Implementation
@@ -107,7 +112,12 @@ Card *Hand::getCard(int i) {
 }
 
 
-Hand::~Hand() {}
+Hand::~Hand() {
+    for (auto card : cards) {
+        delete card;
+    }
+    cards.clear();
+}
 
 
 

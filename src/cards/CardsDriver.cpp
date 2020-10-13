@@ -22,6 +22,9 @@ int main() {
     auto order4 = hand->getCard(0)->play(deck, hand, 0, 1, 10, 0);
     auto order5 = hand->getCard(0)->play(deck, hand, 0, 1, 10, 0);
 
+    delete deck;
+    delete hand;
+
     delete order1;
     delete order2;
     delete order3;

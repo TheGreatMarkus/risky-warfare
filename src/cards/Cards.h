@@ -64,7 +64,7 @@ public:
     virtual Card *clone() = 0;
     virtual ostream &print(ostream &out) const = 0;
 
-    ~Card();
+    virtual ~Card();
 };
 
 class BombCard : public Card {

@@ -29,7 +29,7 @@ public:
     void move(int origin, int dest);
     void remove(int i);
 
-    virtual ~OrdersList();
+    ~OrdersList();
 };
 
 class Order {
