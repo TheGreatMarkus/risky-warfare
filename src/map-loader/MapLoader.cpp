@@ -14,7 +14,6 @@ using std::ifstream;
 using cris_utils::strSplit;
 using cris_utils::trim;
 using cris_utils::isNumber;
-using cris_utils::NO_PLAYER_ID;
 
 namespace {
     void printError(string message, int lineNum) {
@@ -98,7 +97,7 @@ Map *MapLoader::readMapFile(string fileName) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
                     return map;
                 }
-                map->addTerritory(tokens[1], stoi(tokens[2]) - 1, NO_PLAYER_ID, 0);
+                map->addTerritory(tokens[1], stoi(tokens[2]) - 1, 0);
                 break;
             case Section::borders:
                 if (tokens.size() < 2) {

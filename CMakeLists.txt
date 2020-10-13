@@ -17,14 +17,35 @@ add_executable(
         src/utils/Utils.cpp
 )
 
+project(Player)
+add_executable(
+        Player
+        src/player/PlayerDriver.cpp
+        src/player/Player.cpp
+        src/cards/Cards.cpp
+        src/orders/Orders.cpp
+        src/utils/Utils.cpp
+        src/map/Map.cpp
+)
+
 project(Orders)
-add_executable(Orders
+add_executable(
+        Orders
         src/orders/Orders.cpp
         src/orders/OrdersDriver.cpp
+        src/cards/Cards.cpp
         src/map/Map.cpp
-        src/player/Player.cpp)
+        src/player/Player.cpp
+        src/utils/Utils.cpp
+)
 
 project(Cards)
-add_executable(Cards
+add_executable(
+        Cards
         src/cards/Cards.cpp
-        src/cards/CardsDriver.cpp src/utils/Utils.cpp src/utils/Utils.h)
+        src/cards/CardsDriver.cpp
+        src/utils/Utils.cpp
+        src/utils/Utils.h
+)
+
+

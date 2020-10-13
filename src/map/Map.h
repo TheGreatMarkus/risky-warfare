@@ -32,13 +32,15 @@ public:
     Map &operator=(Map other);
     friend ostream &operator<<(ostream &out, const Map &obj);
 
-    void addTerritory(string terrName,
+    void addTerritory(string name,
                       int continent,
-                      int playerId,
                       int armies);
-    void addContinent(string continentName, int armyValue);
+    void addContinent(string name, int armyValue);
     void addConnection(int t1Id, int t2Id);
     bool validate();
+    const vector<Territory *> &getTerritories() const;
+    bool areAdjacent(int t1, int t2);
+
 
     ~Map();
 };
@@ -64,22 +66,25 @@ class Territory {
 private:
     string name;
     int continent;
-    int playerId;
     int armies;
 
 public:
     Territory(string name,
               int continent,
-              int playerId,
               int armies);
     Territory(const Territory &other);
     friend void swap(Territory &a, Territory &b);
     Territory &operator=(Territory other);
     friend ostream &operator<<(ostream &out, const Territory &obj);
 
+    void addArmies(int armies);
+    void removeArmies(int armies);
+    void bomb();
+    void blockade();
 
     const string &getName() const;
     const int &getContinent() const;
+    const int &getArmies() const;
 
     ~Territory();
 };

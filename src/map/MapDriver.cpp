@@ -19,12 +19,12 @@ int main() {
 
     unconnectedMap.addContinent("Continent 0", 1);
     unconnectedMap.addContinent("Continent 1", 1);
-    unconnectedMap.addTerritory("t0", 0, 1, 1);
-    unconnectedMap.addTerritory("t1", 0, 0, 1);
-    unconnectedMap.addTerritory("t2", 0, 0, 1);
-    unconnectedMap.addTerritory("t3", 0, 0, 1);
-    unconnectedMap.addTerritory("t4", 0, 0, 1);
-    unconnectedMap.addTerritory("t5", 0, 1, 1);
+    unconnectedMap.addTerritory("t0", 0, 1);
+    unconnectedMap.addTerritory("t1", 0, 1);
+    unconnectedMap.addTerritory("t2", 0, 1);
+    unconnectedMap.addTerritory("t3", 0, 1);
+    unconnectedMap.addTerritory("t4", 0, 1);
+    unconnectedMap.addTerritory("t5", 0, 1);
     unconnectedMap.addConnection(2, 1);
     unconnectedMap.addConnection(0, 2);
     unconnectedMap.addConnection(3, 0);
@@ -38,12 +38,12 @@ int main() {
 
     unconnectedContinent.addContinent("Continent 0", 1);
     unconnectedContinent.addContinent("Continent 1", 1);
-    unconnectedContinent.addTerritory("t0", 0, 0, 1);
-    unconnectedContinent.addTerritory("t1", 0, 0, 1);
-    unconnectedContinent.addTerritory("t2", 1, 0, 1);
-    unconnectedContinent.addTerritory("t3", 1, 0, 1);
-    unconnectedContinent.addTerritory("t4", 1, 1, 1);
-    unconnectedContinent.addTerritory("t5", 1, 1, 1);
+    unconnectedContinent.addTerritory("t0", 0, 1);
+    unconnectedContinent.addTerritory("t1", 0, 1);
+    unconnectedContinent.addTerritory("t2", 1, 1);
+    unconnectedContinent.addTerritory("t3", 1, 1);
+    unconnectedContinent.addTerritory("t4", 1, 1);
+    unconnectedContinent.addTerritory("t5", 1, 1);
     unconnectedContinent.addConnection(0, 2);
     unconnectedContinent.addConnection(1, 2);
     unconnectedContinent.addConnection(3, 2);
@@ -52,18 +52,35 @@ int main() {
 
     evaluateMap(unconnectedContinent);
 
-    // TODO: Invalid map: Continent missing for one territory.
+    // Invalid map: One of the territories has an invalid continent
+    Map badContinent = Map("This map has a territories with an invalid continent!");
+
+    unconnectedContinent.addContinent("Continent 0", 1);
+    unconnectedContinent.addContinent("Continent 1", 1);
+    unconnectedContinent.addTerritory("t0", 0, 1);
+    unconnectedContinent.addTerritory("t1", 0, 1);
+    unconnectedContinent.addTerritory("t2", 1, 1);
+    unconnectedContinent.addTerritory("t3", 1, 1);
+    unconnectedContinent.addTerritory("t4", 1, 1);
+    unconnectedContinent.addTerritory("t5", 1, 1);
+    unconnectedContinent.addConnection(0, 2);
+    unconnectedContinent.addConnection(1, 2);
+    unconnectedContinent.addConnection(3, 2);
+    unconnectedContinent.addConnection(4, 3);
+    unconnectedContinent.addConnection(5, 4);
+
+    evaluateMap(unconnectedContinent);
 
     // Valid map
     Map validMap = Map("Valid Map");
     validMap.addContinent("Continent 0", 1);
     validMap.addContinent("Continent 1", 1);
-    validMap.addTerritory("t0", 0, 0, 1);
-    validMap.addTerritory("t1", 0, 0, 1);
-    validMap.addTerritory("t2", 0, 0, 1);
-    validMap.addTerritory("t3", 0, 0, 1);
-    validMap.addTerritory("t4", 1, 1, 1);
-    validMap.addTerritory("t5", 1, 1, 1);
+    validMap.addTerritory("t0", 0, 1);
+    validMap.addTerritory("t1", 0, 1);
+    validMap.addTerritory("t2", 0, 1);
+    validMap.addTerritory("t3", 0, 1);
+    validMap.addTerritory("t4", 1, 1);
+    validMap.addTerritory("t5", 1, 1);
     validMap.addConnection(2, 1);
     validMap.addConnection(0, 2);
     validMap.addConnection(3, 0);

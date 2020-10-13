@@ -90,13 +90,13 @@ ostream &operator<<(ostream &out, const Map &obj) {
         << "name: \'" << obj.name << "\"" << endl
         << "continents[" << obj.continents.size() << "][" << endl;
 
-    for (auto const continent : obj.continents) {
+    for (const auto &continent : obj.continents) {
         out << "\t" << *continent << endl;
     }
 
     out << "]" << endl;
     out << "territories[" << obj.territories.size() << "] [" << endl;
-    for (auto const territory : obj.territories) {
+    for (const auto &territory : obj.territories) {
         out << "\t" << *territory << endl;
     }
 
@@ -114,19 +114,18 @@ ostream &operator<<(ostream &out, const Map &obj) {
 }
 
 void Map::addTerritory(
-        string terrName,
+        string name,
         int continent,
-        int playerId,
         int armies) {
-    auto *newTerritory = new Territory(terrName, continent, playerId, armies);
+    auto *newTerritory = new Territory(name, continent, armies);
     territories.push_back(newTerritory);
     adj.emplace_back();
 }
 
 void Map::addContinent(
-        string continentName,
+        string name,
         int armyValue) {
-    auto *newContinent = new Continent(continentName, armyValue);
+    auto *newContinent = new Continent(name, armyValue);
     continents.push_back(newContinent);
 }
 
@@ -197,6 +196,13 @@ bool Map::validate() {
     return true;
 }
 
+const vector<Territory *> &Map::getTerritories() const {
+    return territories;
+}
+
+bool Map::areAdjacent(int t1, int t2) {
+    return adj[t1].find(t2) != adj[t1].end();
+}
 
 Map::~Map() {
     for (auto territory : territories) {
@@ -209,7 +215,6 @@ Map::~Map() {
     }
     territories.clear();
 }
-
 
 
 //=============================
@@ -255,18 +260,15 @@ Continent::~Continent() = default;
 // Territory Implementation
 //=============================
 
-Territory::Territory(string name, int continent, int playerId, int armies)
+Territory::Territory(string name, int continent, int armies)
         : name{name},
           continent{continent},
-          playerId{playerId},
           armies{armies} {}
 
 Territory::Territory(const Territory &other)
-        :
-        name{other.name},
-        continent{other.continent},
-        playerId{other.playerId},
-        armies{other.armies} {}
+        : name{other.name},
+          continent{other.continent},
+          armies{other.armies} {}
 
 Territory &Territory::operator=(Territory other) {
     swap(*this, other);
@@ -278,7 +280,6 @@ void swap(Territory &a, Territory &b) {
 
     swap(a.name, b.name);
     swap(a.continent, b.continent);
-    swap(a.playerId, b.playerId);
     swap(a.armies, b.armies);
 }
 
@@ -286,13 +287,30 @@ ostream &operator<<(ostream &out, const Territory &obj) {
     out << "Territory{ "
         << "name: \"" << obj.name
         << "\", continent: " << obj.continent
-        << ", playerId: " << obj.playerId
         << ", armies: " << obj.armies
         << " }";
 
     return out;
 }
 
+void Territory::addArmies(int armies) {
+    this->armies += armies;
+}
+
+void Territory::removeArmies(int armies) {
+    if (this->armies < armies) {
+        cout << "Removing too many armies!";
+    }
+    this->armies -= armies;
+}
+
+void Territory::bomb() {
+    this->armies /= 2;
+}
+
+void Territory::blockade() {
+    this->armies *= 3;
+}
 
 const string &Territory::getName() const {
     return name;
@@ -302,6 +320,18 @@ const int &Territory::getContinent() const {
     return continent;
 }
 
+const int &Territory::getArmies() const {
+    return armies;
+}
+
 Territory::~Territory() {}
+
+
+
+
+
+
+
+
 
 

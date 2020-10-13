@@ -9,9 +9,7 @@ using std::vector;
 using std::ostream;
 
 namespace cris_utils {
-    const int NO_PLAYER_ID = -1;
-
-    template<class T>
+    template<typename T>
     bool vectorContains(vector<T> v, T element);
 
     template<typename T>
@@ -20,5 +18,8 @@ namespace cris_utils {
     vector<string> strSplit(string str, const string &delim);
     void trim(std::string &s);
     bool isNumber(const string &str);
+
+    template<typename T>
+    void removeElement(vector<T> &v, T element);
 
 }

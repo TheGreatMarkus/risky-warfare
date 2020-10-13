@@ -7,6 +7,7 @@
 using std::ostream;
 using std::string;
 using std::vector;
+using std::stringstream;
 
 class Order;
 class Territory;
@@ -24,8 +25,9 @@ public:
     OrdersList &operator=(OrdersList other);
     friend ostream &operator<<(ostream &out, const OrdersList &obj);
 
-    bool moveOrder(int origin, int dest);
-    bool deleteOrder(int i);
+    void add(Order *order);
+    void move(int origin, int dest);
+    void remove(int i);
 
     ~OrdersList();
 };
@@ -33,20 +35,24 @@ public:
 class Order {
 private:
     bool executed;
+    string effect;
 public:
     Order();
     Order(const Order &other);
     friend void swap(Order &a, Order &b);
-    friend ostream &operator<<(ostream &out, Order &obj);
-    // Can't override assignment operator for abstract class
-    // Order &operator=(Order other);
+    //Order &operator=(Order other); // abstract class, can't overload assignment operator
+    friend ostream &operator<<(ostream &out, const Order &obj);
 
     virtual bool validate(Map *map, Player *player) = 0;
     virtual void execute(Map *map, Player *player) = 0;
-    virtual string toString() = 0;
+    virtual ostream &print(ostream &out) const = 0;
+    virtual Order *clone() = 0;
 
-    bool getExecuted() const;
+    const bool &getExecuted() const;
+    const string &getEffect() const;
     void setExecuted(bool executed);
+    void setEffect(string effect);
+
 
     ~Order();
 };
@@ -54,17 +60,19 @@ public:
 class DeployOrder : public Order {
 private:
     int armies;
-    int territoryId;
+    int territory;
 public:
     DeployOrder(int armies,
-                int territoryId);
+                int territory);
     DeployOrder(const DeployOrder &other);
     friend void swap(DeployOrder &a, DeployOrder &b);
     DeployOrder &operator=(DeployOrder other);
+    friend ostream &operator<<(ostream &out, const DeployOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    DeployOrder *clone() override;
 
     ~DeployOrder();
 };
@@ -72,51 +80,57 @@ public:
 class AdvanceOrder : public Order {
 private:
     int armies;
-    int originId;
-    int destId;
+    int origin;
+    int dest;
 public:
     AdvanceOrder(int armies,
-                 int originId,
-                 int destId);
+                 int originTerr,
+                 int destTerr);
     AdvanceOrder(const AdvanceOrder &other);
     friend void swap(AdvanceOrder &a, AdvanceOrder &b);
     AdvanceOrder &operator=(AdvanceOrder other);
+    friend ostream &operator<<(ostream &out, const AdvanceOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    AdvanceOrder *clone() override;
 
     ~AdvanceOrder();
 };
 
 class BombOrder : public Order {
 private:
-    int territoryId;
+    int territory;
 public:
-    BombOrder(int territoryId);
+    BombOrder(int territory);
     BombOrder(const BombOrder &other);
     friend void swap(BombOrder &a, BombOrder &b);
     BombOrder &operator=(BombOrder other);
+    friend ostream &operator<<(ostream &out, const BombOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    BombOrder *clone() override;
 
     ~BombOrder();
 };
 
 class BlockadeOrder : public Order {
 private:
-    int territoryId;
+    int territory;
 public:
-    BlockadeOrder(int territoryId);
+    BlockadeOrder(int territory);
     BlockadeOrder(const BlockadeOrder &other);
     friend void swap(BlockadeOrder &a, BlockadeOrder &b);
     BlockadeOrder &operator=(BlockadeOrder other);
+    friend ostream &operator<<(ostream &out, const BlockadeOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    BlockadeOrder *clone() override;
 
     ~BlockadeOrder();
 };
@@ -124,35 +138,39 @@ public:
 class AirliftOrder : public Order {
 private:
     int armies;
-    int originId;
-    int destId;
+    int origin;
+    int dest;
 public:
     AirliftOrder(int armies,
-                 int originId,
-                 int destId);
+                 int origin,
+                 int dest);
     AirliftOrder(const AirliftOrder &other);
     friend void swap(AirliftOrder &a, AirliftOrder &b);
     AirliftOrder &operator=(AirliftOrder other);
+    friend ostream &operator<<(ostream &out, const AirliftOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    AirliftOrder *clone() override;
 
     ~AirliftOrder();
 };
 
 class NegotiateOrder : public Order {
 private:
-    int playerId;
+    int player;
 public:
     NegotiateOrder(int playerId);
     NegotiateOrder(const NegotiateOrder &other);
     friend void swap(NegotiateOrder &a, NegotiateOrder &b);
     NegotiateOrder &operator=(NegotiateOrder other);
+    friend ostream &operator<<(ostream &out, const NegotiateOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    string toString() override;
+    ostream &print(ostream &out) const override;
+    NegotiateOrder *clone() override;
 
     ~NegotiateOrder();
 };

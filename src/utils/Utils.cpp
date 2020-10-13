@@ -5,7 +5,7 @@
 using std::find;
 
 
-template<class T>
+template<typename T>
 bool cris_utils::vectorContains(vector<T> v, T element) {
     return find(v.begin(), v.end(), element) != v.end();
 }
@@ -62,3 +62,10 @@ bool cris_utils::isNumber(const std::string &str) {
     while (it != str.end() && std::isdigit(*it)) ++it;
     return !str.empty() && it == str.end();
 }
+
+template<typename T>
+void cris_utils::removeElement(vector<T> &v, T element) {
+    v.erase(std::remove(v.begin(), v.end(), 8), v.end());
+}
+
+template void cris_utils::removeElement(vector<int> &v, int element);
