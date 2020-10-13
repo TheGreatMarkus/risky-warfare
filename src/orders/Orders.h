@@ -14,6 +14,9 @@ class Territory;
 class Map;
 class Player;
 
+/**
+ * Class for representing a list of orders
+ */
 class OrdersList {
 private:
     vector<Order *> orders;
@@ -32,6 +35,9 @@ public:
     ~OrdersList();
 };
 
+/**
+ * Abstract class for player orders.
+ */
 class Order {
 private:
     bool executed;
@@ -57,6 +63,9 @@ public:
     virtual ~Order();
 };
 
+/**
+ * Order for deploying troops.
+ */
 class DeployOrder : public Order {
 private:
     int armies;
@@ -74,9 +83,12 @@ public:
     ostream &print(ostream &out) const override;
     DeployOrder *clone() override;
 
-    ~DeployOrder();
+    ~DeployOrder() override;
 };
 
+/**
+ * Order for advancing troops
+ */
 class AdvanceOrder : public Order {
 private:
     int armies;
@@ -96,9 +108,12 @@ public:
     ostream &print(ostream &out) const override;
     AdvanceOrder *clone() override;
 
-    ~AdvanceOrder();
+    ~AdvanceOrder() override;
 };
 
+/**
+ * Order for bombing territories
+ */
 class BombOrder : public Order {
 private:
     int territory;
@@ -114,9 +129,12 @@ public:
     ostream &print(ostream &out) const override;
     BombOrder *clone() override;
 
-    ~BombOrder();
+    ~BombOrder() override;
 };
 
+/**
+ * Order for creating blockades
+ */
 class BlockadeOrder : public Order {
 private:
     int territory;
@@ -132,9 +150,12 @@ public:
     ostream &print(ostream &out) const override;
     BlockadeOrder *clone() override;
 
-    ~BlockadeOrder();
+    ~BlockadeOrder() override;
 };
 
+/**
+ * Order for moving troops long distances
+ */
 class AirliftOrder : public Order {
 private:
     int armies;
@@ -154,9 +175,12 @@ public:
     ostream &print(ostream &out) const override;
     AirliftOrder *clone() override;
 
-    ~AirliftOrder();
+    ~AirliftOrder() override;
 };
 
+/**
+ * Order for negotiating with other players
+ */
 class NegotiateOrder : public Order {
 private:
     int player;
@@ -172,6 +196,6 @@ public:
     ostream &print(ostream &out) const override;
     NegotiateOrder *clone() override;
 
-    ~NegotiateOrder();
+    ~NegotiateOrder() override;
 };
 

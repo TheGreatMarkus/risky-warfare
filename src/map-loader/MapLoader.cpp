@@ -25,6 +25,11 @@ MapLoader::MapLoader() = default;
 
 MapLoader::MapLoader(const MapLoader &other) = default;
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(MapLoader &a, MapLoader &b) {}
 
 MapLoader &MapLoader::operator=(MapLoader other) {
@@ -37,7 +42,12 @@ ostream &operator<<(ostream &out, const MapLoader &obj) {
     return out;
 }
 
-Map *MapLoader::readMapFile(string fileName) {
+/**
+ * Reads a given .map file and return the equivalent Map object
+ * @param filePath The path to the .map file
+ * @return a Map object
+ */
+Map *MapLoader::readMapFile(string filePath) {
     enum class Section {
         files,
         continents,
@@ -47,21 +57,23 @@ Map *MapLoader::readMapFile(string fileName) {
     };
 
     Section currentSection(Section::none);
-    ifstream mapFile(fileName);
+    ifstream mapFile(filePath);
     string line;
 
-    Map *map = new Map(fileName);
+    Map *map = new Map(filePath);
     int lineNum = 0;
 
     while (getline(mapFile, line)) {
         lineNum++;
+        // Clean line to avoid issues with special characters (line carriage, etc.)
         trim(line);
 
+        // Skip empty for comment lines
         if (line.empty() || line[0] == ';') {
             continue;
         }
 
-        // Set mode
+        // If current line is a header for a section, set currentSection accordingly
         if (line == "[continents]") {
             currentSection = Section::continents;
             continue;
@@ -76,30 +88,42 @@ Map *MapLoader::readMapFile(string fileName) {
             continue;
         }
 
-        if (currentSection == Section::files) {
+        // Skip files and none sections
+        if (currentSection == Section::files || currentSection == Section::none) {
             continue;
         }
 
+        // Get tokens for the current line
         vector<string> tokens = strSplit(line, " ");
         switch (currentSection) {
-            case Section::files:
-            case Section::none:
+            case Section::files:{
                 continue;
-            case Section::continents:
+            }
+            case Section::none: {
+                continue;
+            }
+            case Section::continents:{
+                // Expected format of line: "ContinentName ArmyValue"
                 if (tokens.size() < 2 || !isNumber(tokens[1])) {
                     printError("INVALID CONTINENT", lineNum);
                     return map;
                 }
                 map->addContinent(tokens[0], stoi(tokens[1]));
                 break;
-            case Section::countries:
+            }
+            case Section::countries:{
+                // Expected format of line: "TerritoryId TerritoryName ContinentId"
                 if (tokens.size() < 3 || !isNumber(tokens[0]) || !isNumber(tokens[2])) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
                     return map;
                 }
-                map->addTerritory(tokens[1], stoi(tokens[2]) - 1, 0);
+                // In the Map object, territories keep track of continents and each other through indices
+                int continentIndex = stoi(tokens[2]) - 1;
+                map->addTerritory(tokens[1], continentIndex, 0);
                 break;
-            case Section::borders:
+            }
+            case Section::borders: {
+                // Expected format of line: "TerritoryId Neighbor1 Neighbor2 ..."
                 if (tokens.size() < 2) {
                     printError("INVALID BORDERS", lineNum);
                     return map;
@@ -114,6 +138,7 @@ Map *MapLoader::readMapFile(string fileName) {
                     map->addConnection(terr1Id - 1, terr2Id - 1);
                 }
                 break;
+            }
         }
     }
     return map;

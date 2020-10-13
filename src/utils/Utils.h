@@ -8,6 +8,9 @@ using std::string;
 using std::vector;
 using std::ostream;
 
+/**
+ * Utilities used throughout the program
+ */
 namespace cris_utils {
     template<typename T>
     bool vectorContains(vector<T> v, T element);

@@ -17,7 +17,9 @@ class Territory;
 class Continent;
 class Player;
 
-
+/**
+ * Class which represents a connected graph of territories.
+ */
 class Map {
 private:
     string name;
@@ -41,10 +43,12 @@ public:
     const vector<Territory *> &getTerritories() const;
     bool areAdjacent(int t1, int t2);
 
-
     ~Map();
 };
 
+/**
+ * Class for representing a Continent, which is associated with a subset of the territories
+ */
 class Continent {
 private:
     string name;
@@ -62,6 +66,9 @@ public:
     ~Continent();
 };
 
+/**
+ * Class for representing a Territory on a Map.
+ */
 class Territory {
 private:
     string name;

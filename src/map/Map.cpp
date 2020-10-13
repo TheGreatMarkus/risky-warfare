@@ -15,6 +15,12 @@ using cris_utils::vectorContains;
 using cris_utils::compare;
 
 namespace {
+    /**
+     * Returns all territory indices that belong to a given continent
+     * @param territories
+     * @param continent
+     * @return list of territory indices
+     */
     vector<int> getTerritoriesByContinent(const vector<Territory *> &territories, const int &continent) {
         vector<int> list{};
 
@@ -26,6 +32,16 @@ namespace {
         return list;
     }
 
+    /**
+     * Perform Depth-first-search on a graph.
+     *
+     * When encountering a vertex, sets the bool flag for that vertex to true.
+     *
+     * @param current Current territory index
+     * @param territories
+     * @param adj
+     * @param found List of bool flag for each territory on the map.
+     */
     void dfs(int current, vector<Territory *> &territories, vector<set<int>> &adj, vector<bool> &found) {
         found[current] = true;
         for (auto adjId : adj[current]) {
@@ -35,6 +51,16 @@ namespace {
         }
     }
 
+    /**
+     * Performs Depth-first-search of a continent subgraph.
+     *
+     * Keeps track of which vertices were encountered and stores them in the "found" vector
+     * @param current
+     * @param continent
+     * @param territories
+     * @param adj
+     * @param found
+     */
     void dfsContinent(int current,
                       int continent,
                       vector<Territory *> &territories,
@@ -58,6 +84,12 @@ Map::Map(string name)
           territories{vector<Territory *>()},
           continents{vector<Continent *>()} {}
 
+/**
+ * Copy constructor for Map.
+ *
+ * Copies all territories and continents to a new list.
+ * @param other
+ */
 Map::Map(const Map &other)
         : name{other.name},
           territories{vector<Territory *>()},
@@ -71,6 +103,11 @@ Map::Map(const Map &other)
     }
 }
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Map &a, Map &b) {
     using std::swap;
 
@@ -129,6 +166,11 @@ void Map::addContinent(
     continents.push_back(newContinent);
 }
 
+/**
+ * Adds a new edge between two territories.
+ * @param t1 The index of the first territory
+ * @param t2 The index of the second territory
+ */
 void Map::addConnection(int t1, int t2) {
     if (t1 < adj.size() && t2 < adj.size()) {
         adj[t1].insert(t2);
@@ -139,6 +181,10 @@ void Map::addConnection(int t1, int t2) {
 
 }
 
+/**
+ * Validates the current map
+ * @return Whether the map is valid.
+ */
 bool Map::validate() {
     // Validate that map contains territories anc continents.
     if (continents.empty()) {
@@ -154,9 +200,7 @@ bool Map::validate() {
     // Validate map is a connected graph
     {
         vector<bool> found(adj.size());
-
         dfs(0, territories, adj, found);
-
         if (vectorContains(found, false)) {
             cout << "INVALID MAP: NOT A CONNECTED GRAPH. THESE TERRITORIES WEREN'T FOUND DURING THE DFS SEARCH: ( ";
             for (int i = 0; i < found.size(); ++i) {
@@ -172,7 +216,8 @@ bool Map::validate() {
     // Validate each country belongs to one and only one continent.
     for (const auto &territory : territories) {
         if (territory->getContinent() >= continents.size()) {
-            cout << "INVALID MAP: " << *territory << " HAS A NON-EXISTENT CONTINENT: " << territory->getContinent() << endl;
+            cout << "INVALID MAP: " << *territory << " HAS A NON-EXISTENT CONTINENT: " << territory->getContinent()
+                 << endl;
             return false;
         }
     }
@@ -200,6 +245,12 @@ const vector<Territory *> &Map::getTerritories() const {
     return territories;
 }
 
+/**
+ * Returns whether two territories are adjacent.
+ * @param t1 The index of the first territory
+ * @param t2 The index of the second territory
+ * @return Whether the two territories are adjacent
+ */
 bool Map::areAdjacent(int t1, int t2) {
     return adj[t1].find(t2) != adj[t1].end();
 }
@@ -229,6 +280,11 @@ Continent::Continent(const Continent &other)
         : name{other.name},
           armies{other.armies} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(Continent &a, Continent &b) {
     using std::swap;
 
@@ -275,6 +331,11 @@ Territory &Territory::operator=(Territory other) {
     return *this;
 }
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Territory &a, Territory &b) {
     using std::swap;
 
@@ -304,10 +365,18 @@ void Territory::removeArmies(int armies) {
     this->armies -= armies;
 }
 
+/**
+ * Bombs the current territory
+ * @see BombOrder
+ */
 void Territory::bomb() {
     this->armies /= 2;
 }
 
+/**
+ * Blockades the current territory
+ * @see BlockadeOrder
+ */
 void Territory::blockade() {
     this->armies *= 3;
 }

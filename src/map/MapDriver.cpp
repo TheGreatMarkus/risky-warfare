@@ -8,6 +8,9 @@ using std::boolalpha;
 
 void evaluateMap(Map &map);
 
+/**
+ * Driver for Map
+ */
 int main() {
     cout << boolalpha;
 
@@ -80,8 +83,6 @@ int main() {
     validMap.addConnection(4, 5);
 
     evaluateMap(validMap);
-
-    return 0;
 }
 
 void evaluateMap(Map &map) {

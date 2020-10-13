@@ -20,6 +20,11 @@ OrdersList::OrdersList(const OrdersList &other) : orders{vector<Order *>()} {
     }
 }
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(OrdersList &a, OrdersList &b) {
     using std::swap;
     swap(a.orders, b.orders);
@@ -44,6 +49,11 @@ void OrdersList::add(Order *order) {
     orders.push_back(order);
 }
 
+/**
+ * Moves order from origin to dest.
+ * @param origin
+ * @param dest
+ */
 void OrdersList::move(int origin, int dest) {
     if (origin < orders.size() && dest < orders.size()) {
         int finalDest = dest > origin ? dest - 1 : dest;
@@ -81,6 +91,11 @@ Order::Order() : executed{false} {}
 
 Order::Order(const Order &other) : executed{other.executed} {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Order &a, Order &b) {
     using std::swap;
 
@@ -125,6 +140,11 @@ DeployOrder::DeployOrder(const DeployOrder &other)
           armies{other.armies},
           territory{other.territory} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(DeployOrder &a, DeployOrder &b) {
     using std::swap;
 
@@ -144,7 +164,14 @@ ostream &operator<<(ostream &out, const DeployOrder &obj) {
     return out;
 }
 
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool DeployOrder::validate(Map *map, Player *player) {
+    // Territory must exist and be owned by player
     if (territory >= map->getTerritories().size()
         || !player->owns(territory)) {
         return false;
@@ -152,6 +179,11 @@ bool DeployOrder::validate(Map *map, Player *player) {
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void DeployOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[territory]->addArmies(armies);
@@ -160,6 +192,11 @@ void DeployOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &DeployOrder::print(ostream &out) const {
     out << boolalpha << "DeployOrder{ "
         << "executed: " << getExecuted()
@@ -193,6 +230,11 @@ AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
           origin{other.origin},
           dest{other.dest} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(AdvanceOrder &a, AdvanceOrder &b) {
     using std::swap;
 
@@ -212,16 +254,22 @@ ostream &operator<<(ostream &out, const AdvanceOrder &obj) {
     return out;
 }
 
-
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool AdvanceOrder::validate(Map *map, Player *player) {
+    // both territories must exist
     if (origin >= map->getTerritories().size()
         || dest >= map->getTerritories().size()) {
         return false;
     }
 
     Territory *originTerritory = map->getTerritories()[origin];
-    Territory *destTerritory = map->getTerritories()[dest];
 
+    // Player must own origin territory and dest territory must be adjacent
     if (!player->owns(origin) || !map->areAdjacent(origin, dest)
         || originTerritory->getArmies() < armies) {
         return false;
@@ -230,6 +278,11 @@ bool AdvanceOrder::validate(Map *map, Player *player) {
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void AdvanceOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[origin]->removeArmies(armies);
@@ -240,6 +293,11 @@ void AdvanceOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &AdvanceOrder::print(ostream &out) const {
     out << boolalpha << "AdvanceOrder{ "
         << "executed: " << getExecuted()
@@ -269,6 +327,11 @@ BombOrder::BombOrder(const BombOrder &other)
         : Order(other),
           territory{other.territory} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(BombOrder &a, BombOrder &b) {
     using std::swap;
 
@@ -286,14 +349,24 @@ ostream &operator<<(ostream &out, const BombOrder &obj) {
     return out;
 }
 
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool BombOrder::validate(Map *map, Player *player) {
+    // territory must exist
     if (territory >= map->getTerritories().size()) {
         return false;
     }
 
+    // player can't bomb self
     if (player->owns(territory)) {
         return false;
     }
+
+
     bool adjacent = false;
     for (const auto &ownedTerritory : player->getOwnedTerritories()) {
         if (map->areAdjacent(ownedTerritory, territory)) {
@@ -301,7 +374,7 @@ bool BombOrder::validate(Map *map, Player *player) {
             break;
         }
     }
-
+    // target territory must be adjacent to player
     if (!adjacent) {
         return false;
     }
@@ -309,6 +382,11 @@ bool BombOrder::validate(Map *map, Player *player) {
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void BombOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[territory]->bomb();
@@ -317,6 +395,11 @@ void BombOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &BombOrder::print(ostream &out) const {
     out << boolalpha << "BombOrder{ "
         << "executed: " << getExecuted()
@@ -344,6 +427,11 @@ BlockadeOrder::BlockadeOrder(const BlockadeOrder &other)
         : Order(other),
           territory{other.territory} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(BlockadeOrder &a, BlockadeOrder &b) {
     using std::swap;
 
@@ -361,7 +449,14 @@ ostream &operator<<(ostream &out, const BlockadeOrder &obj) {
     return out;
 }
 
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool BlockadeOrder::validate(Map *map, Player *player) {
+    // territory must exist and be owned by player
     if (territory >= map->getTerritories().size()) {
         return false;
     }
@@ -373,6 +468,11 @@ bool BlockadeOrder::validate(Map *map, Player *player) {
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void BlockadeOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[territory]->blockade();
@@ -382,6 +482,11 @@ void BlockadeOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &BlockadeOrder::print(ostream &out) const {
     out << boolalpha << "BlockadeOrder{ "
         << "executed: " << getExecuted()
@@ -414,6 +519,11 @@ AirliftOrder::AirliftOrder(const AirliftOrder &other)
           origin{other.origin},
           dest{other.dest} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(AirliftOrder &a, AirliftOrder &b) {
     using std::swap;
 
@@ -433,7 +543,14 @@ ostream &operator<<(ostream &out, const AirliftOrder &obj) {
     return out;
 }
 
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool AirliftOrder::validate(Map *map, Player *player) {
+    // Both territories must exist and be owned by player
     if (origin >= map->getTerritories().size()
         || dest >= map->getTerritories().size()) {
         return false;
@@ -443,6 +560,7 @@ bool AirliftOrder::validate(Map *map, Player *player) {
         return false;
     }
 
+    // origin must have enough troops to move
     if (map->getTerritories()[origin]->getArmies() < armies) {
         return false;
     }
@@ -450,6 +568,11 @@ bool AirliftOrder::validate(Map *map, Player *player) {
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void AirliftOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[origin]->removeArmies(armies);
@@ -460,6 +583,11 @@ void AirliftOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &AirliftOrder::print(ostream &out) const {
     out << boolalpha << "AirliftOrder{ "
         << "executed: " << getExecuted()
@@ -489,6 +617,11 @@ NegotiateOrder::NegotiateOrder(const NegotiateOrder &other)
         : Order(other),
           player{other.player} {}
 
+/**
+* Swap method for copy-and-swap
+* @param a first element
+* @param b second element
+*/
 void swap(NegotiateOrder &a, NegotiateOrder &b) {
     using std::swap;
 
@@ -506,14 +639,25 @@ ostream &operator<<(ostream &out, const NegotiateOrder &obj) {
     return out;
 }
 
-
+/**
+ * Validates current Order
+ * @param map
+ * @param player
+ * @return Whether order is valid
+ */
 bool NegotiateOrder::validate(Map *map, Player *player) {
+    // Player can't negotiate with themselves
     if (this->player == player->getId()) {
         return false;
     }
     return true;
 }
 
+/**
+ * Executes current order, modifying the game state if needed.
+ * @param map Current map
+ * @param player Player executing the order
+ */
 void NegotiateOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         player->addAlly(this->player);
@@ -523,6 +667,11 @@ void NegotiateOrder::execute(Map *map, Player *player) {
     }
 }
 
+/**
+ * Helper print function for polymorphic stream insertion.
+ * @param out
+ * @return out
+ */
 ostream &NegotiateOrder::print(ostream &out) const {
     out << boolalpha << "NegotiateOrder{ "
         << "executed: " << getExecuted()

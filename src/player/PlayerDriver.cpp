@@ -6,6 +6,9 @@
 using std::cout;
 using std::endl;
 
+/**
+ * Driver for Player
+ */
 int main() {
     auto deck = new Deck{};
     Player player{0, "Player 1"};
@@ -24,7 +27,7 @@ int main() {
 
     player.issueOrder(10, 0);
     player.issueOrder(10, 0, 1);
-    player.issueOrder(deck, player.getHand(), bombCard, 10, 0 , 1, 1);
+    player.issueOrder(deck, player.getHand(), bombCard, 10, 0, 1, 1);
 
     cout << player;
 

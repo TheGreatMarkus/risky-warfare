@@ -12,6 +12,10 @@ class Player;
 class Hand;
 class Order;
 
+/**
+ * Deck which contains a finite list of cards.
+ * @see Card
+ */
 class Deck {
 private:
     vector<Card *> cards;
@@ -29,6 +33,9 @@ public:
     ~Deck();
 };
 
+/**
+ * A player's hand which contains a finite set of cards.
+ */
 class Hand {
 private:
     vector<Card *> cards;
@@ -47,6 +54,9 @@ public:
     ~Hand();
 };
 
+/**
+ * An abstract class representing a card a player can play to create special orders.
+ */
 class Card {
 public:
     Card();
@@ -64,9 +74,13 @@ public:
     virtual Card *clone() = 0;
     virtual ostream &print(ostream &out) const = 0;
 
-    virtual ~Card();
+    virtual ~Card() = 0;
 };
 
+/**
+ * Card for creating a BombOrder
+ * @see BombOrder
+ */
 class BombCard : public Card {
 public:
     BombCard();
@@ -84,9 +98,13 @@ public:
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
-    ~BombCard();
+    ~BombCard() override;
 };
 
+/**
+ * Card for creating a DeployOrder
+ * @see DeployOrder
+ */
 class ReinforcementCard : public Card {
 public:
     ReinforcementCard();
@@ -104,9 +122,13 @@ public:
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
-    ~ReinforcementCard();
+    ~ReinforcementCard() override;
 };
 
+/**
+ * Card for creating a BlockadeOrder
+ * @see BlockadeOrder
+ */
 class BlockadeCard : public Card {
 public:
     BlockadeCard();
@@ -124,9 +146,13 @@ public:
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
-    ~BlockadeCard();
+    ~BlockadeCard() override;
 };
 
+/**
+ * Card for creating a AirliftOrder
+ * @see AirliftOrder
+ */
 class AirliftCard : public Card {
 public:
     AirliftCard();
@@ -144,9 +170,13 @@ public:
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
-    ~AirliftCard();
+    ~AirliftCard() override;
 };
 
+/**
+ * Card for creating a NegotiateOrder
+ * @see NegotiateOrder
+ */
 class DiplomacyCard : public Card {
 public:
     DiplomacyCard();
@@ -164,5 +194,5 @@ public:
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
-    ~DiplomacyCard();
+    ~DiplomacyCard() override;
 };

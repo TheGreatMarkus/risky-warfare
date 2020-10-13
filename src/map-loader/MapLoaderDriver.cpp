@@ -8,6 +8,9 @@ using std::ofstream;
 
 void evaluateMap(Map &map);
 
+/**
+ * Driver for MapLoader
+ */
 int main() {
     // Valid
     Map *zertina = MapLoader::readMapFile("zertina.map");

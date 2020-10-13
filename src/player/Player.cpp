@@ -24,6 +24,11 @@ Player::Player(const Player &other)
           hand{new Hand(*other.hand)},
           orders{new OrdersList()} {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Player &a, Player &b) {
     using std::swap;
 
@@ -60,8 +65,11 @@ ostream &operator<<(ostream &out, const Player &obj) {
     return out;
 }
 
+/**
+ * Returns list of territories to defend
+ */
 vector<int> Player::toDefend() {
-    // Temporary, returns arbitrary list of territories
+    // Temporary, currently returns arbitrary list of territories
     vector<int> toDefend{};
     for (int i = 0; i < ownedTerritories.size(); i = i + 2) {
         toDefend.push_back(ownedTerritories[i]);
@@ -69,21 +77,39 @@ vector<int> Player::toDefend() {
     return toDefend;
 }
 
+/**
+ * Returns list of territories to attack
+ */
 vector<int> Player::toAttack() {
-    // Temporary, returns arbitrary list of territories
+    // Temporary, currently returns arbitrary list of territories
     vector<int> toAttack{0, 1};
     return toAttack;
 }
 
+/**
+ * Issue DeployOrder
+ * @param armies
+ * @param territory
+ */
 void Player::issueOrder(int armies, int territory) {
     orders->add(new DeployOrder(armies, territory));
 }
 
+/**
+ * Issue AdvanceOrder
+ * @param armies
+ * @param territory
+ */
 void Player::issueOrder(int armies, int origin, int dest) {
     orders->add(new AdvanceOrder(armies, origin, dest));
 }
 
-void Player::issueOrder(Deck *deck, Hand * hand, Card *card, int armies, int origin, int dest, int targetPlayer) {
+/**
+ * Issue Order from a Card
+ * @param armies
+ * @param territory
+ */
+void Player::issueOrder(Deck *deck, Hand *hand, Card *card, int armies, int origin, int dest, int targetPlayer) {
     orders->add(card->play(deck, hand, origin, dest, armies, targetPlayer));
 }
 
@@ -95,11 +121,19 @@ void Player::removeTerritory(int territory) {
     removeElement(ownedTerritories, territory);
 }
 
+/**
+ * Checks whether player own a territory
+ * @param territory
+ * @return
+ */
 bool Player::owns(int territory) {
     return vectorContains(ownedTerritories, territory);
 }
 
-
+/**
+ * Add ally after negotiation
+ * @param otherPlayer
+ */
 void Player::addAlly(int otherPlayer) {
     allies.push_back(otherPlayer);
 }

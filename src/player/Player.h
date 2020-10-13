@@ -17,6 +17,9 @@ class Deck;
 
 enum class OrderType;
 
+/**
+ * Class representing the player in the game
+ */
 class Player {
 private:
     int id;
@@ -42,8 +45,8 @@ public:
                     int origin,
                     int dest);
     void issueOrder(Deck *deck,
-                    Hand * hand,
-                    Card * card,
+                    Hand *hand,
+                    Card *card,
                     int armies,
                     int origin,
                     int dest,

@@ -3,9 +3,7 @@
 #include "Cards.h"
 #include "../orders/Orders.h"
 #include "../player/Player.h"
-#include "../utils/Utils.h"
 
-using cris_utils::removeElement;
 using std::endl;
 using std::remove;
 //=============================
@@ -15,6 +13,12 @@ using std::remove;
 Deck::Deck()
         : cards{vector<Card *>()} {}
 
+/**
+ * Copy constructor for Deck.
+ *
+ * Creates copies of all cards and puts them in a new list.
+ * @param other
+ */
 Deck::Deck(const Deck &other)
         : cards{vector<Card *>{}} {
     for (const auto &card : other.cards) {
@@ -22,6 +26,11 @@ Deck::Deck(const Deck &other)
     }
 }
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Deck &a, Deck &b) {
     using std::swap;
 
@@ -44,6 +53,10 @@ ostream &operator<<(ostream &out, const Deck &obj) {
     return out;
 }
 
+/**
+ * Picks a random cards and moves it to the given hand.
+ * @param hand
+ */
 void Deck::draw(Hand *hand) {
     int picked = rand() % cards.size();
 
@@ -68,16 +81,25 @@ Deck::~Deck() {
 // Hand Implementation
 //=============================
 
-
-
 Hand::Hand() : cards{vector<Card *>()} {}
 
+/**
+ * Copy constructor for Hand.
+ *
+ * Creates copies of all cards and puts them in a new list.
+ * @param other
+ */
 Hand::Hand(const Hand &other) : cards{vector<Card *>()} {
     for (const auto &card : other.cards) {
         cards.push_back(card->clone());
     }
 }
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Hand &a, Hand &b) {
     using std::swap;
     swap(a.cards, b.cards);
@@ -130,6 +152,11 @@ Card::Card() {}
 
 Card::Card(const Card &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(Card &a, Card &b) {
     using std::swap;
 }
@@ -148,6 +175,11 @@ BombCard::BombCard() {}
 
 BombCard::BombCard(const BombCard &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(BombCard &a, BombCard &b) {
     using std::swap;
 }
@@ -162,6 +194,16 @@ ostream &operator<<(ostream &out, const BombCard &obj) {
     return out;
 }
 
+/**
+ * Plays the current BombCard by first moving the card from the hand to the deck, and creating a new BombOrder.
+ * @param deck
+ * @param hand
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param targetPlayer
+ * @return a new BombOrder
+ */
 Order *BombCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
@@ -189,6 +231,11 @@ ReinforcementCard::ReinforcementCard() {}
 
 ReinforcementCard::ReinforcementCard(const ReinforcementCard &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(ReinforcementCard &a, ReinforcementCard &b) {
     using std::swap;
 }
@@ -203,6 +250,16 @@ ostream &operator<<(ostream &out, const ReinforcementCard &obj) {
     return out;
 }
 
+/**
+ * Plays the current ReinforcementCard by first moving the card from the hand to the deck, and creating a new DeployOrder.
+ * @param deck
+ * @param hand
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param targetPlayer
+ * @return a new BombOrder
+ */
 Order *ReinforcementCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
@@ -230,6 +287,11 @@ BlockadeCard::BlockadeCard() {}
 
 BlockadeCard::BlockadeCard(const BlockadeCard &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(BlockadeCard &a, BlockadeCard &b) {
     using std::swap;
 }
@@ -244,6 +306,16 @@ ostream &operator<<(ostream &out, const BlockadeCard &obj) {
     return out;
 }
 
+/**
+ * Plays the current BlockadeCard by first moving the card from the hand to the deck, and creating a new BlockadeOrder.
+ * @param deck
+ * @param hand
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param targetPlayer
+ * @return a new BombOrder
+ */
 Order *BlockadeCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
@@ -271,6 +343,11 @@ AirliftCard::AirliftCard() {}
 
 AirliftCard::AirliftCard(const AirliftCard &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(AirliftCard &a, AirliftCard &b) {
     using std::swap;
 }
@@ -285,6 +362,16 @@ ostream &operator<<(ostream &out, const AirliftCard &obj) {
     return out;
 }
 
+/**
+ * Plays the current AirliftCard by first moving the card from the hand to the deck, and creating a new AirliftOrder.
+ * @param deck
+ * @param hand
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param targetPlayer
+ * @return a new BombOrder
+ */
 Order *AirliftCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
@@ -312,6 +399,11 @@ DiplomacyCard::DiplomacyCard() {}
 
 DiplomacyCard::DiplomacyCard(const DiplomacyCard &other) {}
 
+/**
+ * Swap method for copy-and-swap
+ * @param a first element
+ * @param b second element
+ */
 void swap(DiplomacyCard &a, DiplomacyCard &b) {
     using std::swap;
 }
@@ -326,6 +418,16 @@ ostream &operator<<(ostream &out, const DiplomacyCard &obj) {
     return out;
 }
 
+/**
+ * Plays the current DiplomacyCard by first moving the card from the hand to the deck, and creating a new AirliftOrder.
+ * @param deck
+ * @param hand
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param targetPlayer
+ * @return a new NegotiateOrder
+ */
 Order *DiplomacyCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
