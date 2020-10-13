@@ -45,7 +45,9 @@ add_executable(
         src/cards/Cards.cpp
         src/cards/CardsDriver.cpp
         src/utils/Utils.cpp
-        src/utils/Utils.h
+        src/orders/Orders.cpp
+        src/map/Map.cpp
+        src/player/Player.cpp
 )
 
 

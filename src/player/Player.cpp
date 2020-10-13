@@ -75,18 +75,21 @@ vector<int> Player::toAttack() {
     return toAttack;
 }
 
-void Player::issueOrder(bool isDeploy, int armies, int originTerr, int destTerr) {
-    if (isDeploy) {
-        orders->add(new DeployOrder(armies, originTerr));
-    } else {
-        orders->add(new AdvanceOrder(armies, originTerr, destTerr));
-    }
+void Player::issueOrder(int armies, int territory) {
+    orders->add(new DeployOrder(armies, territory));
+}
+
+void Player::issueOrder(int armies, int origin, int dest) {
+    orders->add(new AdvanceOrder(armies, origin, dest));
+}
+
+void Player::issueOrder(Deck *deck, Hand * hand, Card *card, int armies, int origin, int dest, int targetPlayer) {
+    orders->add(card->play(deck, hand, origin, dest, armies, targetPlayer));
 }
 
 void Player::addTerritory(int territory) {
     ownedTerritories.push_back(territory);
 }
-
 
 void Player::removeTerritory(int territory) {
     removeElement(ownedTerritories, territory);
@@ -105,15 +108,26 @@ void Player::addCardOrder(Order *order) {
     orders->add(order);
 }
 
-const vector<int> &Player::getOwnedTerritories() const {
-    return ownedTerritories;
-}
-
 const int &Player::getId() const {
     return id;
 }
 
-Player::~Player() {}
+const vector<int> &Player::getOwnedTerritories() const {
+    return ownedTerritories;
+}
+
+Hand *Player::getHand() {
+    return hand;
+}
+
+Player::~Player() {
+    delete hand;
+    hand = nullptr;
+
+    delete orders;
+    orders = nullptr;
+}
+
 
 
 

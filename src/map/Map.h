@@ -36,7 +36,7 @@ public:
                       int continent,
                       int armies);
     void addContinent(string name, int armyValue);
-    void addConnection(int t1Id, int t2Id);
+    void addConnection(int t1, int t2);
     bool validate();
     const vector<Territory *> &getTerritories() const;
     bool areAdjacent(int t1, int t2);

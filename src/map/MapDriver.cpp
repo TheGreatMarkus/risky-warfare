@@ -55,21 +55,12 @@ int main() {
     // Invalid map: One of the territories has an invalid continent
     Map badContinent = Map("This map has a territories with an invalid continent!");
 
-    unconnectedContinent.addContinent("Continent 0", 1);
-    unconnectedContinent.addContinent("Continent 1", 1);
-    unconnectedContinent.addTerritory("t0", 0, 1);
-    unconnectedContinent.addTerritory("t1", 0, 1);
-    unconnectedContinent.addTerritory("t2", 1, 1);
-    unconnectedContinent.addTerritory("t3", 1, 1);
-    unconnectedContinent.addTerritory("t4", 1, 1);
-    unconnectedContinent.addTerritory("t5", 1, 1);
-    unconnectedContinent.addConnection(0, 2);
-    unconnectedContinent.addConnection(1, 2);
-    unconnectedContinent.addConnection(3, 2);
-    unconnectedContinent.addConnection(4, 3);
-    unconnectedContinent.addConnection(5, 4);
+    badContinent.addContinent("Continent 0", 1);
+    badContinent.addTerritory("t0", 100, 1);
+    badContinent.addTerritory("t1", 0, 1);
+    badContinent.addConnection(0, 1);
 
-    evaluateMap(unconnectedContinent);
+    evaluateMap(badContinent);
 
     // Valid map
     Map validMap = Map("Valid Map");

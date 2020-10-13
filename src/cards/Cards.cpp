@@ -1,9 +1,13 @@
+#include <algorithm>
+
 #include "Cards.h"
 #include "../orders/Orders.h"
 #include "../player/Player.h"
+#include "../utils/Utils.h"
 
-
+using cris_utils::removeElement;
 using std::endl;
+using std::remove;
 //=============================
 // Deck Implementation
 //=============================
@@ -32,8 +36,8 @@ Deck &Deck::operator=(Deck other) {
 ostream &operator<<(ostream &out, const Deck &obj) {
     out << "Deck{ " << endl
         << "cards[" << obj.cards.size() << "][" << endl;
-    for (const auto &card : obj.cards) {
-        out << card << endl;
+    for (auto card : obj.cards) {
+        out << *card << endl;
     }
     out << "]" << endl << "}" << endl;
 
@@ -82,8 +86,8 @@ Hand &Hand::operator=(Hand other) {
 ostream &operator<<(ostream &out, const Hand &obj) {
     out << "Hand{ " << endl
         << "cards[" << obj.cards.size() << "][" << endl;
-    for (const auto &card : obj.cards) {
-        out << card << endl;
+    for (auto card : obj.cards) {
+        out << *card << endl;
     }
     out << "]" << endl << "}" << endl;
 
@@ -94,12 +98,18 @@ void Hand::addCard(Card *card) {
     cards.push_back(card);
 }
 
+void Hand::removeCard(Card *card) {
+    cards.erase(remove(cards.begin(), cards.end(), card), cards.end());
+}
+
 Card *Hand::getCard(int i) {
     return cards[i];
 }
 
 
 Hand::~Hand() {}
+
+
 
 
 //=============================
@@ -115,6 +125,7 @@ void swap(Card &a, Card &b) {
 }
 
 ostream &operator<<(ostream &out, const Card &obj) {
+    obj.print(out);
     return out;
 }
 
@@ -137,11 +148,13 @@ BombCard &BombCard::operator=(BombCard other) {
 }
 
 ostream &operator<<(ostream &out, const BombCard &obj) {
-    out << "BombCard{}";
+    obj.print(out);
     return out;
 }
 
-Order *BombCard::play(int origin, int dest, int armies, int targetPlayer) {
+Order *BombCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
+    deck->addCard(this);
+    hand->removeCard(this);
     return new BombOrder(origin);
 }
 
@@ -149,7 +162,14 @@ Card *BombCard::clone() {
     return new BombCard();
 }
 
+ostream &BombCard::print(ostream &out) const {
+    out << "BombCard{}";
+    return out;
+}
+
 BombCard::~BombCard() {}
+
+
 
 //=============================
 // ReinforcementCard Implementation
@@ -169,20 +189,28 @@ ReinforcementCard &ReinforcementCard::operator=(ReinforcementCard other) {
 }
 
 ostream &operator<<(ostream &out, const ReinforcementCard &obj) {
-    out << "ReinforcementCard{}";
+    obj.print(out);
     return out;
 }
 
-Order *ReinforcementCard::play(int origin, int dest, int armies, int targetPlayer) {
-
-    return nullptr;
+Order *ReinforcementCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
+    deck->addCard(this);
+    hand->removeCard(this);
+    return new DeployOrder(5, origin);
 }
 
 Card *ReinforcementCard::clone() {
     return new ReinforcementCard();
 }
 
+ostream &ReinforcementCard::print(ostream &out) const {
+    out << "ReinforcementCard{}";
+    return out;
+}
+
 ReinforcementCard::~ReinforcementCard() {}
+
+
 
 //=============================
 // BlockadeCard Implementation
@@ -202,11 +230,13 @@ BlockadeCard &BlockadeCard::operator=(BlockadeCard other) {
 }
 
 ostream &operator<<(ostream &out, const BlockadeCard &obj) {
-    out << "BlockadeCard{}";
+    obj.print(out);
     return out;
 }
 
-Order *BlockadeCard::play(int origin, int dest, int armies, int targetPlayer) {
+Order *BlockadeCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
+    deck->addCard(this);
+    hand->removeCard(this);
     return new BlockadeOrder(origin);
 }
 
@@ -214,7 +244,14 @@ Card *BlockadeCard::clone() {
     return new BlockadeCard();
 }
 
+ostream &BlockadeCard::print(ostream &out) const {
+    out << "BlockadeCard{}";
+    return out;
+}
+
 BlockadeCard::~BlockadeCard() {}
+
+
 
 //=============================
 // AirliftCard Implementation
@@ -234,11 +271,13 @@ AirliftCard &AirliftCard::operator=(AirliftCard other) {
 }
 
 ostream &operator<<(ostream &out, const AirliftCard &obj) {
-    out << "AirliftCard{}";
+    obj.print(out);
     return out;
 }
 
-Order *AirliftCard::play(int origin, int dest, int armies, int targetPlayer) {
+Order *AirliftCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
+    deck->addCard(this);
+    hand->removeCard(this);
     return new AirliftOrder(armies, origin, dest);
 }
 
@@ -246,7 +285,14 @@ Card *AirliftCard::clone() {
     return new AirliftCard();
 }
 
-BlockadeCard::~AirliftCard() {}
+ostream &AirliftCard::print(ostream &out) const {
+    out << "AirliftCard{}";
+    return out;
+}
+
+AirliftCard::~AirliftCard() {}
+
+
 
 //=============================
 // DiplomacyCard Implementation
@@ -266,11 +312,13 @@ DiplomacyCard &DiplomacyCard::operator=(DiplomacyCard other) {
 }
 
 ostream &operator<<(ostream &out, const DiplomacyCard &obj) {
-    out << "DiplomacyCard{}";
+    obj.print(out);
     return out;
 }
 
-Order *DiplomacyCard::play(int origin, int dest, int armies, int targetPlayer) {
+Order *DiplomacyCard::play(Deck *deck, Hand *hand, int origin, int dest, int armies, int targetPlayer) {
+    deck->addCard(this);
+    hand->removeCard(this);
     return new NegotiateOrder(targetPlayer);
 }
 
@@ -278,4 +326,11 @@ Card *DiplomacyCard::clone() {
     return new DiplomacyCard();
 }
 
-BlockadeCard::~DiplomacyCard() {}
+ostream &DiplomacyCard::print(ostream &out) const {
+    out << "DiplomacyCard{}";
+    return out;
+}
+
+
+DiplomacyCard::~DiplomacyCard() {}
+

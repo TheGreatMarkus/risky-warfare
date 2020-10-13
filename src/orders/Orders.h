@@ -29,7 +29,7 @@ public:
     void move(int origin, int dest);
     void remove(int i);
 
-    ~OrdersList();
+    virtual ~OrdersList();
 };
 
 class Order {
@@ -54,7 +54,7 @@ public:
     void setEffect(string effect);
 
 
-    ~Order();
+    virtual ~Order();
 };
 
 class DeployOrder : public Order {

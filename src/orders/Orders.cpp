@@ -8,8 +8,6 @@ using std::stringstream;
 using std::to_string;
 using std::boolalpha;
 
-// TODO update validation to not hit allies
-
 //=============================
 // OrdersList Implementation
 //=============================
@@ -67,7 +65,12 @@ void OrdersList::remove(int i) {
     orders.erase(orders.begin() + i);
 }
 
-OrdersList::~OrdersList() = default;
+OrdersList::~OrdersList() {
+    for (auto order : orders) {
+        delete order;
+    }
+    orders.clear();
+};
 
 
 //=============================
@@ -143,7 +146,7 @@ ostream &operator<<(ostream &out, const DeployOrder &obj) {
 
 bool DeployOrder::validate(Map *map, Player *player) {
     if (territory >= map->getTerritories().size()
-        || player->owns(territory)) {
+        || !player->owns(territory)) {
         return false;
     }
     return true;
@@ -153,6 +156,7 @@ void DeployOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[territory]->addArmies(armies);
         setEffect("Added " + to_string(armies) + " armies to territory " + to_string(territory));
+        setExecuted(true);
     }
 }
 
@@ -232,6 +236,7 @@ void AdvanceOrder::execute(Map *map, Player *player) {
         map->getTerritories()[dest]->addArmies(armies);
         setEffect("Moved " + to_string(armies) + " armies from territory "
                   + to_string(origin) + " to territory " + to_string(dest));
+        setExecuted(true);
     }
 }
 
@@ -308,6 +313,7 @@ void BombOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         map->getTerritories()[territory]->bomb();
         setEffect("Halved armies for territory " + to_string(territory));
+        setExecuted(true);
     }
 }
 
@@ -372,6 +378,7 @@ void BlockadeOrder::execute(Map *map, Player *player) {
         map->getTerritories()[territory]->blockade();
         player->removeTerritory(territory);
         setEffect("Blockaded on territory " + to_string(territory));
+        setExecuted(true);
     }
 }
 
@@ -448,7 +455,8 @@ void AirliftOrder::execute(Map *map, Player *player) {
         map->getTerritories()[origin]->removeArmies(armies);
         map->getTerritories()[origin]->removeArmies(armies);
         setEffect("Airlift " + to_string(armies) + " armies from territory "
-        + to_string(origin) + " to territory " + to_string(dest));
+                  + to_string(origin) + " to territory " + to_string(dest));
+        setExecuted(true);
     }
 }
 
@@ -500,7 +508,7 @@ ostream &operator<<(ostream &out, const NegotiateOrder &obj) {
 
 
 bool NegotiateOrder::validate(Map *map, Player *player) {
-    if( this->player == player->getId()){
+    if (this->player == player->getId()) {
         return false;
     }
     return true;
@@ -511,6 +519,7 @@ void NegotiateOrder::execute(Map *map, Player *player) {
         player->addAlly(this->player);
         setEffect("Players " + to_string(this->player) + " and " + to_string(player->getId())
                   + " are now allies for one turn.");
+        setExecuted(true);
     }
 }
 

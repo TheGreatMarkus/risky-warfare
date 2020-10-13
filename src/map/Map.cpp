@@ -172,7 +172,7 @@ bool Map::validate() {
     // Validate each country belongs to one and only one continent.
     for (const auto &territory : territories) {
         if (territory->getContinent() >= continents.size()) {
-            cout << "INVALID MAP: " << *territory << " HAS A NON-EXISTENT CONTINENT!" << endl;
+            cout << "INVALID MAP: " << *territory << " HAS A NON-EXISTENT CONTINENT: " << territory->getContinent() << endl;
             return false;
         }
     }

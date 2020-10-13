@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "../orders/Orders.h"
 
 using std::ostream;
 using std::string;
@@ -13,6 +12,8 @@ class Territory;
 class Hand;
 class Order;
 class OrdersList;
+class Card;
+class Deck;
 
 enum class OrderType;
 
@@ -35,10 +36,18 @@ public:
 
     vector<int> toDefend();
     vector<int> toAttack();
-    void issueOrder(bool isDeploy,
+    void issueOrder(int armies,
+                    int territory);
+    void issueOrder(int armies,
+                    int origin,
+                    int dest);
+    void issueOrder(Deck *deck,
+                    Hand * hand,
+                    Card * card,
                     int armies,
-                    int originTerr,
-                    int destTerr);
+                    int origin,
+                    int dest,
+                    int targetPlayer);
     void addTerritory(int territory);
     void removeTerritory(int territory);
     bool owns(int territory);
@@ -47,6 +56,7 @@ public:
 
     const int &getId() const;
     const vector<int> &getOwnedTerritories() const;
+    Hand *getHand();
 
     ~Player();
 

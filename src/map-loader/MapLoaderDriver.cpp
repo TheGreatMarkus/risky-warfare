@@ -24,7 +24,11 @@ int main() {
     // Invalid
     Map *invalid = MapLoader::readMapFile("invalid.map");
     evaluateMap(*invalid);
-    return 0;
+
+    delete zertina;
+    delete canada;
+    delete usa;
+    delete invalid;
 }
 
 void evaluateMap(Map &map) {
