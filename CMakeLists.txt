@@ -48,6 +48,6 @@ add_executable(
         src/orders/Orders.cpp
         src/map/Map.cpp
         src/player/Player.cpp
-)
+        src/GameEngine.h src/GameEngine.cpp)
 
 

@@ -51,6 +51,11 @@ int main() {
     airliftOrder->execute(map, player1);
     negotiateOrder->execute(map, player1);
 
+    list.move(0, 2);
+    list.remove(0);
+
+    cout << endl << list << endl;
+
     cout << endl << endl << *deployOrder << endl;
     cout << *advanceOrder << endl;
     cout << *bombOrder << endl;
