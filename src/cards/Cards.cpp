@@ -1,8 +1,8 @@
+#include "Cards.h"
+
 #include <algorithm>
 
-#include "Cards.h"
 #include "../orders/Orders.h"
-#include "../player/Player.h"
 
 using std::endl;
 using std::remove;

@@ -19,7 +19,7 @@ public:
     friend void swap(MapLoader &a, MapLoader &b);
     MapLoader &operator=(MapLoader other);
     friend ostream &operator<<(ostream &out, const MapLoader &obj);
-    static Map *readMapFile(string filePath);
+    static Map *readMapFile(string path, string name);
 
     ~MapLoader();
 };

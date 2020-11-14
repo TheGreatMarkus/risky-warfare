@@ -1,6 +1,7 @@
+#include "Utils.h"
+
 #include <algorithm>
 
-#include "Utils.h"
 
 using std::find;
 using std::vector;

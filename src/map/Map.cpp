@@ -1,8 +1,9 @@
+#include "Map.h"
+
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
 
-#include "Map.h"
 #include "../utils/Utils.h"
 
 

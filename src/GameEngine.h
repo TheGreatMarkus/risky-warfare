@@ -8,10 +8,12 @@ using std::vector;
 
 class Map;
 class Player;
+class Deck;
 
 class Game {
     Map* map;
     vector<Player *> players;
+    Deck *deck;
 public:
     Game();
     Game(const Game &other);
@@ -19,7 +21,7 @@ public:
     Game &operator=(Game other);
     friend ostream &operator<<(ostream &out, const Game &obj);
 
-    // Your methods here
+
     void startGame();
 
     ~Game();

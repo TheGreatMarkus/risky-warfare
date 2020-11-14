@@ -13,19 +13,19 @@ void evaluateMap(Map &map);
  */
 int main() {
     // Valid
-    Map *zertina = MapLoader::readMapFile("zertina.map");
+    Map *zertina = MapLoader::readMapFile("zertina.map", "Zertina");
     evaluateMap(*zertina);
 
     // Valid
-    Map *canada = MapLoader::readMapFile("canada.map");
+    Map *canada = MapLoader::readMapFile("canada.map", "Canada");
     evaluateMap(*canada);
 
     // Valid
-    Map *usa = MapLoader::readMapFile("usa8regions.map");
+    Map *usa = MapLoader::readMapFile("usa8regions.map", "USA");
     evaluateMap(*usa);
 
     // Invalid
-    Map *invalid = MapLoader::readMapFile("invalid.map");
+    Map *invalid = MapLoader::readMapFile("invalid.map", "Invalid");
     evaluateMap(*invalid);
 
     delete zertina;

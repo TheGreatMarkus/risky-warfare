@@ -1,9 +1,10 @@
+#include "MapLoader.h"
+
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
 
-#include "MapLoader.h"
 #include "../map/Map.h"
 #include "../utils/Utils.h"
 
@@ -47,7 +48,7 @@ ostream &operator<<(ostream &out, const MapLoader &obj) {
  * @param filePath The path to the .map file
  * @return a Map object
  */
-Map *MapLoader::readMapFile(string filePath) {
+Map *MapLoader::readMapFile(string path, string name) {
     enum class Section {
         files,
         continents,
@@ -57,10 +58,10 @@ Map *MapLoader::readMapFile(string filePath) {
     };
 
     Section currentSection(Section::none);
-    ifstream mapFile(filePath);
+    ifstream mapFile(path);
     string line;
 
-    Map *map = new Map(filePath);
+    Map *map = new Map(name);
     int lineNum = 0;
 
     while (getline(mapFile, line)) {
@@ -96,13 +97,13 @@ Map *MapLoader::readMapFile(string filePath) {
         // Get tokens for the current line
         vector<string> tokens = strSplit(line, " ");
         switch (currentSection) {
-            case Section::files:{
+            case Section::files: {
                 continue;
             }
             case Section::none: {
                 continue;
             }
-            case Section::continents:{
+            case Section::continents: {
                 // Expected format of line: "ContinentName ArmyValue"
                 if (tokens.size() < 2 || !isNumber(tokens[1])) {
                     printError("INVALID CONTINENT", lineNum);
@@ -111,7 +112,7 @@ Map *MapLoader::readMapFile(string filePath) {
                 map->addContinent(tokens[0], stoi(tokens[1]));
                 break;
             }
-            case Section::countries:{
+            case Section::countries: {
                 // Expected format of line: "TerritoryId TerritoryName ContinentId"
                 if (tokens.size() < 3 || !isNumber(tokens[0]) || !isNumber(tokens[2])) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
