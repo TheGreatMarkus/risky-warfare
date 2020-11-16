@@ -69,10 +69,10 @@ public:
 class DeployOrder : public Order {
 private:
     int armies;
-    int territory;
+    Territory *territory;
 public:
     DeployOrder(int armies,
-                int territory);
+                Territory *territory);
     DeployOrder(const DeployOrder &other);
     friend void swap(DeployOrder &a, DeployOrder &b);
     DeployOrder &operator=(DeployOrder other);
@@ -92,12 +92,12 @@ public:
 class AdvanceOrder : public Order {
 private:
     int armies;
-    int origin;
-    int dest;
+    Territory *origin;
+    Territory *dest;
 public:
     AdvanceOrder(int armies,
-                 int originTerr,
-                 int destTerr);
+                 Territory *originTerr,
+                 Territory *destTerr);
     AdvanceOrder(const AdvanceOrder &other);
     friend void swap(AdvanceOrder &a, AdvanceOrder &b);
     AdvanceOrder &operator=(AdvanceOrder other);
@@ -116,9 +116,9 @@ public:
  */
 class BombOrder : public Order {
 private:
-    int territory;
+    Territory *territory;
 public:
-    BombOrder(int territory);
+    BombOrder(Territory *territory);
     BombOrder(const BombOrder &other);
     friend void swap(BombOrder &a, BombOrder &b);
     BombOrder &operator=(BombOrder other);
@@ -137,9 +137,9 @@ public:
  */
 class BlockadeOrder : public Order {
 private:
-    int territory;
+    Territory *territory;
 public:
-    BlockadeOrder(int territory);
+    BlockadeOrder(Territory *territory);
     BlockadeOrder(const BlockadeOrder &other);
     friend void swap(BlockadeOrder &a, BlockadeOrder &b);
     BlockadeOrder &operator=(BlockadeOrder other);
@@ -159,12 +159,12 @@ public:
 class AirliftOrder : public Order {
 private:
     int armies;
-    int origin;
-    int dest;
+    Territory *origin;
+    Territory *dest;
 public:
     AirliftOrder(int armies,
-                 int origin,
-                 int dest);
+                 Territory *origin,
+                 Territory *dest);
     AirliftOrder(const AirliftOrder &other);
     friend void swap(AirliftOrder &a, AirliftOrder &b);
     AirliftOrder &operator=(AirliftOrder other);
@@ -183,9 +183,9 @@ public:
  */
 class NegotiateOrder : public Order {
 private:
-    int player;
+    Player *player;
 public:
-    NegotiateOrder(int playerId);
+    NegotiateOrder(Player *player);
     NegotiateOrder(const NegotiateOrder &other);
     friend void swap(NegotiateOrder &a, NegotiateOrder &b);
     NegotiateOrder &operator=(NegotiateOrder other);

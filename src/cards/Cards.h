@@ -11,6 +11,7 @@ class Card;
 class Player;
 class Hand;
 class Order;
+class Territory;
 
 /**
  * Deck which contains a finite list of cards.
@@ -67,10 +68,10 @@ public:
 
     virtual Order *play(Deck *deck,
                         Hand *hand,
-                        int origin,
-                        int dest,
+                        Territory * origin,
+                        Territory *dest,
                         int armies,
-                        int targetPlayer) = 0;
+                        Player *targetPlayer) = 0;
     virtual Card *clone() = 0;
     virtual ostream &print(ostream &out) const = 0;
 
@@ -91,10 +92,10 @@ public:
 
     Order *play(Deck *deck,
                 Hand *hand,
-                int origin,
-                int dest,
+                Territory * origin,
+                Territory *dest,
                 int armies,
-                int targetPlayer) override;
+                Player *targetPlayer) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -115,10 +116,10 @@ public:
 
     Order *play(Deck *deck,
                 Hand *hand,
-                int origin,
-                int dest,
+                Territory * origin,
+                Territory *dest,
                 int armies,
-                int targetPlayer) override;
+                Player *targetPlayer) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -139,10 +140,10 @@ public:
 
     Order *play(Deck *deck,
                 Hand *hand,
-                int origin,
-                int dest,
+                Territory * origin,
+                Territory *dest,
                 int armies,
-                int targetPlayer) override;
+                Player *targetPlayer) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -163,10 +164,10 @@ public:
 
     Order *play(Deck *deck,
                 Hand *hand,
-                int origin,
-                int dest,
+                Territory * origin,
+                Territory *dest,
                 int armies,
-                int targetPlayer) override;
+                Player *targetPlayer) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -187,10 +188,10 @@ public:
 
     Order *play(Deck *deck,
                 Hand *hand,
-                int origin,
-                int dest,
+                Territory * origin,
+                Territory *dest,
                 int armies,
-                int targetPlayer) override;
+                Player *targetPlayer) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 

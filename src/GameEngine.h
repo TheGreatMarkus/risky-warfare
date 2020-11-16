@@ -22,7 +22,8 @@ public:
     friend ostream &operator<<(ostream &out, const Game &obj);
 
 
-    void startGame();
+    void initGame();
+    void startupPhase();
 
     ~Game();
 };

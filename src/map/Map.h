@@ -25,7 +25,7 @@ private:
     string name;
     vector<Territory *> territories;
     vector<Continent *> continents;
-    vector<set<int>> adj;
+    map<Territory *, set<Territory *>> adj;
 
 public:
     Map(string name);
@@ -39,9 +39,11 @@ public:
                       int armies);
     void addContinent(string name, int armyValue);
     void addConnection(int t1, int t2);
+
     bool validate();
     const vector<Territory *> &getTerritories() const;
-    bool areAdjacent(int t1, int t2);
+    const vector<Territory *> getTerritoriesByContinent(Continent *continent) const;
+    bool areAdjacent(Territory *t1, Territory *t2);
 
     ~Map();
 };
@@ -72,12 +74,13 @@ public:
 class Territory {
 private:
     string name;
-    int continent;
     int armies;
+    Continent *continent;
+    Player *player;
 
 public:
     Territory(string name,
-              int continent,
+              Continent *continent,
               int armies);
     Territory(const Territory &other);
     friend void swap(Territory &a, Territory &b);
@@ -90,8 +93,12 @@ public:
     void blockade();
 
     const string &getName() const;
-    const int &getContinent() const;
     const int &getArmies() const;
+    Continent *getContinent() const;
+    Player *getPlayer() const;
+
+    void setContinent(Continent *continent);
+    void setPlayer(Player * player);
 
     ~Territory();
 };

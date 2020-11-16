@@ -3,10 +3,12 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <set>
 
 using std::ostream;
 using std::string;
 using std::vector;
+using std::set;
 
 class Territory;
 class Hand;
@@ -22,43 +24,42 @@ enum class OrderType;
  */
 class Player {
 private:
-    int id;
     string name;
-    vector<int> ownedTerritories;
-    vector<int> allies;
+    set<Territory *> ownedTerritories;
+    set<Player *> allies;
     Hand *hand;
     OrdersList *orders;
 public:
 
-    Player(int id, string name);
+    Player(string name);
     Player(const Player &other);
 
     friend void swap(Player &a, Player &b);
     Player &operator=(Player other);
     friend ostream &operator<<(ostream &out, const Player &obj);
 
-    vector<int> toDefend();
-    vector<int> toAttack();
+    vector<Territory *> toDefend();
+    vector<Territory *> toAttack();
     void issueOrder(int armies,
-                    int territory);
+                    Territory *territory);
     void issueOrder(int armies,
-                    int origin,
-                    int dest);
+                    Territory *origin,
+                    Territory *dest);
     void issueOrder(Deck *deck,
-                    Hand *hand,
                     Card *card,
                     int armies,
-                    int origin,
-                    int dest,
-                    int targetPlayer);
-    void addTerritory(int territory);
-    void removeTerritory(int territory);
-    bool owns(int territory);
-    void addAlly(int otherPlayer);
+                    Territory *origin,
+                    Territory *dest,
+                    Player *targetPlayer);
+    void addTerritory(Territory *territory);
+    void removeTerritory(Territory *territory);
+    bool owns(Territory *territory);
+    void addAlly(Player *otherPlayer);
     void addCardOrder(Order *order);
 
     const int &getId() const;
-    const vector<int> &getOwnedTerritories() const;
+    const string &getName() const;
+    const set<Territory *> &getOwnedTerritories() const;
     Hand *getHand();
 
     ~Player();

@@ -57,11 +57,12 @@ int main() {
 
     // Invalid map: One of the territories has an invalid continent
     Map badContinent = Map("This map has a territories with an invalid continent!");
-
+    Continent *outsideContinent = new Continent("outside continent", 1);
     badContinent.addContinent("Continent 0", 1);
-    badContinent.addTerritory("t0", 100, 1);
+    badContinent.addTerritory("t0", 0, 1);
     badContinent.addTerritory("t1", 0, 1);
     badContinent.addConnection(0, 1);
+    badContinent.getTerritories()[0]->setContinent(outsideContinent);
 
     evaluateMap(badContinent);
 
@@ -83,6 +84,8 @@ int main() {
     validMap.addConnection(4, 5);
 
     evaluateMap(validMap);
+
+    delete outsideContinent;
 }
 
 void evaluateMap(Map &map) {

@@ -3,5 +3,6 @@
 int main() {
     Game game{};
 
-    game.startGame();
+    game.initGame();
+    game.startupPhase();
 }

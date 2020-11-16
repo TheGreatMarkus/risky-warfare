@@ -3,26 +3,67 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <set>
+#include "algorithm"
 
 using std::string;
 using std::vector;
 using std::ostream;
+using std::set;
+using std::find;
 
 /**
  * Utilities used throughout the program
+ *
+ * Template functions are included inline, due to the their limitations
+ * in C++: https://stackoverflow.com/questions/495021/why-can-templates-only-be-implemented-in-the-header-file
+ *
  */
 namespace cris_utils {
+    /**
+     * Checks if a vector contains an element.
+     *
+     * @return whether vector contains the element
+     */
     template<typename T>
-    bool vectorContains(vector<T> v, T element);
+    bool contains(vector<T> v, T element) {
+        return find(v.begin(), v.end(), element) != v.end();
+    }
 
     template<typename T>
-    bool compare(std::vector<T> &v1, std::vector<T> &v2);
+    bool contains(set<T> s, T element) {
+        return s.find(element) != s.end();
+    }
+
+    /**
+     * Compares two vectors and returns whether they have the same elements.
+     * @return Whether they have the same elements
+     */
+    template<typename T>
+    bool compare(std::vector<T> &v1, std::vector<T> &v2) {
+        sort(v1.begin(), v1.end());
+        sort(v2.begin(), v2.end());
+        return v1 == v2;
+    }
 
     vector<string> strSplit(string str, const string &delim);
     void trim(std::string &s);
     bool isNumber(const string &str);
 
+    /**
+     * Remove element from vector
+     */
     template<typename T>
-    void removeElement(vector<T> &v, T element);
+    void removeElement(vector<T> &v, T element) {
+        v.erase(remove(v.begin(), v.end(), element), v.end());
+    }
+
+    /**
+     * Remove element from set
+     */
+    template<typename T>
+    void removeElement(set<T> &s, T element) {
+        s.erase(element);
+    }
 
 }

@@ -3,24 +3,23 @@
 #include "../cards/Cards.h"
 #include "../orders/Orders.h"
 #include "../utils/Utils.h"
+#include "../map/Map.h"
 
 using std::endl;
-using cris_utils::vectorContains;
+using cris_utils::contains;
 using cris_utils::removeElement;
 
-Player::Player(int id, string name)
-        : id{id},
-          name{name},
-          ownedTerritories{vector<int>()},
-          allies{vector<int>()},
+Player::Player(string name)
+        : name{name},
+          ownedTerritories{set<Territory *>()},
+          allies{set<Player *>()},
           hand{new Hand()},
           orders{new OrdersList()} {}
 
 Player::Player(const Player &other)
-        : id{other.id},
-          name{other.name},
-          ownedTerritories{vector<int>(other.ownedTerritories)},
-          allies{vector<int>(other.allies)},
+        : name{other.name},
+          ownedTerritories{set<Territory *>(other.ownedTerritories)},
+          allies{set<Player *>(other.allies)},
           hand{new Hand(*other.hand)},
           orders{new OrdersList()} {}
 
@@ -32,7 +31,6 @@ Player::Player(const Player &other)
 void swap(Player &a, Player &b) {
     using std::swap;
 
-    swap(a.id, b.id);
     swap(a.name, b.name);
     swap(a.ownedTerritories, b.ownedTerritories);
     swap(a.allies, b.allies);
@@ -47,16 +45,15 @@ Player &Player::operator=(Player other) {
 
 ostream &operator<<(ostream &out, const Player &obj) {
     out << "Player{" << endl
-        << "id: " << obj.id << endl
         << "name: \"" << obj.name << "\"" << endl
         << "ownedTerritories[" << obj.ownedTerritories.size() << "][ ";
-    for (int const territory : obj.ownedTerritories) {
-        out << territory << " ";
+    for (auto territory : obj.ownedTerritories) {
+        out << territory->getName() << " ";
     }
     out << "] " << endl
         << "allies[" << obj.allies.size() << "][ ";
-    for (int const ally : obj.allies) {
-        out << ally << " ";
+    for (auto ally : obj.allies) {
+        out << ally->getName() << " ";
     }
     out << "] " << endl
         << "hand: " << *obj.hand << endl
@@ -68,21 +65,18 @@ ostream &operator<<(ostream &out, const Player &obj) {
 /**
  * Returns list of territories to defend
  */
-vector<int> Player::toDefend() {
+vector<Territory *> Player::toDefend() {
     // Temporary, currently returns arbitrary list of territories
-    vector<int> toDefend{};
-    for (int i = 0; i < ownedTerritories.size(); i = i + 2) {
-        toDefend.push_back(ownedTerritories[i]);
-    }
+    vector<Territory *> toDefend{};
     return toDefend;
 }
 
 /**
  * Returns list of territories to attack
  */
-vector<int> Player::toAttack() {
+vector<Territory *> Player::toAttack() {
     // Temporary, currently returns arbitrary list of territories
-    vector<int> toAttack{0, 1};
+    vector<Territory *> toAttack{};
     return toAttack;
 }
 
@@ -91,7 +85,7 @@ vector<int> Player::toAttack() {
  * @param armies
  * @param territory
  */
-void Player::issueOrder(int armies, int territory) {
+void Player::issueOrder(int armies, Territory *territory) {
     orders->add(new DeployOrder(armies, territory));
 }
 
@@ -100,7 +94,7 @@ void Player::issueOrder(int armies, int territory) {
  * @param armies
  * @param territory
  */
-void Player::issueOrder(int armies, int origin, int dest) {
+void Player::issueOrder(int armies, Territory *origin, Territory *dest) {
     orders->add(new AdvanceOrder(armies, origin, dest));
 }
 
@@ -109,15 +103,16 @@ void Player::issueOrder(int armies, int origin, int dest) {
  * @param armies
  * @param territory
  */
-void Player::issueOrder(Deck *deck, Hand *hand, Card *card, int armies, int origin, int dest, int targetPlayer) {
+void Player::issueOrder(Deck *deck, Card *card, int armies, Territory *origin, Territory *dest, Player *targetPlayer) {
     orders->add(card->play(deck, hand, origin, dest, armies, targetPlayer));
 }
 
-void Player::addTerritory(int territory) {
-    ownedTerritories.push_back(territory);
+void Player::addTerritory(Territory *territory) {
+    ownedTerritories.insert(territory);
+    territory->setPlayer(this);
 }
 
-void Player::removeTerritory(int territory) {
+void Player::removeTerritory(Territory *territory) {
     removeElement(ownedTerritories, territory);
 }
 
@@ -126,27 +121,28 @@ void Player::removeTerritory(int territory) {
  * @param territory
  * @return
  */
-bool Player::owns(int territory) {
-    return vectorContains(ownedTerritories, territory);
+bool Player::owns(Territory *territory) {
+    return contains(ownedTerritories, territory);
 }
 
 /**
  * Add ally after negotiation
  * @param otherPlayer
  */
-void Player::addAlly(int otherPlayer) {
-    allies.push_back(otherPlayer);
+void Player::addAlly(Player *otherPlayer) {
+    allies.insert(otherPlayer);
 }
 
 void Player::addCardOrder(Order *order) {
     orders->add(order);
 }
 
-const int &Player::getId() const {
-    return id;
+const string &Player::getName() const {
+    return name;
 }
 
-const vector<int> &Player::getOwnedTerritories() const {
+
+const set<Territory *> &Player::getOwnedTerritories() const {
     return ownedTerritories;
 }
 
@@ -161,7 +157,6 @@ Player::~Player() {
     delete orders;
     orders = nullptr;
 }
-
 
 
 

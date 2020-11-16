@@ -118,7 +118,6 @@ Map *MapLoader::readMapFile(string path, string name) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
                     return map;
                 }
-                // In the Map object, territories keep track of continents and each other through indices
                 int continentIndex = stoi(tokens[2]) - 1;
                 map->addTerritory(tokens[1], continentIndex, 0);
                 break;

@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "../orders/Orders.h"
 #include "../cards/Cards.h"
+#include "../map/Map.h"
 
 using std::cout;
 using std::endl;
@@ -11,25 +12,28 @@ using std::endl;
  */
 int main() {
     auto deck = new Deck{};
-    Player player{0, "Player 1"};
+    Player *player1 = new Player{"Player 1"};
+    Player *player2 = new Player{"Player 2"};
+    Continent *c0 = new Continent{"c0", 1};
+    Territory *t0 = new Territory{"t0", c0, 0};
+    Territory *t1 = new Territory{"t1", c0, 0};
 
-    player.addTerritory(0);
-    player.addTerritory(1);
-    player.addTerritory(2);
-    player.addTerritory(3);
+    player1->addTerritory(t0);
+    player1->addTerritory(t1);
+
 
     auto *bombCard = new BombCard();
     deck->addCard(bombCard);
-    deck->draw(player.getHand());
+    deck->draw(player1->getHand());
 
-    vector<int> toDefend = player.toDefend();
-    vector<int> toAttack = player.toAttack();
+    vector<Territory *> toDefend = player1->toDefend();
+    vector<Territory *> toAttack = player1->toAttack();
 
-    player.issueOrder(10, 0);
-    player.issueOrder(10, 0, 1);
-    player.issueOrder(deck, player.getHand(), bombCard, 10, 0, 1, 1);
+    player1->issueOrder(10, t0);
+    player1->issueOrder(10, t0, t1);
+    player1->issueOrder(deck, bombCard, 10, t0, t1, player2);
 
-    cout << player;
+    cout << *player1;
 
     delete deck;
 }

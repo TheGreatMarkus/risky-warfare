@@ -22,31 +22,6 @@ namespace {
     }
 }
 
-/**
- * Checks if a vector contains an element.
- *
- * @return whether vector contains the element
- */
-template<typename T>
-bool cris_utils::vectorContains(vector<T> v, T element) {
-    return find(v.begin(), v.end(), element) != v.end();
-}
-
-template bool cris_utils::vectorContains(vector<int> v, int element);
-template bool cris_utils::vectorContains(vector<bool> v, bool element);
-
-/**
- * Compares two vectors and returns whether they have the same elements.
- * @return Whether they have the same elements
- */
-template<typename T>
-bool cris_utils::compare(vector<T> &v1, vector<T> &v2) {
-    sort(v1.begin(), v1.end());
-    sort(v2.begin(), v2.end());
-    return v1 == v2;
-}
-
-template bool cris_utils::compare(vector<int> &v1, vector<int> &v2);
 
 /**
  * Splits a string given a delimiter
@@ -94,13 +69,3 @@ bool cris_utils::isNumber(const string &str) {
     while (it != str.end() && isdigit(*it)) ++it;
     return !str.empty() && it == str.end();
 }
-
-/**
- * Remove element from vector
- */
-template<typename T>
-void cris_utils::removeElement(vector<T> &v, T element) {
-    v.erase(remove(v.begin(), v.end(), element), v.end());
-}
-
-template void cris_utils::removeElement(vector<int> &v, int element);

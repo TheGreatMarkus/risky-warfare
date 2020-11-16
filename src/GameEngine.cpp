@@ -1,10 +1,12 @@
 #include "GameEngine.h"
 
 #include <filesystem>
+#include <algorithm>
 
 #include "map/Map.h"
 #include "player/Player.h"
 #include "map-loader/MapLoader.h"
+#include "cards/Cards.h"
 
 using std::cout;
 using std::cin;
@@ -39,7 +41,7 @@ ostream &operator<<(ostream &out, const Game &obj) {
     return out;
 }
 
-void Game::startGame() {
+void Game::initGame() {
     cout << "Welcome to the game!" << endl;
     cout << "Looking for map in: " << current_path() << endl;
     vector<string> maps{};
@@ -59,10 +61,30 @@ void Game::startGame() {
 
     map = MapLoader::readMapFile(maps[chosenMap], maps[chosenMap]);
 
-    cout << "How many Players?";
-    // TODO players
+    cout << "Enter the number of players: ";
 
+    int numPlayers;
+    cin >> numPlayers;
+
+    for (int i = 0; i < numPlayers; ++i) {
+        players.push_back(new Player(i, "Player " + std::to_string(i + 1)));
+    }
     // TODO observers
+
+
+    deck = new Deck();
+
+}
+
+void Game::startupPhase() {
+    // TODO Determine order of play for players
+        std::random_shuffle(players.begin(), players.end());
+
+    // TODO Assign territories round robin style
+    for (auto &territory : map->getTerritories()) {
+        cout << territory;
+    }
+    // TODO Give initial armies
 
 }
 
@@ -72,3 +94,5 @@ Game::~Game() {
         delete player;
     }
 }
+
+
