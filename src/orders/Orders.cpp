@@ -8,7 +8,6 @@ using std::cout;
 using std::endl;
 using std::stringstream;
 using std::to_string;
-using std::boolalpha;
 
 using cris_utils::contains;
 
@@ -49,6 +48,14 @@ ostream &operator<<(ostream &out, const OrdersList &obj) {
     return out;
 }
 
+Order *OrdersList::operator[](int i) {
+    return orders[i];
+}
+
+const int OrdersList::size() const {
+    return orders.size();
+}
+
 void OrdersList::add(Order *order) {
     orders.push_back(order);
 }
@@ -79,12 +86,15 @@ void OrdersList::remove(int i) {
     orders.erase(orders.begin() + i);
 }
 
+
 OrdersList::~OrdersList() {
     for (auto order : orders) {
         delete order;
     }
     orders.clear();
-};
+}
+
+
 
 
 //=============================
@@ -175,9 +185,12 @@ ostream &operator<<(ostream &out, const DeployOrder &obj) {
  * @return Whether order is valid
  */
 bool DeployOrder::validate(Map *map, Player *player) {
-    // Territory must exist and be owned by player
+    // Territory must exist
+    // Territory must be owned by the player
+    // Player must have enough armies
     if (!contains(map->getTerritories(), territory)
-        || !player->owns(territory)) {
+        || !player->owns(territory)
+        || player->getArmies() < armies) {
         return false;
     }
     return true;
@@ -202,7 +215,7 @@ void DeployOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &DeployOrder::print(ostream &out) const {
-    out << boolalpha << "DeployOrder{ "
+    out << "DeployOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
@@ -266,16 +279,13 @@ ostream &operator<<(ostream &out, const AdvanceOrder &obj) {
  */
 bool AdvanceOrder::validate(Map *map, Player *player) {
     // both territories must exist
-    if (!contains(map->getTerritories(), origin)
-        || !contains(map->getTerritories(), dest)) {
-        return false;
-    }
-
-
     // Player must own origin territory
     // origin and dest territory must be adjacent
     // origin must have enough troops
-    if (!player->owns(origin) || !map->areAdjacent(origin, dest)
+    if (!contains(map->getTerritories(), origin)
+        || !contains(map->getTerritories(), dest)
+        || !player->owns(origin)
+        || !map->areAdjacent(origin, dest)
         || origin->getArmies() < armies) {
         return false;
     }
@@ -291,7 +301,12 @@ bool AdvanceOrder::validate(Map *map, Player *player) {
 void AdvanceOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         origin->removeArmies(armies);
-        dest->addArmies(armies);
+        if (dest->getPlayer() == player) {
+            dest->addArmies(armies);
+        } else {
+            // TODO battle scenario
+        }
+
         setEffect("Moved " + to_string(armies) + " armies from territory "
                   + origin->getName() + " to territory " + dest->getName());
         setExecuted(true);
@@ -304,7 +319,7 @@ void AdvanceOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &AdvanceOrder::print(ostream &out) const {
-    out << boolalpha << "AdvanceOrder{ "
+    out << "AdvanceOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
@@ -362,16 +377,13 @@ ostream &operator<<(ostream &out, const BombOrder &obj) {
  */
 bool BombOrder::validate(Map *map, Player *player) {
     // territory must exist
-    if (!contains(map->getTerritories(), territory)) {
-        return false;
-    }
-
     // player can't bomb self
-    if (player->owns(territory)) {
+    if (!contains(map->getTerritories(), territory)
+        || player->owns(territory)) {
         return false;
     }
 
-
+    // target territory must be adjacent to one of the player's territories
     bool adjacent = false;
     for (const auto &ownedTerritory : player->getOwnedTerritories()) {
         if (map->areAdjacent(ownedTerritory, territory)) {
@@ -379,7 +391,6 @@ bool BombOrder::validate(Map *map, Player *player) {
             break;
         }
     }
-    // target territory must be adjacent to player
     if (!adjacent) {
         return false;
     }
@@ -406,7 +417,7 @@ void BombOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &BombOrder::print(ostream &out) const {
-    out << boolalpha << "BombOrder{ "
+    out << "BombOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", territory: " << territory->getName()
@@ -462,11 +473,8 @@ ostream &operator<<(ostream &out, const BlockadeOrder &obj) {
  */
 bool BlockadeOrder::validate(Map *map, Player *player) {
     // territory must exist and be owned by player
-    if (!contains(map->getTerritories(), territory)) {
-        return false;
-    }
-
-    if (!player->owns(territory)) {
+    if (!contains(map->getTerritories(), territory)
+        || !player->owns(territory)) {
         return false;
     }
 
@@ -481,7 +489,7 @@ bool BlockadeOrder::validate(Map *map, Player *player) {
 void BlockadeOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         territory->blockade();
-        player->removeTerritory(territory);
+        player->loseTerritory(territory);
         setEffect("Blockaded territory " + territory->getName());
         setExecuted(true);
     }
@@ -493,7 +501,7 @@ void BlockadeOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &BlockadeOrder::print(ostream &out) const {
-    out << boolalpha << "BlockadeOrder{ "
+    out << "BlockadeOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", territory: " << territory->getName()
@@ -556,17 +564,13 @@ ostream &operator<<(ostream &out, const AirliftOrder &obj) {
  */
 bool AirliftOrder::validate(Map *map, Player *player) {
     // Both territories must exist
-    if (!contains(map->getTerritories(), origin)
-        || !contains(map->getTerritories(), dest)) {
-        return false;
-    }
     // Both territories must be owned by player
-    if (!player->owns(origin) || !player->owns(dest)) {
-        return false;
-    }
-
-    // origin must have enough troops to move
-    if (origin->getArmies() < armies) {
+    // Origin must have enough troops to move
+    if (!contains(map->getTerritories(), origin)
+        || !contains(map->getTerritories(), dest)
+        || !player->owns(origin)
+        || !player->owns(dest)
+        || origin->getArmies() < armies) {
         return false;
     }
 
@@ -594,7 +598,7 @@ void AirliftOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &AirliftOrder::print(ostream &out) const {
-    out << boolalpha << "AirliftOrder{ "
+    out << "AirliftOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
@@ -678,7 +682,7 @@ void NegotiateOrder::execute(Map *map, Player *player) {
  * @return out
  */
 ostream &NegotiateOrder::print(ostream &out) const {
-    out << boolalpha << "NegotiateOrder{ "
+    out << "NegotiateOrder{ "
         << "executed: " << getExecuted()
         << ", effect: \"" << getEffect()
         << "\", player: " << player->getName()

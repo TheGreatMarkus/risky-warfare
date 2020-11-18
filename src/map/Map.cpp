@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "../utils/Utils.h"
+#include "../player/Player.h"
 
 
 using std::cout;
@@ -12,10 +13,13 @@ using std::endl;
 using std::runtime_error;
 using std::find;
 using std::pair;
+using std::set_difference;
+using std::inserter;
 
 using cris_utils::contains;
 using cris_utils::compare;
 using cris_utils::contains;
+using cris_utils::vectorToSet;
 
 namespace {
 
@@ -32,8 +36,8 @@ namespace {
      */
     void dfs(Territory *current,
              map<Territory *, set<Territory *>> &adj,
-             vector<Territory *> &found) {
-        found.push_back(current);
+             set<Territory *> &found) {
+        found.insert(current);
         for (auto territory : adj[current]) {
             if (!contains(found, territory)) {
                 dfs(territory, adj, found);
@@ -53,10 +57,10 @@ namespace {
      */
     void dfsContinent(Territory *current,
                       Continent *continent,
-                      vector<Territory *> continentTerritories,
+                      set<Territory *> continentTerritories,
                       map<Territory *, set<Territory *>> &adj,
-                      vector<Territory *> &found) {
-        found.push_back(current);
+                      set<Territory *> &found) {
+        found.insert(current);
         for (auto territory : adj[current]) {
             if (!contains(found, territory) && contains(continentTerritories, territory)) {
                 dfsContinent(territory, continent, continentTerritories, adj, found);
@@ -71,8 +75,8 @@ namespace {
 
 Map::Map(string name)
         : name{name},
-          territories{vector<Territory *>()},
-          continents{vector<Continent *>()} {}
+          territories{},
+          continents{} {}
 
 /**
  * Copy constructor for Map.
@@ -82,8 +86,8 @@ Map::Map(string name)
  */
 Map::Map(const Map &other)
         : name{other.name},
-          territories{vector<Territory *>()},
-          continents{vector<Continent *>()} {
+          territories{},
+          continents{} {
     for (auto territory : other.territories) {
         territories.push_back(new Territory(*territory));
     }
@@ -146,7 +150,9 @@ void Map::addTerritory(
         int armies) {
     auto *newTerritory = new Territory(name, continents[continent], armies);
     territories.push_back(newTerritory);
-    adj.insert(pair(newTerritory, set<Territory *>{}));
+    if (contains(adj, newTerritory)) {
+        adj.insert(pair(newTerritory, set<Territory *>{}));
+    }
 }
 
 void Map::addContinent(
@@ -189,9 +195,10 @@ bool Map::validate() {
 
     // Validate map is a connected graph
     {
-        vector<Territory *> found{};
-        dfs(territories[0], adj, found);
-        if (!compare(found, territories)) {
+        set<Territory *> found{};
+        set<Territory *> territoriesSet = vectorToSet(territories);
+        dfs(*territories.begin(), adj, found);
+        if (!compare(found, territoriesSet)) {
             cout << "INVALID MAP: NOT A CONNECTED GRAPH. THESE TERRITORIES WEREN'T FOUND DURING THE DFS SEARCH: ( ";
             for (auto &territory : territories) {
                 if (!contains(found, territory)) {
@@ -214,12 +221,12 @@ bool Map::validate() {
     }
 
     // Validate continents are connected sub-graphs
-    for (int i = 0; i < continents.size(); ++i) {
-        vector<Territory *> continentTerritories = getTerritoriesByContinent(continents[i]);
-        vector<Territory *> found{};
-        dfsContinent(continentTerritories[0], continents[i], continentTerritories, adj, found);
+    for (auto &continent : continents) {
+        set<Territory *> continentTerritories = getTerritoriesByContinent(continent);
+        set<Territory *> found{};
+        dfsContinent(*continentTerritories.begin(), continent, continentTerritories, adj, found);
         if (!compare(continentTerritories, found)) {
-            cout << "INVALID MAP: THE FOLLOWING TERRITORIES OF " << *continents[i] << " AREN'T CONNECTED: ( ";
+            cout << "INVALID MAP: THE FOLLOWING TERRITORIES OF " << *continent << " AREN'T CONNECTED: ( ";
             for (auto continentTerritory : continentTerritories) {
                 if (!contains(found, continentTerritory)) {
                     cout << continentTerritory->getName() << " ";
@@ -239,25 +246,21 @@ const vector<Territory *> &Map::getTerritories() const {
 }
 
 
-vector<int> getTerritoriesByContinent(const vector<Territory *> &territories, const Continent *continent) {
-
-}
-
 /**
    * Returns all territories that belong to a given continent
    * @param territories
    * @param continent
    * @return list of territories
    */
-const vector<Territory *> Map::getTerritoriesByContinent(Continent *continent) const {
-    vector<Territory *> tempList{};
+const set<Territory *> Map::getTerritoriesByContinent(Continent *continent) const {
+    set<Territory *> tempSet{};
 
     for (Territory *territory : territories) {
         if (territory->getContinent() == continent) {
-            tempList.push_back(territory);
+            tempSet.insert(territory);
         }
     }
-    return tempList;
+    return tempSet;
 }
 
 /**
@@ -282,8 +285,20 @@ Map::~Map() {
     territories.clear();
 }
 
-
-
+set<Continent *> Map::getContinentsControlledByPlayer(Player *player) {
+    set<Continent *> controlledContinents{};
+    for (auto &continent : continents) {
+        set<Territory *> cTerrs = getTerritoriesByContinent(continent);
+        set<Territory *> difference;
+        set_difference(cTerrs.begin(), cTerrs.end(),
+                       player->getOwnedTerritories().begin(), player->getOwnedTerritories().end(),
+                       inserter(difference, difference.end()));
+        if (difference.empty()) {
+            controlledContinents.insert(continent);
+        }
+    }
+    return controlledContinents;
+}
 
 //=============================
 // Continent Implementation
@@ -324,6 +339,10 @@ ostream &operator<<(ostream &out, const Continent &obj) {
 
 const string &Continent::getName() const {
     return name;
+}
+
+const int &Continent::getArmies() const {
+    return armies;
 }
 
 

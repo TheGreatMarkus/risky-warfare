@@ -1,7 +1,9 @@
 #include "Cards.h"
 
+#include <iostream>
 
 #include "../player/Player.h"
+#include "../orders/Orders.h"
 #include "../map/Map.h"
 
 using std::cout;
@@ -12,6 +14,8 @@ using std::endl;
  * @return
  */
 int main() {
+    cout << std::boolalpha;
+
     Deck *deck = new Deck{};
 
     Player *player1 = new Player{"p0"};

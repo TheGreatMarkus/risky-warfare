@@ -6,8 +6,13 @@
 #include "../map/Map.h"
 
 using std::endl;
+using std::cout;
+using std::to_string;
+
 using cris_utils::contains;
 using cris_utils::removeElement;
+using cris_utils::getIntInput;
+
 
 Player::Player(string name)
         : name{name},
@@ -66,7 +71,7 @@ ostream &operator<<(ostream &out, const Player &obj) {
  * Returns list of territories to defend
  */
 vector<Territory *> Player::toDefend() {
-    // Temporary, currently returns arbitrary list of territories
+    // TODO, currently returns arbitrary list of territories
     vector<Territory *> toDefend{};
     return toDefend;
 }
@@ -75,9 +80,26 @@ vector<Territory *> Player::toDefend() {
  * Returns list of territories to attack
  */
 vector<Territory *> Player::toAttack() {
-    // Temporary, currently returns arbitrary list of territories
+    // TODO, currently returns arbitrary list of territories
     vector<Territory *> toAttack{};
     return toAttack;
+}
+
+void Player::issueOrder() {
+    cout << "Player " << name << " is issuing orders!" << endl;
+
+    vector<Territory *> attack = toAttack();
+    vector<Territory *> defend = toDefend();
+
+    // TODO issue deploy and advance orders
+
+    cout << "Player " << name << ", you have the following cards: " << endl;
+    for (int i = 0; i < hand->getCards().size(); ++i) {
+        cout << i << ": " << *(hand->getCards()[i]) << endl;
+    }
+    int cardIndex = getIntInput("Pick a card", 0, hand->getCards().size() - 1);
+
+
 }
 
 /**
@@ -107,13 +129,14 @@ void Player::issueOrder(Deck *deck, Card *card, int armies, Territory *origin, T
     orders->add(card->play(deck, hand, origin, dest, armies, targetPlayer));
 }
 
-void Player::addTerritory(Territory *territory) {
+void Player::captureTerritory(Territory *territory) {
     ownedTerritories.insert(territory);
     territory->setPlayer(this);
 }
 
-void Player::removeTerritory(Territory *territory) {
+void Player::loseTerritory(Territory *territory) {
     removeElement(ownedTerritories, territory);
+    territory->setPlayer(nullptr);
 }
 
 /**
@@ -141,6 +164,14 @@ const string &Player::getName() const {
     return name;
 }
 
+const int &Player::getArmies() const {
+    return armies;
+}
+
+OrdersList &Player::getOrders() {
+    return *orders;
+}
+
 
 const set<Territory *> &Player::getOwnedTerritories() const {
     return ownedTerritories;
@@ -150,6 +181,16 @@ Hand *Player::getHand() {
     return hand;
 }
 
+void Player::addArmies(int armies) {
+    this->armies += armies;
+}
+
+void Player::removeArmies(int armies) {
+    if (this->armies < armies) {
+        throw "Player" + this->getName() + " doesn't have enough armies: " + to_string(armies);
+    }
+}
+
 Player::~Player() {
     delete hand;
     hand = nullptr;
@@ -157,6 +198,17 @@ Player::~Player() {
     delete orders;
     orders = nullptr;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

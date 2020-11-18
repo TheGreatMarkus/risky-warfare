@@ -1,14 +1,21 @@
 #include "Utils.h"
 
 #include <algorithm>
-
+#include <iostream>
 
 using std::find;
 using std::vector;
 using std::sort;
 using std::string;
+using std::cin;
+using std::cout;
+using std::end;
+using std::endl;
+using std::getline;
 
 namespace {
+
+
     void ltrim(string &s) {
         s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
             return !isspace(ch);
@@ -69,3 +76,58 @@ bool cris_utils::isNumber(const string &str) {
     while (it != str.end() && isdigit(*it)) ++it;
     return !str.empty() && it == str.end();
 }
+
+int cris_utils::getIntInput(string prompt, int min, int max) {
+    int answer;
+    bool error = false;
+
+    do {
+        if (error) {
+            cout << prompt << " (Please enter a number between " << min << " and " << max << "): ";
+        } else {
+            cout << prompt << " (" << min << "-" << max << "): ";
+        }
+        cin >> answer;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        error = !cin || answer < min || answer > max;
+    } while (error);
+
+    return answer;
+}
+
+int cris_utils::getBoolInput(string prompt) {
+    string answer = "";
+    bool error = false;
+
+    do {
+        if (error) {
+            cout << prompt << " (Please answer with either \"y\" or \"n\"): ";
+        } else {
+            cout << prompt << " (y/n): ";
+        }
+
+        getline(cin, answer);
+        cin.clear();
+        error = answer != "y" && answer != "n" && answer != "yes" && answer != "no";
+    } while (error);
+
+    if (answer == "y" || answer == "yes") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void cris_utils::printTitle(string title) {
+    cout << "==========================================================" << endl
+         << title << endl
+         << "==========================================================" << endl << endl;
+}
+
+void cris_utils::printSubtitle(string title) {
+    cout << "============== " <<
+         title
+         << " ==============" << endl << endl;
+}
+

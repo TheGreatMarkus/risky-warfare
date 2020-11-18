@@ -9,6 +9,8 @@ using std::endl;
  * Driver for Orders.
  */
 int main() {
+    cout << std::boolalpha;
+
     OrdersList list{};
     Map *map = new Map{"Test Map"};
     Player *player1 = new Player{"p0"};
@@ -25,17 +27,17 @@ int main() {
     Territory *t1 = map->getTerritories()[1];
     Territory *t2 = map->getTerritories()[2];
 
-    player1->addTerritory(t0);
-    player1->addTerritory(t1);
-    player2->addTerritory(t2);
+    player1->captureTerritory(t0);
+    player1->captureTerritory(t1);
+    player2->captureTerritory(t2);
 
     // You can play with these values to make them false
-    auto deployOrder = new DeployOrder(2, t0);
-    auto advanceOrder = new AdvanceOrder(2, t0, t1);
-    auto bombOrder = new BombOrder(t2);
-    auto airliftOrder = new AirliftOrder(2, t0, t1);
-    auto negotiateOrder = new NegotiateOrder(player2);
-    auto blockadeOrder = new BlockadeOrder(t0);
+    Order *deployOrder = new DeployOrder(2, t0);
+    Order *advanceOrder = new AdvanceOrder(2, t0, t1);
+    Order *bombOrder = new BombOrder(t2);
+    Order *airliftOrder = new AirliftOrder(2, t0, t1);
+    Order *negotiateOrder = new NegotiateOrder(player2);
+    Order *blockadeOrder = new BlockadeOrder(t0);
 
     list.add(deployOrder);
     list.add(advanceOrder);

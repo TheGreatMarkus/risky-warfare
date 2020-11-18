@@ -42,8 +42,9 @@ public:
 
     bool validate();
     const vector<Territory *> &getTerritories() const;
-    const vector<Territory *> getTerritoriesByContinent(Continent *continent) const;
+    const set<Territory *> getTerritoriesByContinent(Continent *continent) const;
     bool areAdjacent(Territory *t1, Territory *t2);
+    set<Continent *> getContinentsControlledByPlayer(Player *player);
 
     ~Map();
 };
@@ -64,6 +65,7 @@ public:
     friend ostream &operator<<(ostream &out, const Continent &obj);
 
     const string &getName() const;
+    const int &getArmies() const;
 
     ~Continent();
 };
@@ -98,7 +100,7 @@ public:
     Player *getPlayer() const;
 
     void setContinent(Continent *continent);
-    void setPlayer(Player * player);
+    void setPlayer(Player *player);
 
     ~Territory();
 };

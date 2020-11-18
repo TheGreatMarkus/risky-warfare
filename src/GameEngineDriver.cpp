@@ -1,8 +1,14 @@
 #include "GameEngine.h"
+#include <iostream>
+
+using std::cout;
+
 
 int main() {
+    cout << std::boolalpha;
     Game game{};
 
-    game.initGame();
+    game.gameStart();
     game.startupPhase();
+    game.mainGameLoop();
 }

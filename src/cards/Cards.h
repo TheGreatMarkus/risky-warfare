@@ -51,6 +51,7 @@ public:
     void addCard(Card *card);
     void removeCard(Card *card);
     Card *getCard(int i);
+    const vector<Card *> &getCards() const;
 
     ~Hand();
 };

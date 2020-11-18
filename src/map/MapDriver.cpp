@@ -4,7 +4,6 @@
 
 using std::cout;
 using std::endl;
-using std::boolalpha;
 
 void evaluateMap(Map &map);
 
@@ -12,7 +11,7 @@ void evaluateMap(Map &map);
  * Driver for Map
  */
 int main() {
-    cout << boolalpha;
+    cout << std::boolalpha;
 
     Map emptyMap("This is an empty map!");
     evaluateMap(emptyMap);

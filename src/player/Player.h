@@ -25,6 +25,7 @@ enum class OrderType;
 class Player {
 private:
     string name;
+    int armies;
     set<Territory *> ownedTerritories;
     set<Player *> allies;
     Hand *hand;
@@ -40,6 +41,7 @@ public:
 
     vector<Territory *> toDefend();
     vector<Territory *> toAttack();
+    void issueOrder();
     void issueOrder(int armies,
                     Territory *territory);
     void issueOrder(int armies,
@@ -51,16 +53,20 @@ public:
                     Territory *origin,
                     Territory *dest,
                     Player *targetPlayer);
-    void addTerritory(Territory *territory);
-    void removeTerritory(Territory *territory);
+    void captureTerritory(Territory *territory);
+    void loseTerritory(Territory *territory);
     bool owns(Territory *territory);
     void addAlly(Player *otherPlayer);
     void addCardOrder(Order *order);
 
-    const int &getId() const;
     const string &getName() const;
+    const int & getArmies() const;
+    OrdersList &getOrders() ;
     const set<Territory *> &getOwnedTerritories() const;
     Hand *getHand();
+
+    void addArmies(int armies);
+    void removeArmies(int armies);
 
     ~Player();
 

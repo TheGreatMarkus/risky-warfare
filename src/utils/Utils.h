@@ -4,12 +4,14 @@
 #include <vector>
 #include <iostream>
 #include <set>
-#include "algorithm"
+#include <algorithm>
+#include <map>
 
 using std::string;
 using std::vector;
 using std::ostream;
 using std::set;
+using std::map;
 using std::find;
 
 /**
@@ -35,6 +37,16 @@ namespace cris_utils {
         return s.find(element) != s.end();
     }
 
+    template<typename T, typename S>
+    bool contains(map<T, S> s, T element) {
+        return s.find(element) != s.end();
+    }
+
+    template<typename T>
+    set<T> vectorToSet(vector<T> v) {
+        return set(v.begin(), v.end());
+    }
+
     /**
      * Compares two vectors and returns whether they have the same elements.
      * @return Whether they have the same elements
@@ -44,6 +56,11 @@ namespace cris_utils {
         sort(v1.begin(), v1.end());
         sort(v2.begin(), v2.end());
         return v1 == v2;
+    }
+
+    template<typename T>
+    bool compare(std::set<T> &s1, std::set<T> &s2) {
+        return s1 == s2;
     }
 
     vector<string> strSplit(string str, const string &delim);
@@ -66,4 +83,10 @@ namespace cris_utils {
         s.erase(element);
     }
 
+    int getIntInput(string prompt, int min, int max);
+    int getBoolInput(string prompt);
+
+    void printTitle(string title);
+    void printSubtitle(string title);
 }
+

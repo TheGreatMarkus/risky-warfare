@@ -1,12 +1,17 @@
 #include "GameEngine.h"
 
+
 #include <filesystem>
 #include <algorithm>
+#include <random>
 
+#include "utils/Utils.h"
 #include "map/Map.h"
 #include "player/Player.h"
 #include "map-loader/MapLoader.h"
 #include "cards/Cards.h"
+#include "orders/Orders.h"
+
 
 using std::cout;
 using std::cin;
@@ -15,11 +20,32 @@ using std::filesystem::recursive_directory_iterator;
 using std::filesystem::directory_entry;
 using std::filesystem::current_path;
 
-Game::Game() : map{nullptr}, players{vector<Player *>()}, deck{nullptr} {}
+using cris_utils::getBoolInput;
+using cris_utils::getIntInput;
+using cris_utils::contains;
+using cris_utils::printTitle;
+using cris_utils::printSubtitle;
+using cris_utils::removeElement;
+using cris_utils::compare;
+using cris_utils::vectorToSet;
 
-Game::Game(const Game &other) : map{new Map(*other.map)}, players{vector<Player *>()}, deck{nullptr} {
-    for (auto &player : other.players) {
-        players.push_back(new Player(*player));
+namespace {
+    auto rd = std::random_device{};
+    auto rng = std::default_random_engine{rd()};
+}
+
+Game::Game() : map{nullptr},
+               activePlayers{},
+               allPlayers{},
+               deck{nullptr},
+               gameOver{false} {}
+
+Game::Game(const Game &other) :
+        map{new Map(*other.map)},
+        activePlayers{vector<Player *>()},
+        deck{nullptr} {
+    for (auto &player : other.activePlayers) {
+        activePlayers.push_back(new Player(*player));
     }
 }
 
@@ -27,7 +53,7 @@ void swap(Game &a, Game &b) {
     using std::swap;
 
     swap(a.map, b.map);
-    swap(a.players, b.players);
+    swap(a.activePlayers, b.activePlayers);
 }
 
 Game &Game::operator=(Game other) {
@@ -41,58 +67,202 @@ ostream &operator<<(ostream &out, const Game &obj) {
     return out;
 }
 
-void Game::initGame() {
-    cout << "Welcome to the game!" << endl;
-    cout << "Looking for map in: " << current_path() << endl;
+void Game::gameStart() {
+    cout << endl;
+    printTitle("Welcome to the game Risky Warfare!");
+
+    string searchPath = current_path();
+
+    // Finding and printing available maps
     vector<string> maps{};
-    for (auto &item : recursive_directory_iterator(current_path())) {
+    for (auto &item : recursive_directory_iterator(searchPath)) {
         if (!item.is_directory() && item.path().extension().string() == ".map") {
             maps.push_back(item.path().string());
         }
     }
-    cout << "Available Maps:" << endl;
+    cout << "Maps available under" << searchPath << endl;
     for (int i = 0; i < maps.size(); ++i) {
-        cout << "Map " << i << ": " << maps[i] << endl;
+        cout << "\t" << (i + 1) << ": " << maps[i] << endl;
     }
 
-    cout << "Please choose a map to load: ";
+    // User picks a map. Map must be valid
+    bool mapValid = true;
     int chosenMap;
-    cin >> chosenMap;
+    do {
+        if (!mapValid) {
+            cout << "Map is invalid! Please pick another" << endl;
+        }
+        chosenMap = getIntInput("Which map file do you want to load?", 1, maps.size());
+        map = MapLoader::readMapFile(maps[chosenMap - 1], maps[chosenMap - 1]);
+        mapValid = map->validate();
 
-    map = MapLoader::readMapFile(maps[chosenMap], maps[chosenMap]);
+    } while (!mapValid);
 
-    cout << "Enter the number of players: ";
 
-    int numPlayers;
-    cin >> numPlayers;
+    // Create players
+    cout << endl;
+    int numPlayers = getIntInput("How many players are there?", 2, 5);
 
     for (int i = 0; i < numPlayers; ++i) {
-        players.push_back(new Player(i, "Player " + std::to_string(i + 1)));
+        allPlayers.push_back(new Player("Player " + std::to_string(i + 1)));
     }
-    // TODO observers
+    activePlayers.insert(activePlayers.begin(), allPlayers.begin(), allPlayers.end());
 
-
+    // Create deck of cards
     deck = new Deck();
+    for (int i = 0; i < 5; ++i) {
+        deck->addCard(new BombCard());
+        deck->addCard(new ReinforcementCard());
+        deck->addCard(new BlockadeCard());
+        deck->addCard(new AirliftCard());
+        deck->addCard(new DiplomacyCard());
+    }
 
+
+    // TODO Set up observers
+    cout << endl;
+    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
+    cout << endl;
+    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
 }
 
 void Game::startupPhase() {
-    // TODO Determine order of play for players
-        std::random_shuffle(players.begin(), players.end());
+    cout << endl;
+    printTitle("Entering the startup phase!");
 
-    // TODO Assign territories round robin style
-    for (auto &territory : map->getTerritories()) {
-        cout << territory;
+    // Determine order of play for players
+    std::shuffle(activePlayers.begin(), activePlayers.end(), rng);
+    cout << "Here is the order of players:" << endl;
+    for (auto &player : activePlayers) {
+        cout << player->getName() << ", ";
     }
-    // TODO Give initial armies
+    cout << endl;
+
+    // Assign territories round robin style
+    int currentPlayer = 0;
+    for (auto &territory : map->getTerritories()) {
+        activePlayers[currentPlayer]->captureTerritory(territory);
+        currentPlayer++;
+        if (currentPlayer >= activePlayers.size()) {
+            currentPlayer = 0;
+        }
+    }
+    // Give initial armies to players
+    int initialArmies = 0;
+    switch (activePlayers.size()) {
+        case 2:
+            initialArmies = INITIAL_ARMIES_2P;
+            break;
+        case 3:
+            initialArmies = INITIAL_ARMIES_3P;
+            break;
+        case 4:
+            initialArmies = INITIAL_ARMIES_4P;
+            break;
+        case 5:
+            initialArmies = INITIAL_ARMIES_5P;
+            break;
+    }
+
+    cout << "Giving each player " << initialArmies << " armies at the start of the game!" << endl;
+    for (auto &player : activePlayers) {
+        player->addArmies(initialArmies);
+    }
+}
+
+void Game::mainGameLoop() {
+    cout << endl;
+    printTitle("Entering the main game loop!");
+    int rounds = 0;
+
+    while (!gameOver) {
+        reinforcementPhase();
+        issueOrderPhase();
+        executeOrdersPhase();
+
+        checkGameState();
+        gameOver = true;
+    }
 
 }
+
+void Game::reinforcementPhase() {
+    printSubtitle("Reinforcement phase");
+
+    for (auto &player : activePlayers) {
+        int numArmies = 0;
+        set<Territory *> ownedTerritories = player->getOwnedTerritories();
+        numArmies += ownedTerritories.size() / 3;
+        set<Continent *> playerConts = map->getContinentsControlledByPlayer(player);
+        for (auto &continent : playerConts) {
+            numArmies += continent->getArmies();
+        }
+        cout << player->getName() << " owns " << ownedTerritories.size()
+             << " territories, ";
+        if (playerConts.empty()) {
+            cout << "and control no continents";
+        } else {
+            cout << "and controls the following continents: " << endl;
+        }
+        for (auto &continent : playerConts) {
+            cout << "\t- " << continent->getName() << "" << endl;
+        }
+        cout << endl << "They will receive " << numArmies << " armies" << endl << endl;
+        player->addArmies(numArmies);
+    }
+}
+
+void Game::issueOrderPhase() {
+    printSubtitle("Order issuing phase");
+    vector<bool> ready(activePlayers.size());
+    while (contains(ready, false)) {
+        for (int i = 0; i < activePlayers.size(); ++i) {
+            if (!ready[i]) {
+                activePlayers[i]->issueOrder();
+                ready[i] = getBoolInput("Are you done issuing orders?");
+            }
+        }
+    }
+
+}
+
+void Game::executeOrdersPhase() {
+    // TODO
+    printSubtitle("Order execution Phase");
+    for (auto player : activePlayers) {
+//        player->getOrders()[0];
+    }
+}
+
+void Game::checkGameState() {
+    printSubtitle("Round over! Checking the game state!");
+
+    for (auto &player : allPlayers) {
+        if (contains(activePlayers, player) && player->getOwnedTerritories().empty()) {
+            cout << player->getName() << " owns no territories. They will be eliminated" << endl;
+            removeElement(activePlayers, player);
+        }
+    }
+
+    for (auto &player : activePlayers) {
+        if (vectorToSet(map->getTerritories()) == player->getOwnedTerritories()) {
+            cout << *player << " won the game!";
+            gameOver = true;
+        }
+    }
+}
+
 
 Game::~Game() {
     delete map;
-    for (auto &player : players) {
+    for (auto &player : activePlayers) {
         delete player;
     }
 }
+
+
+
+
+
 
 

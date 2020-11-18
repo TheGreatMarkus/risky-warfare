@@ -133,6 +133,9 @@ Card *Hand::getCard(int i) {
     return cards[i];
 }
 
+const vector<Card *> &Hand::getCards() const {
+    return cards;
+}
 
 Hand::~Hand() {
     for (auto card : cards) {
@@ -140,8 +143,6 @@ Hand::~Hand() {
     }
     cards.clear();
 }
-
-
 
 
 //=============================
@@ -204,7 +205,7 @@ ostream &operator<<(ostream &out, const BombCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *BombCard::play(Deck *deck, Hand *hand, Territory* origin, Territory* dest, int armies, Player* targetPlayer) {
+Order *BombCard::play(Deck *deck, Hand *hand, Territory *origin, Territory *dest, int armies, Player *targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
     return new BombOrder(origin);
@@ -260,7 +261,8 @@ ostream &operator<<(ostream &out, const ReinforcementCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *ReinforcementCard::play(Deck *deck, Hand *hand, Territory* origin, Territory* dest, int armies, Player* targetPlayer) {
+Order *
+ReinforcementCard::play(Deck *deck, Hand *hand, Territory *origin, Territory *dest, int armies, Player *targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
     return new DeployOrder(5, origin);
@@ -316,7 +318,8 @@ ostream &operator<<(ostream &out, const BlockadeCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *BlockadeCard::play(Deck *deck, Hand *hand, Territory* origin, Territory* dest, int armies, Player* targetPlayer) {
+Order *
+BlockadeCard::play(Deck *deck, Hand *hand, Territory *origin, Territory *dest, int armies, Player *targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
     return new BlockadeOrder(origin);
@@ -372,7 +375,7 @@ ostream &operator<<(ostream &out, const AirliftCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *AirliftCard::play(Deck *deck, Hand *hand, Territory* origin, Territory* dest, int armies, Player* targetPlayer) {
+Order *AirliftCard::play(Deck *deck, Hand *hand, Territory *origin, Territory *dest, int armies, Player *targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
     return new AirliftOrder(armies, origin, dest);
@@ -428,7 +431,8 @@ ostream &operator<<(ostream &out, const DiplomacyCard &obj) {
  * @param targetPlayer
  * @return a new NegotiateOrder
  */
-Order *DiplomacyCard::play(Deck *deck, Hand *hand, Territory* origin, Territory* dest, int armies, Player* targetPlayer) {
+Order *
+DiplomacyCard::play(Deck *deck, Hand *hand, Territory *origin, Territory *dest, int armies, Player *targetPlayer) {
     deck->addCard(this);
     hand->removeCard(this);
     return new NegotiateOrder(targetPlayer);

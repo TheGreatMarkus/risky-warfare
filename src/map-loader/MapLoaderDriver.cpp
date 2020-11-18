@@ -4,7 +4,6 @@
 
 using std::cout;
 using std::endl;
-using std::boolalpha;
 
 void evaluateMap(Map &map);
 
@@ -12,7 +11,8 @@ void evaluateMap(Map &map);
  * Driver for MapLoader
  */
 int main() {
-    cout << boolalpha;
+    cout << std::boolalpha;
+
     // Valid
     Map *zertina = MapLoader::readMapFile("zertina.map", "Zertina");
     evaluateMap(*zertina);

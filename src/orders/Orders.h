@@ -28,9 +28,14 @@ public:
     OrdersList &operator=(OrdersList other);
     friend ostream &operator<<(ostream &out, const OrdersList &obj);
 
+    Order *operator[](int i);
+    const int size() const;
     void add(Order *order);
     void move(int origin, int dest);
     void remove(int i);
+
+
+
 
     ~OrdersList();
 };

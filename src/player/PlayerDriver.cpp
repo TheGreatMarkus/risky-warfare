@@ -11,6 +11,8 @@ using std::endl;
  * Driver for Player
  */
 int main() {
+    cout << std::boolalpha;
+
     auto deck = new Deck{};
     Player *player1 = new Player{"Player 1"};
     Player *player2 = new Player{"Player 2"};
@@ -18,8 +20,8 @@ int main() {
     Territory *t0 = new Territory{"t0", c0, 0};
     Territory *t1 = new Territory{"t1", c0, 0};
 
-    player1->addTerritory(t0);
-    player1->addTerritory(t1);
+    player1->captureTerritory(t0);
+    player1->captureTerritory(t1);
 
 
     auto *bombCard = new BombCard();

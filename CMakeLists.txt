@@ -52,6 +52,13 @@ add_executable(
         src/map/Map.cpp
 )
 
+project(GameStatistics)
+add_executable(
+        GameStatistics
+        src/game-stats/GameObservers.cpp
+        src/game-stats/GameObserversDriver.cpp
+)
+
 
 project(GameEngine)
 add_executable(
