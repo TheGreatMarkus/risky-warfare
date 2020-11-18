@@ -3,9 +3,12 @@
 #include <algorithm>
 
 #include "../orders/Orders.h"
+#include "../utils/Utils.h"
 
 using std::endl;
 using std::remove;
+
+using cris_utils::randInt;
 //=============================
 // Deck Implementation
 //=============================
@@ -58,7 +61,7 @@ ostream &operator<<(ostream &out, const Deck &obj) {
  * @param hand
  */
 void Deck::draw(Hand *hand) {
-    int picked = rand() % cards.size();
+    int picked = randInt(0, cards.size() - 1);
 
     Card *pickedCard = cards[picked];
     cards.erase(cards.begin() + picked);

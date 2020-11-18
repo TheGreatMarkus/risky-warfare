@@ -10,6 +10,32 @@ using std::stringstream;
 using std::to_string;
 
 using cris_utils::contains;
+using cris_utils::randInt;
+
+namespace {
+
+    const int ATTACK_CHANCE = 60;
+    const int DEFEND_CHANCE = 70;
+
+    void attackTerritory(Territory *attacker, int numArmies, Territory *defender) {
+        int attackerKills = 0;
+        int defenderKills = 0;
+        for (int i = 0; i < numArmies; ++i) {
+            int roll = randInt(1, 100);
+            if (roll < ATTACK_CHANCE) {
+                attackerKills++;
+            }
+        }
+
+        for (int i = 0; i < defender->getArmies(); ++i) {
+            int roll = randInt(1, 100);
+            if (roll < DEFEND_CHANCE) {
+                defenderKills++;
+            }
+        }
+        // TODO
+    }
+}
 
 //=============================
 // OrdersList Implementation
@@ -304,7 +330,7 @@ void AdvanceOrder::execute(Map *map, Player *player) {
         if (dest->getPlayer() == player) {
             dest->addArmies(armies);
         } else {
-            // TODO battle scenario
+            attackTerritory(origin, armies, dest);
         }
 
         setEffect("Moved " + to_string(armies) + " armies from territory "

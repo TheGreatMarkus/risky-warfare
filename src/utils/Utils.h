@@ -88,5 +88,7 @@ namespace cris_utils {
 
     void printTitle(string title);
     void printSubtitle(string title);
+
+    int randInt(int min, int max);
 }
 

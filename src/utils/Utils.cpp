@@ -14,7 +14,7 @@ using std::endl;
 using std::getline;
 
 namespace {
-
+    bool seedSet = false;
 
     void ltrim(string &s) {
         s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -131,3 +131,11 @@ void cris_utils::printSubtitle(string title) {
          << " ==============" << endl << endl;
 }
 
+
+int cris_utils::randInt(int min, int max) {
+    if (!seedSet) {
+        srand((unsigned int) time(nullptr));
+        seedSet = true;
+    }
+    return (rand() % (max - min + 1)) + min;
+}

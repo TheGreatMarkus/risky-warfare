@@ -6,6 +6,7 @@ using std::cout;
 
 int main() {
     cout << std::boolalpha;
+
     Game game{};
 
     game.gameStart();
