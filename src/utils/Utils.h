@@ -44,7 +44,12 @@ namespace cris_utils {
 
     template<typename T>
     set<T> vectorToSet(vector<T> v) {
-        return set(v.begin(), v.end());
+        return set<T>(v.begin(), v.end());
+    }
+
+    template<typename T>
+    vector<T> setToVector(set<T> s) {
+        return vector<T>(s.begin(), s.end());
     }
 
     /**
@@ -90,5 +95,8 @@ namespace cris_utils {
     void printSubtitle(string title);
 
     int randInt(int min, int max);
+
+    template<typename T>
+    T pickFromList(string desc, string prompt, vector<T> list);
 }
 

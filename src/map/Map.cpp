@@ -151,7 +151,7 @@ void Map::addTerritory(
     auto *newTerritory = new Territory(name, continents[continent], armies);
     territories.push_back(newTerritory);
     if (contains(adj, newTerritory)) {
-        adj.insert(pair(newTerritory, set<Territory *>{}));
+        adj.insert(pair<Territory *, set<Territory *>>(newTerritory, set<Territory *>{}));
     }
 }
 
@@ -273,18 +273,6 @@ bool Map::areAdjacent(Territory *t1, Territory *t2) {
     return adj[t1].find(t2) != adj[t1].end();
 }
 
-Map::~Map() {
-    for (auto territory : territories) {
-        delete territory;
-    }
-    territories.clear();
-
-    for (auto continent : continents) {
-        delete continent;
-    }
-    territories.clear();
-}
-
 set<Continent *> Map::getContinentsControlledByPlayer(Player *player) {
     set<Continent *> controlledContinents{};
     for (auto &continent : continents) {
@@ -299,6 +287,26 @@ set<Continent *> Map::getContinentsControlledByPlayer(Player *player) {
     }
     return controlledContinents;
 }
+
+const set<Territory *> Map::getNeighbors(Territory *territory) {
+    return adj[territory];
+}
+
+Map::~Map() {
+    for (auto territory : territories) {
+        delete territory;
+    }
+    territories.clear();
+
+    for (auto continent : continents) {
+        delete continent;
+    }
+    territories.clear();
+}
+
+
+
+
 
 //=============================
 // Continent Implementation
@@ -355,7 +363,7 @@ Continent::~Continent() = default;
 Territory::Territory(string name, Continent *continent, int armies)
         : name{name},
           continent{continent},
-          armies{armies},
+          armies{10000},
           player{nullptr} {}
 
 Territory::Territory(const Territory &other)
@@ -401,10 +409,10 @@ void Territory::addArmies(int armies) {
 }
 
 void Territory::removeArmies(int armies) {
-    if (this->armies < armies) {
-        cout << "Removing too many armies!";
-    }
     this->armies -= armies;
+    if (this->armies < 0) {
+        this->armies = 0;
+    }
 }
 
 /**
@@ -436,7 +444,7 @@ Continent *Territory::getContinent() const {
     return continent;
 }
 
-Player *Territory::getPlayer() const {
+Player *Territory::getPlayer() {
     return player;
 }
 

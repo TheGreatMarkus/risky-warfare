@@ -17,10 +17,10 @@ namespace {
     const int ATTACK_CHANCE = 60;
     const int DEFEND_CHANCE = 70;
 
-    void attackTerritory(Territory *attacker, int numArmies, Territory *defender) {
+    void attackTerritory(Territory *attacker, int attackingArmies, Territory *defender) {
         int attackerKills = 0;
         int defenderKills = 0;
-        for (int i = 0; i < numArmies; ++i) {
+        for (int i = 0; i < attackingArmies; ++i) {
             int roll = randInt(1, 100);
             if (roll < ATTACK_CHANCE) {
                 attackerKills++;
@@ -33,7 +33,22 @@ namespace {
                 defenderKills++;
             }
         }
-        // TODO
+
+        defender->removeArmies(attackerKills);
+        attackingArmies -= defenderKills;
+        if (attackingArmies < 0) {
+            attackingArmies = 0;
+        }
+
+        if (defender->getArmies() == 0 && attackingArmies > 0) {
+            // Attack successful
+            attacker->getPlayer()->captureTerritory(defender);
+        } else if (defender->getArmies() > 0 && attackingArmies > 0) {
+            // Attack failed, attacker has some armies left alive
+            attacker->addArmies(attackingArmies);
+        } else {
+            // Attack failed, attacker has no armies left alive, nothing additional happens
+        }
     }
 }
 
@@ -590,12 +605,11 @@ ostream &operator<<(ostream &out, const AirliftOrder &obj) {
  */
 bool AirliftOrder::validate(Map *map, Player *player) {
     // Both territories must exist
-    // Both territories must be owned by player
+    // Origin territory must be owned by player
     // Origin must have enough troops to move
     if (!contains(map->getTerritories(), origin)
         || !contains(map->getTerritories(), dest)
         || !player->owns(origin)
-        || !player->owns(dest)
         || origin->getArmies() < armies) {
         return false;
     }
@@ -611,6 +625,7 @@ bool AirliftOrder::validate(Map *map, Player *player) {
 void AirliftOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         origin->removeArmies(armies);
+        // TODO dest doesn't need to be owned by territory. account for when there is an attack
         dest->addArmies(armies);
         setEffect("Airlift " + to_string(armies) + " armies from territory "
                   + origin->getName() + " to territory " + dest->getName());

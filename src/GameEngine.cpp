@@ -120,10 +120,10 @@ void Game::gameStart() {
 
 
     // TODO Set up observers
-    cout << endl;
-    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
-    cout << endl;
-    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
+//    cout << endl;
+//    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
+//    cout << endl;
+//    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
 }
 
 void Game::startupPhase() {
@@ -133,8 +133,9 @@ void Game::startupPhase() {
     // Determine order of play for players
     std::shuffle(activePlayers.begin(), activePlayers.end(), rng);
     cout << "Here is the order of players:" << endl;
-    for (auto &player : activePlayers) {
-        cout << player->getName() << ", ";
+    for (int i = 0; i < activePlayers.size(); ++i) {
+        cout << "\t" << (i + 1) << ": " << activePlayers[i]->getName() << endl;
+
     }
     cout << endl;
 
@@ -218,7 +219,7 @@ void Game::issueOrderPhase() {
     while (contains(ready, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
-                activePlayers[i]->issueOrder();
+                activePlayers[i]->issueOrder(map, nullptr);
                 ready[i] = getBoolInput("Are you done issuing orders?");
             }
         }

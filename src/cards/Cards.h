@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include "../map/Map.h"
 
 using std::vector;
 using std::ostream;
@@ -48,6 +49,9 @@ public:
     Hand &operator=(Hand other);
     friend ostream &operator<<(ostream &out, const Hand &obj);
 
+    Card *operator[](int i);
+    const int size() const;
+    const bool empty() const;
     void addCard(Card *card);
     void removeCard(Card *card);
     Card *getCard(int i);
@@ -67,12 +71,7 @@ public:
     //Card &operator=(Card other); // abstract class, can't overload assignment operator
     friend ostream &operator<<(ostream &out, const Card &obj);
 
-    virtual Order *play(Deck *deck,
-                        Hand *hand,
-                        Territory * origin,
-                        Territory *dest,
-                        int armies,
-                        Player *targetPlayer) = 0;
+    virtual Order *play(Player *cardPlayer, Deck *deck, Map *map) = 0;
     virtual Card *clone() = 0;
     virtual ostream &print(ostream &out) const = 0;
 
@@ -91,12 +90,7 @@ public:
     BombCard &operator=(BombCard other);
     friend ostream &operator<<(ostream &out, const BombCard &obj);
 
-    Order *play(Deck *deck,
-                Hand *hand,
-                Territory * origin,
-                Territory *dest,
-                int armies,
-                Player *targetPlayer) override;
+    Order *play(Player *cardPlayer, Deck *deck, Map *map) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -115,12 +109,7 @@ public:
     ReinforcementCard &operator=(ReinforcementCard other);
     friend ostream &operator<<(ostream &out, const ReinforcementCard &obj);
 
-    Order *play(Deck *deck,
-                Hand *hand,
-                Territory * origin,
-                Territory *dest,
-                int armies,
-                Player *targetPlayer) override;
+    Order *play(Player *cardPlayer, Deck *deck, Map *map) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -139,12 +128,7 @@ public:
     BlockadeCard &operator=(BlockadeCard other);
     friend ostream &operator<<(ostream &out, const BlockadeCard &obj);
 
-    Order *play(Deck *deck,
-                Hand *hand,
-                Territory * origin,
-                Territory *dest,
-                int armies,
-                Player *targetPlayer) override;
+    Order *play(Player *cardPlayer, Deck *deck, Map *map) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -163,12 +147,7 @@ public:
     AirliftCard &operator=(AirliftCard other);
     friend ostream &operator<<(ostream &out, const AirliftCard &obj);
 
-    Order *play(Deck *deck,
-                Hand *hand,
-                Territory * origin,
-                Territory *dest,
-                int armies,
-                Player *targetPlayer) override;
+    Order *play(Player *cardPlayer, Deck *deck, Map *map) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 
@@ -187,12 +166,7 @@ public:
     DiplomacyCard &operator=(DiplomacyCard other);
     friend ostream &operator<<(ostream &out, const DiplomacyCard &obj);
 
-    Order *play(Deck *deck,
-                Hand *hand,
-                Territory * origin,
-                Territory *dest,
-                int armies,
-                Player *targetPlayer) override;
+    Order *play(Player *cardPlayer, Deck *deck, Map *map) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
 

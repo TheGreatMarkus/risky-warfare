@@ -45,6 +45,8 @@ public:
     const set<Territory *> getTerritoriesByContinent(Continent *continent) const;
     bool areAdjacent(Territory *t1, Territory *t2);
     set<Continent *> getContinentsControlledByPlayer(Player *player);
+    const set<Territory *> getNeighbors(Territory *territory) ;
+
 
     ~Map();
 };
@@ -97,7 +99,7 @@ public:
     const string &getName() const;
     const int &getArmies() const;
     Continent *getContinent() const;
-    Player *getPlayer() const;
+    Player *getPlayer();
 
     void setContinent(Continent *continent);
     void setPlayer(Player *player);

@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <set>
+#include "../map/Map.h"
+#include "../GameEngine.h"
 
 using std::ostream;
 using std::string;
@@ -40,13 +42,13 @@ public:
     friend ostream &operator<<(ostream &out, const Player &obj);
 
     vector<Territory *> toDefend();
-    vector<Territory *> toAttack();
-    void issueOrder();
-    void issueOrder(int armies,
-                    Territory *territory);
-    void issueOrder(int armies,
-                    Territory *origin,
-                    Territory *dest);
+    vector<Territory *> toAttack(Map *map);
+    void issueOrder(Map *map, Deck *deck);
+    void issueDeployOrder(int armies,
+                          Territory *territory);
+    void issueAdvanceOrder(int armies,
+                           Territory *origin,
+                           Territory *dest);
     void issueOrder(Deck *deck,
                     Card *card,
                     int armies,
@@ -60,14 +62,16 @@ public:
     void addCardOrder(Order *order);
 
     const string &getName() const;
-    const int & getArmies() const;
-    OrdersList &getOrders() ;
+    const int &getArmies() const;
+    OrdersList &getOrders();
     const set<Territory *> &getOwnedTerritories() const;
+    const vector<Territory *> getNeighboringTerritories(Map *map) const;
     Hand *getHand();
 
     void addArmies(int armies);
     void removeArmies(int armies);
 
     ~Player();
+
 
 };
