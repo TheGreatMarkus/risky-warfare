@@ -12,7 +12,10 @@ using std::vector;
 using std::ostream;
 using std::set;
 using std::map;
+using std::cout;
 using std::find;
+using std::endl;
+using std::is_pointer;
 
 /**
  * Utilities used throughout the program
@@ -96,7 +99,26 @@ namespace cris_utils {
 
     int randInt(int min, int max);
 
+
     template<typename T>
-    T pickFromList(string desc, string prompt, vector<T> list);
+    void printList(vector<T> list) {
+        for (int i = 0; i < list.size(); ++i) {
+            cout << "\t" << (i + 1) << ": " << list[i] << endl;
+        }
+    }
+
+    template<typename T>
+    void printList(vector<T *> list) {
+        for (int i = 0; i < list.size(); ++i) {
+            cout << "\t" << (i + 1) << ": " << *(list[i]) << endl;
+        }
+    }
+
+    template<typename T>
+    T pickFromList(string desc, string prompt, vector<T> list) {
+        cout << desc << endl;
+        printList(list);
+        return list[getIntInput(prompt, 1, list.size()) - 1];
+    }
 }
 

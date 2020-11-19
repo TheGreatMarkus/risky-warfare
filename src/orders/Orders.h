@@ -14,6 +14,16 @@ class Territory;
 class Map;
 class Player;
 
+
+enum class OrderType {
+    DEPLOY,
+    ADVANCE,
+    BOMB,
+    BLOCKADE,
+    AIRLIFT,
+    NEGOTIATE,
+};
+
 /**
  * Class for representing a list of orders
  */
@@ -33,9 +43,9 @@ public:
     void add(Order *order);
     void move(int origin, int dest);
     void remove(int i);
+    void remove(Order* order);
 
-
-
+    Order* getHighestPriorityOrder();
 
     ~OrdersList();
 };
@@ -47,8 +57,9 @@ class Order {
 private:
     bool executed;
     string effect;
+    OrderType type;
 public:
-    Order();
+    Order(OrderType type);
     Order(const Order &other);
     friend void swap(Order &a, Order &b);
     //Order &operator=(Order other); // abstract class, can't overload assignment operator
@@ -59,8 +70,10 @@ public:
     virtual ostream &print(ostream &out) const = 0;
     virtual Order *clone() = 0;
 
-    const bool &getExecuted() const;
+    const bool &isExecuted() const;
     const string &getEffect() const;
+    OrderType getType() const;
+
     void setExecuted(bool executed);
     void setEffect(string effect);
 

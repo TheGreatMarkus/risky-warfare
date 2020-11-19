@@ -13,6 +13,8 @@ using std::cout;
 using cris_utils::randInt;
 using cris_utils::getIntInput;
 using cris_utils::setToVector;
+using cris_utils::pickFromList;
+using cris_utils::removeElement;
 
 //=============================
 // Deck Implementation
@@ -69,7 +71,7 @@ void Deck::draw(Hand *hand) {
     int picked = randInt(0, cards.size() - 1);
 
     Card *pickedCard = cards[picked];
-    cards.erase(cards.begin() + picked);
+    removeElement(cards, pickedCard);
 
     hand->addCard(pickedCard);
 }
@@ -224,18 +226,13 @@ ostream &operator<<(ostream &out, const BombCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *BombCard::play(Player *cardPlayer, Deck *deck, Map *map) {
-    cout << "Playing " << *this << endl;
+Order *BombCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) {
 
     deck->addCard(this);
     cardPlayer->getHand()->removeCard(this);
 
-    cout << "Among these enemy neighbors:" << endl;
     vector<Territory *> neighbors = cardPlayer->getNeighboringTerritories(map);
-    for (int i = 0; i < neighbors.size(); ++i) {
-        cout << (i + 1) << ": " << neighbors[i]->getName() << endl;
-    }
-    Territory *origin = neighbors[getIntInput("Which should be bombed?", 1, neighbors.size()) - 1];
+    Territory *origin = pickFromList("Among these enemy neighbors:", "Which should be bombed?", neighbors);
 
     return new BombOrder(origin);
 }
@@ -291,18 +288,13 @@ ostream &operator<<(ostream &out, const ReinforcementCard &obj) {
  * @return a new BombOrder
  */
 Order *
-ReinforcementCard::play(Player *cardPlayer, Deck *deck, Map *map) {
-    cout << "Playing " << *this << endl;
-
+ReinforcementCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) {
     deck->addCard(this);
     cardPlayer->getHand()->removeCard(this);
 
-    cout << "Among these territories you own:" << endl;
     vector<Territory *> ownedTerritories = setToVector(cardPlayer->getOwnedTerritories());
-    for (int i = 0; i < ownedTerritories.size(); ++i) {
-        cout << (i + 1) << ": " << ownedTerritories[i]->getName() << endl;
-    }
-    Territory *target = ownedTerritories[getIntInput("Which should be reinforced?", 1, ownedTerritories.size()) - 1];
+    Territory *target = pickFromList("Among these territories you own:", "Which should be reinforced?",
+                                     ownedTerritories);
 
     return new DeployOrder(5, target);
 }
@@ -358,18 +350,13 @@ ostream &operator<<(ostream &out, const BlockadeCard &obj) {
  * @return a new BombOrder
  */
 Order *
-BlockadeCard::play(Player *cardPlayer, Deck *deck, Map *map) {
-    cout << "Playing " << *this << endl;
-
+BlockadeCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) {
     deck->addCard(this);
     cardPlayer->getHand()->removeCard(this);
 
-    cout << "Among these territories you own:" << endl;
     vector<Territory *> ownedTerritories = setToVector(cardPlayer->getOwnedTerritories());
-    for (int i = 0; i < ownedTerritories.size(); ++i) {
-        cout << (i + 1) << ": " << ownedTerritories[i]->getName() << endl;
-    }
-    Territory *target = ownedTerritories[getIntInput("Which should be blockaded?", 1, ownedTerritories.size()) - 1];
+    Territory *target = pickFromList("Among these territories you own:", "Which should be blockaded?",
+                                     ownedTerritories);
 
     return new BlockadeOrder(target);
 }
@@ -424,9 +411,26 @@ ostream &operator<<(ostream &out, const AirliftCard &obj) {
  * @param targetPlayer
  * @return a new BombOrder
  */
-Order *AirliftCard::play(Player *cardPlayer, Deck *deck, Map *map) {
+Order *AirliftCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) {
     deck->addCard(this);
-    hand->removeCard(this);
+    cardPlayer->getHand()->removeCard(this);
+
+    vector<Territory *> validOrigins{};
+    for (auto &territory : cardPlayer->getOwnedTerritories()) {
+        if (territory->getArmies() > 0) {
+            validOrigins.push_back(territory);
+        }
+    }
+
+    Territory *origin = pickFromList("From the territories you own that have armies:",
+                                     "Which territory do you want to airlift from?",
+                                     validOrigins);
+
+    Territory *dest = pickFromList("From all territories on the map:", "Which territory do you want to airlift to?",
+                                   map->getTerritories());
+
+    int armies = getIntInput("How many armies do you want to send?", 1, origin->getArmies());
+
     return new AirliftOrder(armies, origin, dest);
 }
 
@@ -481,9 +485,15 @@ ostream &operator<<(ostream &out, const DiplomacyCard &obj) {
  * @return a new NegotiateOrder
  */
 Order *
-DiplomacyCard::play(Player *cardPlayer, Deck *deck, Map *map) {
+DiplomacyCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> activePlayers) {
     deck->addCard(this);
-    hand->removeCard(this);
+    cardPlayer->getHand()->removeCard(this);
+
+    removeElement(activePlayers, cardPlayer);
+
+    Player *targetPlayer = pickFromList("Among the players still in the game:", "Who do you want to negotiate with?",
+                                        activePlayers);
+
     return new NegotiateOrder(targetPlayer);
 }
 

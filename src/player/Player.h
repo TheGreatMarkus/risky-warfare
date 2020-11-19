@@ -28,10 +28,11 @@ class Player {
 private:
     string name;
     int armies;
+    bool cardDue;
     set<Territory *> ownedTerritories;
     set<Player *> allies;
     Hand *hand;
-    OrdersList *orders;
+    OrdersList *ordersList;
 public:
 
     Player(string name);
@@ -41,35 +42,30 @@ public:
     Player &operator=(Player other);
     friend ostream &operator<<(ostream &out, const Player &obj);
 
-    vector<Territory *> toDefend();
+    vector<Territory *> toDefend(Map *map);
     vector<Territory *> toAttack(Map *map);
-    void issueOrder(Map *map, Deck *deck);
+    void issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
     void issueDeployOrder(int armies,
                           Territory *territory);
     void issueAdvanceOrder(int armies,
                            Territory *origin,
                            Territory *dest);
-    void issueOrder(Deck *deck,
-                    Card *card,
-                    int armies,
-                    Territory *origin,
-                    Territory *dest,
-                    Player *targetPlayer);
     void captureTerritory(Territory *territory);
     void loseTerritory(Territory *territory);
     bool owns(Territory *territory);
     void addAlly(Player *otherPlayer);
-    void addCardOrder(Order *order);
+    void resetAllies();
 
     const string &getName() const;
     const int &getArmies() const;
-    OrdersList &getOrders();
+    bool isCardDue() const;
     const set<Territory *> &getOwnedTerritories() const;
     const vector<Territory *> getNeighboringTerritories(Map *map) const;
     Hand *getHand();
+    OrdersList *getOrdersList() const;
 
     void addArmies(int armies);
-    void removeArmies(int armies);
+    void setCardDue(bool cardDue);
 
     ~Player();
 

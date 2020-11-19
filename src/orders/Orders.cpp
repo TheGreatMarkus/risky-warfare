@@ -11,6 +11,7 @@ using std::to_string;
 
 using cris_utils::contains;
 using cris_utils::randInt;
+using cris_utils::removeElement;
 
 namespace {
 
@@ -128,6 +129,32 @@ void OrdersList::remove(int i) {
 }
 
 
+void OrdersList::remove(Order *order) {
+    removeElement(orders, order);
+}
+
+Order *OrdersList::getHighestPriorityOrder() {
+    Order *returnedOrder = nullptr;
+    vector<OrderType> priorities = {OrderType::DEPLOY, OrderType::AIRLIFT, OrderType::BLOCKADE};
+
+    for (auto &priority : priorities) {
+        for (const auto &order : orders) {
+            if (order->getType() == priority) {
+                returnedOrder = order;
+                break;
+            }
+        }
+        if (returnedOrder != nullptr) {
+            break;
+        }
+    }
+
+    if (returnedOrder == nullptr && !orders.empty()) {
+        returnedOrder = orders[0];
+    }
+    return returnedOrder;
+}
+
 OrdersList::~OrdersList() {
     for (auto order : orders) {
         delete order;
@@ -138,13 +165,20 @@ OrdersList::~OrdersList() {
 
 
 
+
 //=============================
 // Order Implementation
 //=============================
 
-Order::Order() : executed{false} {}
+Order::Order(OrderType type)
+        : executed{false},
+          effect{""},
+          type{type} {}
 
-Order::Order(const Order &other) : executed{other.executed} {}
+Order::Order(const Order &other)
+        : executed{other.executed},
+          effect{other.effect},
+          type{other.type} {}
 
 /**
  * Swap method for copy-and-swap
@@ -162,7 +196,7 @@ ostream &operator<<(ostream &out, const Order &obj) {
     return out;
 }
 
-const bool &Order::getExecuted() const {
+const bool &Order::isExecuted() const {
     return executed;
 }
 
@@ -178,6 +212,10 @@ void Order::setEffect(string effect) {
     this->effect = effect;
 }
 
+OrderType Order::getType() const {
+    return type;
+}
+
 
 Order::~Order() = default;
 
@@ -187,7 +225,8 @@ Order::~Order() = default;
 //=============================
 
 DeployOrder::DeployOrder(int armies, Territory *territory)
-        : armies{armies},
+        : Order(OrderType::DEPLOY),
+          armies{armies},
           territory{territory} {}
 
 DeployOrder::DeployOrder(const DeployOrder &other)
@@ -257,7 +296,7 @@ void DeployOrder::execute(Map *map, Player *player) {
  */
 ostream &DeployOrder::print(ostream &out) const {
     out << "DeployOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
         << ", territory: " << territory->getName()
@@ -278,7 +317,8 @@ DeployOrder::~DeployOrder() = default;
 //=============================
 
 AdvanceOrder::AdvanceOrder(int armies, Territory *originTerr, Territory *destTerr)
-        : armies{armies},
+        : Order(OrderType::ADVANCE),
+          armies{armies},
           origin{originTerr},
           dest{destTerr} {}
 
@@ -344,12 +384,13 @@ void AdvanceOrder::execute(Map *map, Player *player) {
         origin->removeArmies(armies);
         if (dest->getPlayer() == player) {
             dest->addArmies(armies);
+            setEffect("Moved " + to_string(armies) + " armies from territory "
+                      + origin->getName() + " to territory " + dest->getName());
         } else {
             attackTerritory(origin, armies, dest);
+            setEffect("Moved " + to_string(armies) + " armies from territory "
+                      + origin->getName() + " to attack territory " + dest->getName());
         }
-
-        setEffect("Moved " + to_string(armies) + " armies from territory "
-                  + origin->getName() + " to territory " + dest->getName());
         setExecuted(true);
     }
 }
@@ -361,7 +402,7 @@ void AdvanceOrder::execute(Map *map, Player *player) {
  */
 ostream &AdvanceOrder::print(ostream &out) const {
     out << "AdvanceOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
         << ", origin: " << origin->getName()
@@ -382,7 +423,7 @@ AdvanceOrder::~AdvanceOrder() = default;
 // BombOrder Implementation
 //=============================
 
-BombOrder::BombOrder(Territory *territory) : territory{territory} {}
+BombOrder::BombOrder(Territory *territory) : Order(OrderType::BOMB), territory{territory} {}
 
 BombOrder::BombOrder(const BombOrder &other)
         : Order(other),
@@ -459,7 +500,7 @@ void BombOrder::execute(Map *map, Player *player) {
  */
 ostream &BombOrder::print(ostream &out) const {
     out << "BombOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", territory: " << territory->getName()
         << " }";
@@ -478,7 +519,7 @@ BombOrder::~BombOrder() = default;
 // BlockadeOrder Implementation
 //=============================
 
-BlockadeOrder::BlockadeOrder(Territory *territory) : territory{territory} {}
+BlockadeOrder::BlockadeOrder(Territory *territory) : Order(OrderType::BLOCKADE), territory{territory} {}
 
 BlockadeOrder::BlockadeOrder(const BlockadeOrder &other)
         : Order(other),
@@ -543,7 +584,7 @@ void BlockadeOrder::execute(Map *map, Player *player) {
  */
 ostream &BlockadeOrder::print(ostream &out) const {
     out << "BlockadeOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", territory: " << territory->getName()
         << " }";
@@ -563,7 +604,8 @@ BlockadeOrder::~BlockadeOrder() = default;
 //=============================
 
 AirliftOrder::AirliftOrder(int armies, Territory *origin, Territory *dest)
-        : armies{armies},
+        : Order(OrderType::AIRLIFT),
+          armies{armies},
           origin{origin},
           dest{dest} {}
 
@@ -625,10 +667,16 @@ bool AirliftOrder::validate(Map *map, Player *player) {
 void AirliftOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         origin->removeArmies(armies);
-        // TODO dest doesn't need to be owned by territory. account for when there is an attack
-        dest->addArmies(armies);
-        setEffect("Airlift " + to_string(armies) + " armies from territory "
-                  + origin->getName() + " to territory " + dest->getName());
+        if (dest->getPlayer() == player) {
+            dest->addArmies(armies);
+            setEffect("Airlift " + to_string(armies) + " armies from territory "
+                      + origin->getName() + " to territory " + dest->getName());
+        } else {
+            attackTerritory(origin, armies, dest);
+            setEffect("Airlift " + to_string(armies) + " armies from territory "
+                      + origin->getName() + " to attack territory " + dest->getName());
+        }
+
         setExecuted(true);
     }
 }
@@ -640,7 +688,7 @@ void AirliftOrder::execute(Map *map, Player *player) {
  */
 ostream &AirliftOrder::print(ostream &out) const {
     out << "AirliftOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", armies: " << armies
         << ", origin: " << origin->getName()
@@ -661,7 +709,8 @@ AirliftOrder::~AirliftOrder() = default;
 //=============================
 
 NegotiateOrder::NegotiateOrder(Player *player)
-        : player{player} {}
+        : Order(OrderType::NEGOTIATE),
+          player{player} {}
 
 NegotiateOrder::NegotiateOrder(const NegotiateOrder &other)
         : Order(other),
@@ -724,7 +773,7 @@ void NegotiateOrder::execute(Map *map, Player *player) {
  */
 ostream &NegotiateOrder::print(ostream &out) const {
     out << "NegotiateOrder{ "
-        << "executed: " << getExecuted()
+        << "executed: " << isExecuted()
         << ", effect: \"" << getEffect()
         << "\", player: " << player->getName()
         << " }";
@@ -736,8 +785,3 @@ NegotiateOrder *NegotiateOrder::clone() {
 };
 
 NegotiateOrder::~NegotiateOrder() {}
-
-
-
-
-

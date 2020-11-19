@@ -55,8 +55,9 @@ add_executable(
 project(GameStatistics)
 add_executable(
         GameStatistics
-        src/game-stats/GameObservers.cpp
         src/game-stats/GameObserversDriver.cpp
+        src/game-stats/GameObservers.cpp
+        src/utils/Utils.cpp
 )
 
 

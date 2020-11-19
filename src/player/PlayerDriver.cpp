@@ -33,7 +33,7 @@ int main() {
 
     player1->issueDeployOrder(10, t0);
     player1->issueAdvanceOrder(10, t0, t1);
-    player1->issueOrder(deck, bombCard, 10, t0, t1, player2);
+    player1->issueCardOrder(deck, bombCard, 10, t0, t1, player2);
 
     cout << *player1;
 

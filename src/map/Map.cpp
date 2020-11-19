@@ -363,7 +363,7 @@ Continent::~Continent() = default;
 Territory::Territory(string name, Continent *continent, int armies)
         : name{name},
           continent{continent},
-          armies{10000},
+          armies{0},
           player{nullptr} {}
 
 Territory::Territory(const Territory &other)
@@ -397,7 +397,7 @@ ostream &operator<<(ostream &out, const Territory &obj) {
         << "\", continent: " << obj.continent->getName()
         << ", armies: " << obj.armies;
     if (obj.player != nullptr) {
-        out << ", player: " << obj.player;
+        out << ", player: " << obj.player->getName();
     }
     out << " }";
 

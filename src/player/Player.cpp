@@ -43,18 +43,20 @@ namespace {
 Player::Player(string name)
         : name{name},
           armies{0},
+          cardDue{false},
           ownedTerritories{set<Territory *>()},
           allies{set<Player *>()},
           hand{new Hand()},
-          orders{new OrdersList()} {}
+          ordersList{new OrdersList()} {}
 
 Player::Player(const Player &other)
         : name{other.name},
           armies{other.armies},
+          cardDue{other.cardDue},
           ownedTerritories{set<Territory *>(other.ownedTerritories)},
           allies{set<Player *>(other.allies)},
           hand{new Hand(*other.hand)},
-          orders{new OrdersList()} {}
+          ordersList{new OrdersList()} {}
 
 /**
  * Swap method for copy-and-swap
@@ -66,10 +68,11 @@ void swap(Player &a, Player &b) {
 
     swap(a.name, b.name);
     swap(a.armies, b.armies);
+    swap(a.cardDue, b.cardDue);
     swap(a.ownedTerritories, b.ownedTerritories);
     swap(a.allies, b.allies);
     swap(a.hand, b.hand);
-    swap(a.orders, b.orders);
+    swap(a.ordersList, b.ordersList);
 }
 
 Player &Player::operator=(Player other) {
@@ -78,32 +81,35 @@ Player &Player::operator=(Player other) {
 }
 
 ostream &operator<<(ostream &out, const Player &obj) {
-    out << "Player{" << endl
-        << "name: \"" << obj.name << "\"" << endl
-        << "ownedTerritories[" << obj.ownedTerritories.size() << "][ ";
-    for (auto territory : obj.ownedTerritories) {
-        out << territory->getName() << " ";
-    }
-    out << "] " << endl
-        << "allies[" << obj.allies.size() << "][ ";
-    for (auto ally : obj.allies) {
-        out << ally->getName() << " ";
-    }
-    out << "] " << endl
-        << "hand: " << *obj.hand << endl
-        << "orders: " << *obj.orders << endl
-        << "}" << endl;
+    out << "Player{ name: \"" << obj.name << "\""
+        << ", armies: " << obj.armies
+        << ", cardDue: " << obj.cardDue
+        << ", ownedTerritories[" << obj.ownedTerritories.size() << "]"
+        << ", allies[" << obj.allies.size() << "]"
+        << ", hand[" << obj.hand->size() << "]"
+        << ", orders[" << obj.ordersList->size() << "]"
+        << " }";
     return out;
 }
 
 /**
  * Returns list of territories to defend
  */
-vector<Territory *> Player::toDefend() {
+vector<Territory *> Player::toDefend(Map *map) {
+    vector<Territory *> available = setToVector(ownedTerritories);
     vector<Territory *> toDefend{};
-    vector<Territory *> availableTerritories = setToVector(ownedTerritories);
+    vector<Territory *> canDefend{};
 
-    pickTerritoriesFromList(availableTerritories, toDefend,
+    // Filter for enemy territories which can be attacked
+    for (auto &ownedTerritory : ownedTerritories) {
+        for (const auto &neighbor : map->getNeighbors(ownedTerritory)) {
+            if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
+                canDefend.push_back(ownedTerritory);
+            }
+        }
+    }
+
+    pickTerritoriesFromList(canDefend, toDefend,
                             "Among these territories which you own:", "Which do you want to defend most?");
 
 
@@ -114,29 +120,42 @@ vector<Territory *> Player::toDefend() {
  * Returns list of territories to attack
  */
 vector<Territory *> Player::toAttack(Map *map) {
+    vector<Territory *> enemyTerritories = getNeighboringTerritories(map);
     vector<Territory *> toAttack{};
-    vector<Territory *> availableTerritories = getNeighboringTerritories(map);
-    pickTerritoriesFromList(availableTerritories, toAttack,
+    vector<Territory *> canAttack{};
+
+    // Filter for enemy territories which can be attacked
+    for (auto &enemyTerritory : enemyTerritories) {
+        for (const auto &neighbor : map->getNeighbors(enemyTerritory)) {
+            if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
+                canAttack.push_back(enemyTerritory);
+            }
+        }
+    }
+    pickTerritoriesFromList(canAttack, toAttack,
                             "Among these neighboring enemy territories:", "Which do you want to attack most?");
     return toAttack;
 }
 
-void Player::issueOrder(Map *map, Deck *deck) {
+void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << name << " is issuing orders!" << endl << endl;
 
-    vector<Territory *> attack = toAttack(map);
-    vector<Territory *> defend = toDefend();
+
 
     // Deploy orders
     while (armies > 0) {
+        cout << endl;
         Territory *deployTo = pickFromList(
-                name + " has " + to_string(armies) + " armies. They will be prompted for deploy orders.",
-                "Which territory do you want to deploy to?", defend);
+                name + " has " + to_string(armies) + " armies.",
+                "Which territory do you want to deploy to?", setToVector(ownedTerritories));
 
         int armiesToDeploy = getIntInput("How many armies do you want to deploy?", 1, armies);
         issueDeployOrder(armiesToDeploy, deployTo);
         armies -= armiesToDeploy;
     }
+
+    vector<Territory *> attack = toAttack(map);
+    vector<Territory *> defend = toDefend(map);
 
     bool stop = false;
     do {
@@ -162,11 +181,8 @@ void Player::issueOrder(Map *map, Deck *deck) {
                                   "Which of your territories should perform the attack?", attackers);
 
         } else {
-            cout << "Here are the territories you set to defend:" << endl;
-            for (int i = 0; i < defend.size(); ++i) {
-                cout << "\t" << (i + 1) << ": " << defend[i]->getName() << endl;
-            }
-            dest = defend[getIntInput("Which territory to defend?", 1, defend.size()) - 1];
+            dest = pickFromList("Here are the territories you set to defend:",
+                                "Which territory do you want to defend?", defend);
 
             vector<Territory *> senders{};
             for (auto &neighbor : map->getNeighbors(dest)) {
@@ -174,32 +190,22 @@ void Player::issueOrder(Map *map, Deck *deck) {
                     senders.push_back(neighbor);
                 }
             }
-            cout << "Here are territories you own which neighbor the territory you want to defend:" << endl;
-            for (int i = 0; i < senders.size(); ++i) {
-                cout << "\t" << (i + 1) << ": " << senders[i]->getName() << ", "
-                     << senders[i]->getArmies() << " armies" << endl;
-            }
-            origin = senders[getIntInput("Which of your territories should send armies?",
-                                         1, senders.size()) - 1];
+            origin = pickFromList("Here are territories you own which neighbor the territory you want to defend:",
+                                  "Which of your territories should send armies?", senders);
         }
         armies = getIntInput("How many armies should be sent?", 1, origin->getArmies());
         issueAdvanceOrder(armies, origin, dest);
     } while (true);
 
     if (!hand->empty()) {
-        cout << name << " has the following cards: " << endl;
-        for (int i = 0; i < (*hand).size(); ++i) {
-            cout << "\t" << (i + 1) << ": " << (*hand)[i] << endl;
-        }
         bool play = getBoolInput("Do you want to play a card?");
         if (play) {
-            Territory *origin = nullptr;
-            Territory *dest = nullptr;
-            Player *targetPlayer = nullptr;
-            int armies = 0;
-
-            int cardIndex = getIntInput("Pick a card to play", 1, hand->getCards().size()) - 1;
-            hand->getCard(cardIndex)->play(nullptr, deck, nullptr);
+            Card *cardToPlay = pickFromList(name + " has the following cards:", "Pick a card to play",
+                                            hand->getCards());
+            cout << "Playing " << cardToPlay << endl;
+            Order *cardOrder = cardToPlay->play(this, deck, map, activePlayers);
+            cout << name << " issued " << *cardOrder << endl;
+            ordersList->add(cardOrder);
         }
     }
 
@@ -213,8 +219,8 @@ void Player::issueOrder(Map *map, Deck *deck) {
  */
 void Player::issueDeployOrder(int armies, Territory *territory) {
     DeployOrder *order = new DeployOrder(armies, territory);
-    cout << "Created order:" << *order << endl;
-    orders->add(order);
+    cout << name << " issued " << *order << endl;
+    ordersList->add(order);
 }
 
 /**
@@ -224,26 +230,19 @@ void Player::issueDeployOrder(int armies, Territory *territory) {
  */
 void Player::issueAdvanceOrder(int armies, Territory *origin, Territory *dest) {
     AdvanceOrder *order = new AdvanceOrder(armies, origin, dest);
-    cout << "Created order:" << *order << endl;
-    orders->add(order);
+    cout << name << " issued " << *order << endl;
+    ordersList->add(order);
 }
 
-/**
- * Issue Order from a Card
- * @param armies
- * @param territory
- */
-void Player::issueOrder(Deck *deck, Card *card, int armies, Territory *origin, Territory *dest, Player *targetPlayer) {
-    orders->add(card->play(nullptr, deck, nullptr));
-}
 
 void Player::captureTerritory(Territory *territory) {
-    // If you capture a territory remove from opposing player's owned territories
+    // If territory belonged to a player, remove from their ownedTerritories
     ownedTerritories.insert(territory);
     if (territory->getPlayer() != nullptr) {
         territory->getPlayer()->loseTerritory(territory);
     }
     territory->setPlayer(this);
+    cardDue = true;
 }
 
 void Player::loseTerritory(Territory *territory) {
@@ -268,9 +267,10 @@ void Player::addAlly(Player *otherPlayer) {
     allies.insert(otherPlayer);
 }
 
-void Player::addCardOrder(Order *order) {
-    orders->add(order);
+void Player::resetAllies() {
+    allies.clear();
 }
+
 
 const string &Player::getName() const {
     return name;
@@ -280,10 +280,9 @@ const int &Player::getArmies() const {
     return armies;
 }
 
-OrdersList &Player::getOrders() {
-    return *orders;
+bool Player::isCardDue() const {
+    return cardDue;
 }
-
 
 const set<Territory *> &Player::getOwnedTerritories() const {
     return ownedTerritories;
@@ -308,47 +307,25 @@ Hand *Player::getHand() {
     return hand;
 }
 
+OrdersList *Player::getOrdersList() const {
+    return ordersList;
+}
+
 void Player::addArmies(int armies) {
     this->armies += armies;
 }
 
-void Player::removeArmies(int armies) {
-    if (this->armies < armies) {
-        throw "Player" + this->getName() + " doesn't have enough armies: " + to_string(armies);
-    }
+void Player::setCardDue(bool cardDue) {
+    Player::cardDue = cardDue;
 }
 
 Player::~Player() {
     delete hand;
     hand = nullptr;
 
-    delete orders;
-    orders = nullptr;
+    delete ordersList;
+    ordersList = nullptr;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

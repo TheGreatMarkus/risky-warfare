@@ -19,6 +19,7 @@ using std::endl;
 using std::filesystem::recursive_directory_iterator;
 using std::filesystem::directory_entry;
 using std::filesystem::current_path;
+using std::filesystem::path;
 
 using cris_utils::getBoolInput;
 using cris_utils::getIntInput;
@@ -28,6 +29,8 @@ using cris_utils::printSubtitle;
 using cris_utils::removeElement;
 using cris_utils::compare;
 using cris_utils::vectorToSet;
+using cris_utils::pickFromList;
+using cris_utils::printList;
 
 namespace {
     auto rd = std::random_device{};
@@ -73,27 +76,22 @@ void Game::gameStart() {
 
     string searchPath = current_path();
 
-    // Finding and printing available maps
+    // Finding available maps
     vector<string> maps{};
     for (auto &item : recursive_directory_iterator(searchPath)) {
         if (!item.is_directory() && item.path().extension().string() == ".map") {
             maps.push_back(item.path().string());
         }
     }
-    cout << "Maps available under" << searchPath << endl;
-    for (int i = 0; i < maps.size(); ++i) {
-        cout << "\t" << (i + 1) << ": " << maps[i] << endl;
-    }
 
     // User picks a map. Map must be valid
     bool mapValid = true;
-    int chosenMap;
     do {
         if (!mapValid) {
-            cout << "Map is invalid! Please pick another" << endl;
+            cout << "Map is invalid! Please pick another." << endl;
         }
-        chosenMap = getIntInput("Which map file do you want to load?", 1, maps.size());
-        map = MapLoader::readMapFile(maps[chosenMap - 1], maps[chosenMap - 1]);
+        string mapPath = pickFromList("Maps available under" + searchPath, "Which map file do you want to load?", maps);
+        map = MapLoader::readMapFile(mapPath, path(mapPath).filename());
         mapValid = map->validate();
 
     } while (!mapValid);
@@ -103,8 +101,8 @@ void Game::gameStart() {
     cout << endl;
     int numPlayers = getIntInput("How many players are there?", 2, 5);
 
-    for (int i = 0; i < numPlayers; ++i) {
-        allPlayers.push_back(new Player("Player " + std::to_string(i + 1)));
+    for (int i = 1; i < numPlayers + 1; ++i) {
+        allPlayers.push_back(new Player("Player " + std::to_string(i)));
     }
     activePlayers.insert(activePlayers.begin(), allPlayers.begin(), allPlayers.end());
 
@@ -133,15 +131,14 @@ void Game::startupPhase() {
     // Determine order of play for players
     std::shuffle(activePlayers.begin(), activePlayers.end(), rng);
     cout << "Here is the order of players:" << endl;
-    for (int i = 0; i < activePlayers.size(); ++i) {
-        cout << "\t" << (i + 1) << ": " << activePlayers[i]->getName() << endl;
-
-    }
+    printList(activePlayers);
     cout << endl;
 
     // Assign territories round robin style
     int currentPlayer = 0;
-    for (auto &territory : map->getTerritories()) {
+    vector<Territory *> shuffledTerritories = map->getTerritories();
+    std::shuffle(shuffledTerritories.begin(), shuffledTerritories.end(), rng);
+    for (auto &territory : shuffledTerritories) {
         activePlayers[currentPlayer]->captureTerritory(territory);
         currentPlayer++;
         if (currentPlayer >= activePlayers.size()) {
@@ -183,6 +180,22 @@ void Game::mainGameLoop() {
 
         checkGameState();
         gameOver = true;
+
+        for (auto &player : activePlayers) {
+            // Reset allies
+            player->resetAllies();
+
+            // Give card if captured territory.
+            if (player->isCardDue()) {
+                cout << player->getName() << " captured a territory this round! They will get a card" << endl;
+                deck->draw(player->getHand());
+                // Reset flag
+                player->setCardDue(false);
+            }
+
+
+        }
+
     }
 
 }
@@ -219,7 +232,7 @@ void Game::issueOrderPhase() {
     while (contains(ready, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
-                activePlayers[i]->issueOrder(map, nullptr);
+                activePlayers[i]->issueOrder(map, nullptr, activePlayers);
                 ready[i] = getBoolInput("Are you done issuing orders?");
             }
         }
@@ -231,7 +244,11 @@ void Game::executeOrdersPhase() {
     // TODO
     printSubtitle("Order execution Phase");
     for (auto player : activePlayers) {
-//        player->getOrders()[0];
+        Order *order = player->getOrdersList()->getHighestPriorityOrder();
+
+        cout << "Executing " << *order << endl;
+        order->execute(map, player);
+
     }
 }
 

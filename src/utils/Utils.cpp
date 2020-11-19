@@ -140,11 +140,3 @@ int cris_utils::randInt(int min, int max) {
     return (rand() % (max - min + 1)) + min;
 }
 
-template<typename T>
-T cris_utils::pickFromList(string desc, string prompt, vector<T> list) {
-    cout << desc << endl;
-    for (int i = 0; i < list.size(); ++i) {
-        cout << "\t" << (i + 1) << ": " << *list[i] << endl;
-    }
-    return list[getIntInput(prompt, 1, list.size()) - 1];
-}

@@ -39,11 +39,11 @@ int main() {
     deck->draw(hand);
     deck->draw(hand);
 
-    auto order1 = hand->getCard(0)->play(nullptr, deck, nullptr);
-    auto order2 = hand->getCard(0)->play(nullptr, deck, nullptr);
-    auto order3 = hand->getCard(0)->play(nullptr, deck, nullptr);
-    auto order4 = hand->getCard(0)->play(nullptr, deck, nullptr);
-    auto order5 = hand->getCard(0)->play(nullptr, deck, nullptr);
+    auto order1 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
+    auto order2 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
+    auto order3 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
+    auto order4 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
+    auto order5 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
 
     cout << *deck << endl;
     cout << *hand << endl;
