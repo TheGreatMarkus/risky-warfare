@@ -28,12 +28,11 @@ int main() {
     deck->addCard(bombCard);
     deck->draw(player1->getHand());
 
-    vector<Territory *> toDefend = player1->toDefend();
+    vector<Territory *> toDefend = player1->toDefend(nullptr);
     vector<Territory *> toAttack = player1->toAttack(nullptr);
 
-    player1->issueDeployOrder(10, t0);
+    player1->issueDeployOrder(10, t0, nullptr);
     player1->issueAdvanceOrder(10, t0, t1);
-    player1->issueCardOrder(deck, bombCard, 10, t0, t1, player2);
 
     cout << *player1;
 

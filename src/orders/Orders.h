@@ -40,6 +40,7 @@ public:
 
     Order *operator[](int i);
     const int size() const;
+    const bool empty() const;
     void add(Order *order);
     void move(int origin, int dest);
     void remove(int i);

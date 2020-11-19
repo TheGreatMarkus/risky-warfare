@@ -8,6 +8,9 @@ add_executable(
         src/map/MapDriver.cpp
         src/map/Map.cpp
         src/utils/Utils.cpp
+        src/player/Player.cpp
+        src/orders/Orders.cpp
+        src/cards/Cards.cpp
 )
 
 project(MapLoader)
@@ -17,6 +20,9 @@ add_executable(
         src/map-loader/MapLoader.cpp
         src/utils/Utils.cpp
         src/map/Map.cpp
+        src/player/Player.cpp
+        src/orders/Orders.cpp
+        src/cards/Cards.cpp
 )
 
 project(Player)
@@ -64,7 +70,6 @@ add_executable(
 project(GameEngine)
 add_executable(
         GameEngine
-        src/GameEngineDriver.cpp
         src/GameEngine.cpp
         src/utils/Utils.cpp
         src/map/Map.cpp

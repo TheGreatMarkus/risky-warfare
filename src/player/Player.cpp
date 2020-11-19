@@ -108,9 +108,10 @@ vector<Territory *> Player::toDefend(Map *map) {
             }
         }
     }
-
-    pickTerritoriesFromList(canDefend, toDefend,
-                            "Among these territories which you own:", "Which do you want to defend most?");
+    if (!canDefend.empty()) {
+        pickTerritoriesFromList(canDefend, toDefend,
+                                "You can defend the following territories:", "Which do you want to defend most?");
+    }
 
 
     return toDefend;
@@ -132,14 +133,15 @@ vector<Territory *> Player::toAttack(Map *map) {
             }
         }
     }
-    pickTerritoriesFromList(canAttack, toAttack,
-                            "Among these neighboring enemy territories:", "Which do you want to attack most?");
+    if (!canAttack.empty()) {
+        pickTerritoriesFromList(canAttack, toAttack,
+                                "You can attack the following territories:", "Which do you want to attack most?");
+    }
     return toAttack;
 }
 
 void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << name << " is issuing orders!" << endl << endl;
-
 
 
     // Deploy orders
@@ -150,8 +152,7 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
                 "Which territory do you want to deploy to?", setToVector(ownedTerritories));
 
         int armiesToDeploy = getIntInput("How many armies do you want to deploy?", 1, armies);
-        issueDeployOrder(armiesToDeploy, deployTo);
-        armies -= armiesToDeploy;
+        issueDeployOrder(armiesToDeploy, deployTo, map);
     }
 
     vector<Territory *> attack = toAttack(map);
@@ -169,6 +170,10 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
         int armies = 0;
         int action = getIntInput("Do you want to attack (1) or defend (2)?", 1, 2);
         if (action == 1) {
+            if (attack.empty()) {
+                cout << "you cannot attack" << endl;
+                continue;
+            }
             dest = pickFromList("Here are the territories you set to attack:",
                                 "Which territory do you want to attack?", attack);
             vector<Territory *> attackers{};
@@ -181,6 +186,10 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
                                   "Which of your territories should perform the attack?", attackers);
 
         } else {
+            if (defend.empty()) {
+                cout << "you cannot defend" << endl;
+                continue;
+            }
             dest = pickFromList("Here are the territories you set to defend:",
                                 "Which territory do you want to defend?", defend);
 
@@ -202,7 +211,7 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
         if (play) {
             Card *cardToPlay = pickFromList(name + " has the following cards:", "Pick a card to play",
                                             hand->getCards());
-            cout << "Playing " << cardToPlay << endl;
+            cout << "Playing " << *cardToPlay << endl;
             Order *cardOrder = cardToPlay->play(this, deck, map, activePlayers);
             cout << name << " issued " << *cardOrder << endl;
             ordersList->add(cardOrder);
@@ -217,9 +226,11 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
  * @param armies
  * @param territory
  */
-void Player::issueDeployOrder(int armies, Territory *territory) {
+void Player::issueDeployOrder(int armies, Territory *territory, Map *map) {
     DeployOrder *order = new DeployOrder(armies, territory);
     cout << name << " issued " << *order << endl;
+    cout << "Executing " << *order << endl;
+    order->execute(map, this);
     ordersList->add(order);
 }
 
@@ -315,6 +326,13 @@ void Player::addArmies(int armies) {
     this->armies += armies;
 }
 
+void Player::removeArmies(int armies) {
+    this->armies -= armies;
+    if (this->armies < 0) {
+        this->armies = 0;
+    }
+}
+
 void Player::setCardDue(bool cardDue) {
     Player::cardDue = cardDue;
 }
@@ -326,6 +344,12 @@ Player::~Player() {
     delete ordersList;
     ordersList = nullptr;
 }
+
+const set<Player *> &Player::getAllies() const {
+    return allies;
+}
+
+
 
 
 

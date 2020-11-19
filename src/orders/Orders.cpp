@@ -19,6 +19,12 @@ namespace {
     const int DEFEND_CHANCE = 70;
 
     void attackTerritory(Territory *attacker, int attackingArmies, Territory *defender) {
+        if (contains(attacker->getPlayer()->getAllies(), defender->getPlayer())) {
+            cout << attacker->getPlayer()->getName() << " and " << defender->getPlayer()->getName()
+                 << " are allies! Skipping attack" << endl;
+            return;
+        }
+
         int attackerKills = 0;
         int defenderKills = 0;
         for (int i = 0; i < attackingArmies; ++i) {
@@ -98,6 +104,10 @@ const int OrdersList::size() const {
     return orders.size();
 }
 
+const bool OrdersList::empty() const {
+    return orders.empty();
+}
+
 void OrdersList::add(Order *order) {
     orders.push_back(order);
 }
@@ -161,6 +171,8 @@ OrdersList::~OrdersList() {
     }
     orders.clear();
 }
+
+
 
 
 
@@ -284,6 +296,7 @@ bool DeployOrder::validate(Map *map, Player *player) {
 void DeployOrder::execute(Map *map, Player *player) {
     if (validate(map, player)) {
         territory->addArmies(armies);
+        player->removeArmies(armies);
         setEffect("Added " + to_string(armies) + " armies to territory " + territory->getName());
         setExecuted(true);
     }

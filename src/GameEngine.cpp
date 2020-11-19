@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <random>
+#include <iostream>
 
 #include "utils/Utils.h"
 #include "map/Map.h"
@@ -117,11 +118,10 @@ void Game::gameStart() {
     }
 
 
-    // TODO Set up observers
-//    cout << endl;
-//    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
-//    cout << endl;
-//    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
+    cout << endl;
+    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
+    cout << endl;
+    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
 }
 
 void Game::startupPhase() {
@@ -174,12 +174,15 @@ void Game::mainGameLoop() {
     int rounds = 0;
 
     while (!gameOver) {
+        for (auto &player : activePlayers) {
+            player->setCardDue(false);
+        }
+
         reinforcementPhase();
         issueOrderPhase();
         executeOrdersPhase();
 
         checkGameState();
-        gameOver = true;
 
         for (auto &player : activePlayers) {
             // Reset allies
@@ -189,10 +192,7 @@ void Game::mainGameLoop() {
             if (player->isCardDue()) {
                 cout << player->getName() << " captured a territory this round! They will get a card" << endl;
                 deck->draw(player->getHand());
-                // Reset flag
-                player->setCardDue(false);
             }
-
 
         }
 
@@ -232,7 +232,8 @@ void Game::issueOrderPhase() {
     while (contains(ready, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
-                activePlayers[i]->issueOrder(map, nullptr, activePlayers);
+                cout << *activePlayers[i] << endl;
+//                activePlayers[i]->issueOrder(map, deck, activePlayers);
                 ready[i] = getBoolInput("Are you done issuing orders?");
             }
         }
@@ -241,15 +242,31 @@ void Game::issueOrderPhase() {
 }
 
 void Game::executeOrdersPhase() {
-    // TODO
+    cout << endl;
     printSubtitle("Order execution Phase");
-    for (auto player : activePlayers) {
-        Order *order = player->getOrdersList()->getHighestPriorityOrder();
+    vector<bool> allExecuted(activePlayers.size());
+    while (contains(allExecuted, false)) {
+        for (int i = 0; i < activePlayers.size(); ++i) {
+            OrdersList *ordersList = activePlayers[i]->getOrdersList();
+            Order *order = ordersList->getHighestPriorityOrder();
+            if (order != nullptr) {
+                if (!order->isExecuted()) {
+                    cout << "Executing " << *order << endl;
+                    order->execute(map, activePlayers[i]);
+                }
 
-        cout << "Executing " << *order << endl;
-        order->execute(map, player);
+                // Remove order after executing
+                ordersList->remove(order);
+                delete order;
+                order = nullptr;
+            }
 
+            if (ordersList->empty()) {
+                allExecuted[i] = true;
+            }
+        }
     }
+
 }
 
 void Game::checkGameState() {
@@ -279,6 +296,15 @@ Game::~Game() {
 }
 
 
+int main() {
+    cout << std::boolalpha;
+
+    Game game{};
+
+    game.gameStart();
+    game.startupPhase();
+    game.mainGameLoop();
+}
 
 
 

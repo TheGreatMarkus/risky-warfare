@@ -46,7 +46,8 @@ public:
     vector<Territory *> toAttack(Map *map);
     void issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
     void issueDeployOrder(int armies,
-                          Territory *territory);
+                          Territory *territory,
+                          Map* map);
     void issueAdvanceOrder(int armies,
                            Territory *origin,
                            Territory *dest);
@@ -63,8 +64,10 @@ public:
     const vector<Territory *> getNeighboringTerritories(Map *map) const;
     Hand *getHand();
     OrdersList *getOrdersList() const;
+    const set<Player *> &getAllies() const;
 
     void addArmies(int armies);
+    void removeArmies(int armies);
     void setCardDue(bool cardDue);
 
     ~Player();
