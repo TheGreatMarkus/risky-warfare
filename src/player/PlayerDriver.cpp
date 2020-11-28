@@ -23,7 +23,6 @@ int main() {
     player1->captureTerritory(t0);
     player1->captureTerritory(t1);
 
-
     auto *bombCard = new BombCard();
     deck->addCard(bombCard);
     deck->draw(player1->getHand());

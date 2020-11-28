@@ -193,6 +193,7 @@ Card::~Card() {}
 //=============================
 // BombCard Implementation
 //=============================
+
 BombCard::BombCard() {}
 
 BombCard::BombCard(const BombCard &other) {}

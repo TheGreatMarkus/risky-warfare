@@ -99,7 +99,6 @@ namespace cris_utils {
 
     int randInt(int min, int max);
 
-
     template<typename T>
     void printList(vector<T> list) {
         for (int i = 0; i < list.size(); ++i) {

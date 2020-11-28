@@ -16,14 +16,12 @@ using cris_utils::getBoolInput;
 using cris_utils::setToVector;
 using cris_utils::pickFromList;
 
-
 namespace {
     void pickTerritoriesFromList(vector<Territory *> &available, vector<Territory *> &toFill,
                                  string desc, string prompt) {
         bool stop;
         do {
             Territory *choice = pickFromList(desc, prompt, available);
-
             toFill.push_back(choice);
             removeElement(available, choice);
 
@@ -39,6 +37,9 @@ namespace {
     }
 }
 
+//=============================
+// Player Implementation
+//=============================
 
 Player::Player(string name)
         : name{name},
@@ -112,7 +113,6 @@ vector<Territory *> Player::toDefend(Map *map) {
         pickTerritoriesFromList(canDefend, toDefend,
                                 "You can defend the following territories:", "Which do you want to defend most?");
     }
-
 
     return toDefend;
 }
@@ -218,7 +218,6 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
         }
     }
 
-
 }
 
 /**
@@ -244,7 +243,6 @@ void Player::issueAdvanceOrder(int armies, Territory *origin, Territory *dest) {
     cout << name << " issued " << *order << endl;
     ordersList->add(order);
 }
-
 
 void Player::captureTerritory(Territory *territory) {
     // If territory belonged to a player, remove from their ownedTerritories
@@ -297,7 +295,6 @@ const vector<Territory *> Player::getNeighboringTerritories(Map *map) const {
     return neighbors;
 }
 
-
 const string &Player::getName() const {
     return name;
 }
@@ -314,13 +311,16 @@ const set<Territory *> &Player::getOwnedTerritories() const {
     return ownedTerritories;
 }
 
-
 Hand *Player::getHand() {
     return hand;
 }
 
 OrdersList *Player::getOrdersList() const {
     return ordersList;
+}
+
+const set<Player *> &Player::getAllies() const {
+    return allies;
 }
 
 void Player::addArmies(int armies) {
@@ -346,9 +346,6 @@ Player::~Player() {
     ordersList = nullptr;
 }
 
-const set<Player *> &Player::getAllies() const {
-    return allies;
-}
 
 
 

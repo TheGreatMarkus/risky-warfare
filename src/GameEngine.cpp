@@ -1,6 +1,5 @@
 #include "GameEngine.h"
 
-
 #include <filesystem>
 #include <algorithm>
 #include <random>
@@ -12,7 +11,6 @@
 #include "map-loader/MapLoader.h"
 #include "cards/Cards.h"
 #include "orders/Orders.h"
-
 
 using std::cout;
 using std::cin;
@@ -37,6 +35,10 @@ namespace {
     auto rd = std::random_device{};
     auto rng = std::default_random_engine{rd()};
 }
+
+//=============================
+// Game Implementation
+//=============================
 
 Game::Game() : map{nullptr},
                activePlayers{},
@@ -116,7 +118,6 @@ void Game::gameStart() {
         deck->addCard(new AirliftCard());
         deck->addCard(new DiplomacyCard());
     }
-
 
     cout << endl;
     bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
@@ -287,7 +288,6 @@ void Game::checkGameState() {
     }
 }
 
-
 Game::~Game() {
     delete map;
     for (auto &player : activePlayers) {
@@ -296,7 +296,6 @@ Game::~Game() {
 
     delete deck;
 }
-
 
 int main() {
     cout << std::boolalpha;

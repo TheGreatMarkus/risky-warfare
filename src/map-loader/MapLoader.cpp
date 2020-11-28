@@ -18,9 +18,13 @@ using cris_utils::isNumber;
 
 namespace {
     void printError(string message, int lineNum) {
-        cout << "ERROR: \"" << message << "\" AT LINE " << lineNum << endl;
+        cout << "ERROR: \"" << message << "\" IN MAP FILE AT LINE " << lineNum << endl;
     };
 }
+
+//=============================
+// MapLoader Implementation
+//=============================
 
 MapLoader::MapLoader() = default;
 

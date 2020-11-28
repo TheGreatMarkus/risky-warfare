@@ -14,7 +14,6 @@ class Territory;
 class Map;
 class Player;
 
-
 enum class OrderType {
     DEPLOY,
     ADVANCE,
@@ -77,7 +76,6 @@ public:
 
     void setExecuted(bool executed);
     void setEffect(string effect);
-
 
     virtual ~Order();
 };

@@ -23,7 +23,6 @@ using cris_utils::vectorToSet;
 
 namespace {
 
-
     /**
      * Perform Depth-first-search on a graph.
      *
@@ -304,10 +303,6 @@ Map::~Map() {
     territories.clear();
 }
 
-
-
-
-
 //=============================
 // Continent Implementation
 //=============================
@@ -431,7 +426,6 @@ void Territory::blockade() {
     this->armies *= 3;
 }
 
-
 const string &Territory::getName() const {
     return name;
 }
@@ -457,20 +451,3 @@ void Territory::setPlayer(Player *player) {
 }
 
 Territory::~Territory() {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -3,8 +3,8 @@
 #include "../utils/Utils.h"
 #include "../GameEngine.h"
 
-
 using cris_utils::removeElement;
+
 //=============================
 // Observer Implementation
 //=============================
@@ -22,11 +22,9 @@ ostream &operator<<(ostream &out, const Observer &obj) {
 
 Observer::~Observer() {}
 
-
 //=============================
 // Subject Implementation
 //=============================
-
 
 Subject::Subject() : observers{} {}
 
@@ -67,6 +65,9 @@ Subject::~Subject() {
     }
 }
 
+//=============================
+// PhaseObserver Implementation
+//=============================
 
 PhaseObserver::PhaseObserver(Game *game) : game{game} {}
 
@@ -98,6 +99,9 @@ Observer *PhaseObserver::clone() {
 // This observer is not responsible for managing the game's memory, so it won't delete it
 PhaseObserver::~PhaseObserver() {}
 
+//=============================
+// GameStatisticsObserver Implementation
+//=============================
 
 GameStatisticsObserver::GameStatisticsObserver(Game *game) : game{game} {}
 

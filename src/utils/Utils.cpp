@@ -29,7 +29,6 @@ namespace {
     }
 }
 
-
 /**
  * Splits a string given a delimiter
  *
@@ -131,7 +130,6 @@ void cris_utils::printSubtitle(string title) {
          << " ==============" << endl << endl;
 }
 
-
 int cris_utils::randInt(int min, int max) {
     if (!seedSet) {
         srand((unsigned int) time(nullptr));
@@ -139,4 +137,3 @@ int cris_utils::randInt(int min, int max) {
     }
     return (rand() % (max - min + 1)) + min;
 }
-

@@ -23,7 +23,6 @@ public:
     Game &operator=(Game other);
     friend ostream &operator<<(ostream &out, const Game &obj);
 
-
     void gameStart();
     void startupPhase();
     void mainGameLoop();

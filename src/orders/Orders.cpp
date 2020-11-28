@@ -138,7 +138,6 @@ void OrdersList::remove(int i) {
     orders.erase(orders.begin() + i);
 }
 
-
 void OrdersList::remove(Order *order) {
     removeElement(orders, order);
 }
@@ -171,11 +170,6 @@ OrdersList::~OrdersList() {
     }
     orders.clear();
 }
-
-
-
-
-
 
 
 //=============================
@@ -228,9 +222,7 @@ OrderType Order::getType() const {
     return type;
 }
 
-
 Order::~Order() = default;
-
 
 //=============================
 // DeployedOrder Implementation
@@ -258,7 +250,6 @@ void swap(DeployOrder &a, DeployOrder &b) {
     swap(a.armies, b.armies);
     swap(a.territory, b.territory);
 }
-
 
 DeployOrder &DeployOrder::operator=(DeployOrder other) {
     swap(*this, other);
@@ -316,9 +307,7 @@ DeployOrder *DeployOrder::clone() {
     return new DeployOrder(*this);
 }
 
-
 DeployOrder::~DeployOrder() = default;
-
 
 //=============================
 // AdvanceOrder Implementation
@@ -418,9 +407,7 @@ AdvanceOrder *AdvanceOrder::clone() {
     return new AdvanceOrder(*this);
 }
 
-
 AdvanceOrder::~AdvanceOrder() = default;
-
 
 //=============================
 // BombOrder Implementation
@@ -509,9 +496,7 @@ BombOrder *BombOrder::clone() {
     return new BombOrder(*this);
 }
 
-
 BombOrder::~BombOrder() = default;
-
 
 //=============================
 // BlockadeOrder Implementation
@@ -588,9 +573,7 @@ BlockadeOrder *BlockadeOrder::clone() {
     return new BlockadeOrder(*this);
 }
 
-
 BlockadeOrder::~BlockadeOrder() = default;
-
 
 //=============================
 // AirliftOrder Implementation
@@ -688,7 +671,6 @@ ostream &AirliftOrder::print(ostream &out) const {
 AirliftOrder *AirliftOrder::clone() {
     return new AirliftOrder(*this);
 }
-
 
 AirliftOrder::~AirliftOrder() = default;
 
