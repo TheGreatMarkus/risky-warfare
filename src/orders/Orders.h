@@ -32,7 +32,7 @@ private:
     vector<Order *> orders;
 
 public:
-    OrdersList(/* args */);
+    OrdersList();
     OrdersList(const OrdersList &other);
     friend void swap(OrdersList &a, OrdersList &b);
     OrdersList &operator=(OrdersList other);
@@ -44,9 +44,8 @@ public:
     void add(Order *order);
     void move(int origin, int dest);
     void remove(int i);
-    void remove(Order* order);
-
-    Order* getHighestPriorityOrder();
+    void remove(Order *order);
+    Order *getHighestPriorityOrder();
 
     ~OrdersList();
 };
@@ -63,7 +62,8 @@ public:
     Order(OrderType type);
     Order(const Order &other);
     friend void swap(Order &a, Order &b);
-    //Order &operator=(Order other); // abstract class, can't overload assignment operator
+    // abstract class, can't overload assignment operator
+    // Order &operator=(Order other);
     friend ostream &operator<<(ostream &out, const Order &obj);
 
     virtual bool validate(Map *map, Player *player) = 0;
@@ -95,7 +95,6 @@ public:
     DeployOrder(const DeployOrder &other);
     friend void swap(DeployOrder &a, DeployOrder &b);
     DeployOrder &operator=(DeployOrder other);
-    friend ostream &operator<<(ostream &out, const DeployOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
@@ -120,7 +119,6 @@ public:
     AdvanceOrder(const AdvanceOrder &other);
     friend void swap(AdvanceOrder &a, AdvanceOrder &b);
     AdvanceOrder &operator=(AdvanceOrder other);
-    friend ostream &operator<<(ostream &out, const AdvanceOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
@@ -141,7 +139,6 @@ public:
     BombOrder(const BombOrder &other);
     friend void swap(BombOrder &a, BombOrder &b);
     BombOrder &operator=(BombOrder other);
-    friend ostream &operator<<(ostream &out, const BombOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
@@ -162,7 +159,6 @@ public:
     BlockadeOrder(const BlockadeOrder &other);
     friend void swap(BlockadeOrder &a, BlockadeOrder &b);
     BlockadeOrder &operator=(BlockadeOrder other);
-    friend ostream &operator<<(ostream &out, const BlockadeOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
@@ -187,7 +183,6 @@ public:
     AirliftOrder(const AirliftOrder &other);
     friend void swap(AirliftOrder &a, AirliftOrder &b);
     AirliftOrder &operator=(AirliftOrder other);
-    friend ostream &operator<<(ostream &out, const AirliftOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
@@ -208,7 +203,6 @@ public:
     NegotiateOrder(const NegotiateOrder &other);
     friend void swap(NegotiateOrder &a, NegotiateOrder &b);
     NegotiateOrder &operator=(NegotiateOrder other);
-    friend ostream &operator<<(ostream &out, const NegotiateOrder &obj);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;

@@ -293,6 +293,8 @@ Game::~Game() {
     for (auto &player : activePlayers) {
         delete player;
     }
+
+    delete deck;
 }
 
 

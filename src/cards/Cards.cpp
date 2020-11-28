@@ -211,11 +211,6 @@ BombCard &BombCard::operator=(BombCard other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const BombCard &obj) {
-    obj.print(out);
-    return out;
-}
-
 /**
  * Plays the current BombCard by first moving the card from the hand to the deck, and creating a new BombOrder.
  * @param deck
@@ -270,11 +265,6 @@ void swap(ReinforcementCard &a, ReinforcementCard &b) {
 ReinforcementCard &ReinforcementCard::operator=(ReinforcementCard other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const ReinforcementCard &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**
@@ -334,11 +324,6 @@ BlockadeCard &BlockadeCard::operator=(BlockadeCard other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const BlockadeCard &obj) {
-    obj.print(out);
-    return out;
-}
-
 /**
  * Plays the current BlockadeCard by first moving the card from the hand to the deck, and creating a new BlockadeOrder.
  * @param deck
@@ -394,11 +379,6 @@ void swap(AirliftCard &a, AirliftCard &b) {
 AirliftCard &AirliftCard::operator=(AirliftCard other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const AirliftCard &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**
@@ -467,11 +447,6 @@ void swap(DiplomacyCard &a, DiplomacyCard &b) {
 DiplomacyCard &DiplomacyCard::operator=(DiplomacyCard other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const DiplomacyCard &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**

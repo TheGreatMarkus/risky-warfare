@@ -282,6 +282,21 @@ void Player::resetAllies() {
     allies.clear();
 }
 
+const vector<Territory *> Player::getNeighboringTerritories(Map *map) const {
+    vector<Territory *> neighbors{};
+    for (auto &territory : map->getTerritories()) {
+        if (territory->getPlayer() != this) {
+            for (auto &ownedTerritory : ownedTerritories) {
+                if (map->areAdjacent(territory, ownedTerritory)) {
+                    neighbors.push_back(territory);
+                    break;
+                }
+            }
+        }
+    }
+    return neighbors;
+}
+
 
 const string &Player::getName() const {
     return name;
@@ -299,20 +314,6 @@ const set<Territory *> &Player::getOwnedTerritories() const {
     return ownedTerritories;
 }
 
-const vector<Territory *> Player::getNeighboringTerritories(Map *map) const {
-    vector<Territory *> neighbors{};
-    for (auto &territory : map->getTerritories()) {
-        if (territory->getPlayer() != this) {
-            for (auto &ownedTerritory : ownedTerritories) {
-                if (map->areAdjacent(territory, ownedTerritory)) {
-                    neighbors.push_back(territory);
-                    break;
-                }
-            }
-        }
-    }
-    return neighbors;
-}
 
 Hand *Player::getHand() {
     return hand;

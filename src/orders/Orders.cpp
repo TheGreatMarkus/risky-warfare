@@ -265,11 +265,6 @@ DeployOrder &DeployOrder::operator=(DeployOrder other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const DeployOrder &obj) {
-    obj.print(out);
-    return out;
-}
-
 /**
  * Validates current Order
  * @param map
@@ -358,11 +353,6 @@ void swap(AdvanceOrder &a, AdvanceOrder &b) {
 AdvanceOrder &AdvanceOrder::operator=(AdvanceOrder other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const AdvanceOrder &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**
@@ -459,11 +449,6 @@ BombOrder &BombOrder::operator=(BombOrder other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const BombOrder &obj) {
-    obj.print(out);
-    return out;
-}
-
 /**
  * Validates current Order
  * @param map
@@ -555,11 +540,6 @@ BlockadeOrder &BlockadeOrder::operator=(BlockadeOrder other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const BlockadeOrder &obj) {
-    obj.print(out);
-    return out;
-}
-
 /**
  * Validates current Order
  * @param map
@@ -645,11 +625,6 @@ void swap(AirliftOrder &a, AirliftOrder &b) {
 AirliftOrder &AirliftOrder::operator=(AirliftOrder other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const AirliftOrder &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**
@@ -744,11 +719,6 @@ void swap(NegotiateOrder &a, NegotiateOrder &b) {
 NegotiateOrder &NegotiateOrder::operator=(NegotiateOrder other) {
     swap(*this, other);
     return *this;
-}
-
-ostream &operator<<(ostream &out, const NegotiateOrder &obj) {
-    obj.print(out);
-    return out;
 }
 
 /**

@@ -39,14 +39,12 @@ public:
                       int armies);
     void addContinent(string name, int armyValue);
     void addConnection(int t1, int t2);
-
     bool validate();
     const vector<Territory *> &getTerritories() const;
     const set<Territory *> getTerritoriesByContinent(Continent *continent) const;
     bool areAdjacent(Territory *t1, Territory *t2);
     set<Continent *> getContinentsControlledByPlayer(Player *player);
-    const set<Territory *> getNeighbors(Territory *territory) ;
-
+    const set<Territory *> getNeighbors(Territory *territory);
 
     ~Map();
 };

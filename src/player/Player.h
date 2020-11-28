@@ -34,10 +34,8 @@ private:
     Hand *hand;
     OrdersList *ordersList;
 public:
-
     Player(string name);
     Player(const Player &other);
-
     friend void swap(Player &a, Player &b);
     Player &operator=(Player other);
     friend ostream &operator<<(ostream &out, const Player &obj);
@@ -47,7 +45,7 @@ public:
     void issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
     void issueDeployOrder(int armies,
                           Territory *territory,
-                          Map* map);
+                          Map *map);
     void issueAdvanceOrder(int armies,
                            Territory *origin,
                            Territory *dest);
@@ -56,12 +54,12 @@ public:
     bool owns(Territory *territory);
     void addAlly(Player *otherPlayer);
     void resetAllies();
+    const vector<Territory *> getNeighboringTerritories(Map *map) const;
 
     const string &getName() const;
     const int &getArmies() const;
     bool isCardDue() const;
     const set<Territory *> &getOwnedTerritories() const;
-    const vector<Territory *> getNeighboringTerritories(Map *map) const;
     Hand *getHand();
     OrdersList *getOrdersList() const;
     const set<Player *> &getAllies() const;

@@ -35,7 +35,7 @@ public:
     Subject(const Subject &other);
     friend void swap(Subject &a, Subject &b);
     // abstract class, can't overload assignment operator
-    //Order &operator=(Order other);
+    // Subject &operator=(Subject other);
     friend ostream &operator<<(ostream &out, const Subject &obj);
 
     void attach(Observer *observer);

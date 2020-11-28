@@ -68,7 +68,8 @@ public:
     Card();
     Card(const Card &other);
     friend void swap(Card &a, Card &b);
-    //Card &operator=(Card other); // abstract class, can't overload assignment operator
+    // abstract class, can't overload assignment operator
+    // Card &operator=(Card other);
     friend ostream &operator<<(ostream &out, const Card &obj);
 
     virtual Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) = 0;
@@ -88,7 +89,6 @@ public:
     BombCard(const BombCard &other);
     friend void swap(BombCard &a, BombCard &b);
     BombCard &operator=(BombCard other);
-    friend ostream &operator<<(ostream &out, const BombCard &obj);
 
     Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
     Card *clone() override;
@@ -107,7 +107,6 @@ public:
     ReinforcementCard(const ReinforcementCard &other);
     friend void swap(ReinforcementCard &a, ReinforcementCard &b);
     ReinforcementCard &operator=(ReinforcementCard other);
-    friend ostream &operator<<(ostream &out, const ReinforcementCard &obj);
 
     Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
     Card *clone() override;
@@ -126,7 +125,6 @@ public:
     BlockadeCard(const BlockadeCard &other);
     friend void swap(BlockadeCard &a, BlockadeCard &b);
     BlockadeCard &operator=(BlockadeCard other);
-    friend ostream &operator<<(ostream &out, const BlockadeCard &obj);
 
     Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
     Card *clone() override;
@@ -145,7 +143,6 @@ public:
     AirliftCard(const AirliftCard &other);
     friend void swap(AirliftCard &a, AirliftCard &b);
     AirliftCard &operator=(AirliftCard other);
-    friend ostream &operator<<(ostream &out, const AirliftCard &obj);
 
     Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
     Card *clone() override;
@@ -164,7 +161,6 @@ public:
     DiplomacyCard(const DiplomacyCard &other);
     friend void swap(DiplomacyCard &a, DiplomacyCard &b);
     DiplomacyCard &operator=(DiplomacyCard other);
-    friend ostream &operator<<(ostream &out, const DiplomacyCard &obj);
 
     Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> activePlayers) override;
     Card *clone() override;
