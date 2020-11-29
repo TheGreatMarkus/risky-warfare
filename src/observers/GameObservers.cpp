@@ -158,7 +158,6 @@ GameStatisticsObserver &GameStatisticsObserver::operator=(GameStatisticsObserver
 const int BAR_WIDTH = 40;
 
 void GameStatisticsObserver::update() {
-    // TODO implement
     cout << fixed << setprecision(0);
     printSubtitle("[GameStatisticsObserver]: World Domination Overview");
     Player *victor = nullptr;

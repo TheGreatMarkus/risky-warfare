@@ -7,7 +7,6 @@
 #include "../utils/Utils.h"
 #include "../player/Player.h"
 
-
 using std::cout;
 using std::endl;
 using std::runtime_error;
@@ -109,7 +108,6 @@ void swap(Map &a, Map &b) {
     swap(a.continents, b.continents);
 }
 
-
 Map &Map::operator=(Map other) {
     swap(*this, other);
     return *this;
@@ -117,7 +115,7 @@ Map &Map::operator=(Map other) {
 
 ostream &operator<<(ostream &out, const Map &obj) {
     out << "Map{" << endl
-        << "name: \'" << obj.name << "\"" << endl
+        << "name: " << obj.name << endl
         << "continents[" << obj.continents.size() << "][" << endl;
 
     for (const auto &continent : obj.continents) {
@@ -236,14 +234,12 @@ bool Map::validate() {
         }
     }
 
-
     return true;
 }
 
 const vector<Territory *> &Map::getTerritories() const {
     return territories;
 }
-
 
 /**
    * Returns all territories that belong to a given continent
@@ -334,8 +330,8 @@ Continent &Continent::operator=(Continent other) {
 
 ostream &operator<<(ostream &out, const Continent &obj) {
     out << "Continent{ "
-        << "name: \"" << obj.name
-        << "\", armies: " << obj.armies
+        << "name: " << obj.name
+        << ", armies: " << obj.armies
         << " }";
     return out;
 }
@@ -347,7 +343,6 @@ const string &Continent::getName() const {
 const int &Continent::getArmies() const {
     return armies;
 }
-
 
 Continent::~Continent() = default;
 
@@ -388,8 +383,8 @@ void swap(Territory &a, Territory &b) {
 
 ostream &operator<<(ostream &out, const Territory &obj) {
     out << "Territory{ "
-        << "name: \"" << obj.name
-        << "\", continent: " << obj.continent->getName()
+        << "name: " << obj.name
+        << ", continent: " << obj.continent->getName()
         << ", armies: " << obj.armies;
     if (obj.player != nullptr) {
         out << ", player: " << obj.player->getName();
@@ -450,4 +445,9 @@ void Territory::setPlayer(Player *player) {
     this->player = player;
 }
 
+void Territory::setArmies(int armies) {
+    Territory::armies = armies;
+}
+
 Territory::~Territory() {}
+

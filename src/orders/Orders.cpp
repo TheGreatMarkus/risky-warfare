@@ -19,6 +19,8 @@ namespace {
     const int DEFEND_CHANCE = 70;
 
     void attackTerritory(Territory *attacker, int attackingArmies, Territory *defender) {
+        cout << attacker->getName() << " (" << attacker->getPlayer()->getName() << ") is attacking "
+             << defender->getName() << " (" << defender->getPlayer()->getName() << ")" << endl;
         if (contains(attacker->getPlayer()->getAllies(), defender->getPlayer())) {
             cout << attacker->getPlayer()->getName() << " and " << defender->getPlayer()->getName()
                  << " are allies! Skipping attack" << endl;
@@ -50,11 +52,16 @@ namespace {
         if (defender->getArmies() == 0 && attackingArmies > 0) {
             // Attack successful
             attacker->getPlayer()->captureTerritory(defender);
+            defender->setArmies(attackingArmies);
+            cout << "Attack was successful! " << attacker->getPlayer()->getName() << " captured "
+                 << defender->getName() << endl;
         } else if (defender->getArmies() > 0 && attackingArmies > 0) {
             // Attack failed, attacker has some armies left alive
             attacker->addArmies(attackingArmies);
+            cout << "Attack failed!" << endl;
         } else {
             // Attack failed, attacker has no armies left alive, nothing additional happens
+            cout << "Attack failed!" << endl;
         }
     }
 }
@@ -133,7 +140,7 @@ void OrdersList::remove(int i) {
     if (orders.size() <= i) {
         cout << "That index doesn't exist in the list!" << endl;
     }
-
+    delete orders[i];
     orders.erase(orders.begin() + i);
 }
 
@@ -141,26 +148,26 @@ void OrdersList::remove(Order *order) {
     removeElement(orders, order);
 }
 
+/**
+ *
+ * @return highest priority order. Returns nullptr when there are no orders
+ */
 Order *OrdersList::getHighestPriorityOrder() {
-    Order *returnedOrder = nullptr;
     vector<OrderType> priorities = {OrderType::DEPLOY, OrderType::AIRLIFT, OrderType::BLOCKADE};
 
     for (auto &priority : priorities) {
         for (const auto &order : orders) {
             if (order->getType() == priority) {
-                returnedOrder = order;
-                break;
+                return order;
             }
-        }
-        if (returnedOrder != nullptr) {
-            break;
         }
     }
 
-    if (returnedOrder == nullptr && !orders.empty()) {
-        returnedOrder = orders[0];
+    if (!orders.empty()) {
+        return orders[0];
     }
-    return returnedOrder;
+
+    return nullptr;
 }
 
 OrdersList::~OrdersList() {
@@ -279,12 +286,22 @@ bool DeployOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void DeployOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        territory->addArmies(armies);
-        player->removeArmies(armies);
-        setEffect("Added " + to_string(armies) + " armies to territory " + territory->getName());
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    territory->addArmies(armies);
+    player->removeArmies(armies);
+    setEffect("Added " + to_string(armies) + " armies to territory " + territory->getName());
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
 }
 
 /**
@@ -299,9 +316,9 @@ ostream &DeployOrder::print(ostream &out) const {
         out << ", effect: " << getEffect();
     } else {
         out << ", armies: " << armies
-            << ", territory: " << territory->getName()
-            << " }";
+            << ", territory: " << territory->getName();
     }
+    out << " }";
 
     return out;
 }
@@ -375,19 +392,30 @@ bool AdvanceOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void AdvanceOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        origin->removeArmies(armies);
-        if (dest->getPlayer() == player) {
-            dest->addArmies(armies);
-            setEffect("Moved " + to_string(armies) + " armies from territory "
-                      + origin->getName() + " to territory " + dest->getName());
-        } else {
-            attackTerritory(origin, armies, dest);
-            setEffect("Moved " + to_string(armies) + " armies from territory "
-                      + origin->getName() + " to attack territory " + dest->getName());
-        }
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    origin->removeArmies(armies);
+    if (dest->getPlayer() == player) {
+        dest->addArmies(armies);
+        setEffect("Moved " + to_string(armies) + " armies from territory "
+                  + origin->getName() + " to territory " + dest->getName());
+    } else {
+        attackTerritory(origin, armies, dest);
+        setEffect("Moved " + to_string(armies) + " armies from territory "
+                  + origin->getName() + " to attack territory " + dest->getName());
+    }
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
+
 }
 
 /**
@@ -403,9 +431,9 @@ ostream &AdvanceOrder::print(ostream &out) const {
     } else {
         out << ", armies: " << armies
             << ", origin: " << origin->getName()
-            << ", dest: " << dest->getName()
-            << " }";
+            << ", dest: " << dest->getName();
     }
+    out << " }";
 
     return out;
 }
@@ -478,11 +506,22 @@ bool BombOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void BombOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        territory->bomb();
-        setEffect("Bombed territory " + territory->getName());
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    territory->bomb();
+    setEffect("Bombed territory " + territory->getName());
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
+
 }
 
 /**
@@ -496,9 +535,9 @@ ostream &BombOrder::print(ostream &out) const {
     if (isExecuted()) {
         out << ", effect: " << getEffect();
     } else {
-        out << ", territory: " << territory->getName()
-            << " }";
+        out << ", territory: " << territory->getName();
     }
+    out << " }";
 
     return out;
 }
@@ -558,12 +597,23 @@ bool BlockadeOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void BlockadeOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        territory->blockade();
-        player->loseTerritory(territory);
-        setEffect("Blockaded territory " + territory->getName());
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    territory->blockade();
+    player->loseTerritory(territory);
+    setEffect("Blockaded territory " + territory->getName());
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
+
 }
 
 /**
@@ -577,10 +627,9 @@ ostream &BlockadeOrder::print(ostream &out) const {
     if (isExecuted()) {
         out << ", effect: " << getEffect();
     } else {
-        out << ", territory: " << territory->getName()
-            << " }";
+        out << ", territory: " << territory->getName();
     }
-
+    out << " }";
     return out;
 }
 
@@ -651,20 +700,30 @@ bool AirliftOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void AirliftOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        origin->removeArmies(armies);
-        if (dest->getPlayer() == player) {
-            dest->addArmies(armies);
-            setEffect("Airlift " + to_string(armies) + " armies from territory "
-                      + origin->getName() + " to territory " + dest->getName());
-        } else {
-            attackTerritory(origin, armies, dest);
-            setEffect("Airlift " + to_string(armies) + " armies from territory "
-                      + origin->getName() + " to attack territory " + dest->getName());
-        }
-
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    origin->removeArmies(armies);
+    if (dest->getPlayer() == player) {
+        dest->addArmies(armies);
+        setEffect("Airlift " + to_string(armies) + " armies from territory "
+                  + origin->getName() + " to territory " + dest->getName());
+    } else {
+        attackTerritory(origin, armies, dest);
+        setEffect("Airlift " + to_string(armies) + " armies from territory "
+                  + origin->getName() + " to attack territory " + dest->getName());
+    }
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
+
 }
 
 /**
@@ -680,10 +739,9 @@ ostream &AirliftOrder::print(ostream &out) const {
     } else {
         out << ", armies: " << armies
             << ", origin: " << origin->getName()
-            << ", dest: " << dest->getName()
-            << " }";
+            << ", dest: " << dest->getName();
     }
-
+    out << " }";
     return out;
 }
 
@@ -742,12 +800,23 @@ bool NegotiateOrder::validate(Map *map, Player *player) {
  * @param player Player executing the order
  */
 void NegotiateOrder::execute(Map *map, Player *player) {
-    if (validate(map, player)) {
-        player->addAlly(this->player);
-        setEffect("Players " + this->player->getName() + " and " + player->getName()
-                  + " are now allies for one turn.");
-        setExecuted(true);
+    if (isExecuted()) {
+        cout << *this << " was already executed. Not executing." << endl;
+        return;
     }
+    if (!validate(map, player)) {
+        cout << *this << " is invalid. Not executing." << endl;
+        return;
+    }
+    cout << "Executing " << *this << endl;
+
+    player->addAlly(this->player);
+    setEffect("Players " + this->player->getName() + " and " + player->getName()
+              + " are now allies for one turn.");
+
+    setExecuted(true);
+    cout << "Effect: " << getEffect() << endl;
+
 }
 
 /**
@@ -761,10 +830,9 @@ ostream &NegotiateOrder::print(ostream &out) const {
     if (isExecuted()) {
         out << ", effect: " << getEffect();
     } else {
-        out << ", player: " << player->getName()
-            << " }";
+        out << ", player: " << player->getName();
     }
-
+    out << " }";
     return out;
 }
 

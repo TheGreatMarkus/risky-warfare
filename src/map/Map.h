@@ -101,6 +101,7 @@ public:
 
     void setContinent(Continent *continent);
     void setPlayer(Player *player);
+    void setArmies(int armies);
 
     ~Territory();
 };

@@ -69,6 +69,8 @@ int main() {
         delete player;
     }
 
+    delete map;
+
     delete order1;
     delete order2;
     delete order3;

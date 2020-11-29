@@ -43,12 +43,10 @@ public:
     vector<Territory *> toDefend(Map *map);
     vector<Territory *> toAttack(Map *map);
     void issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
-    void issueDeployOrder(int armies,
-                          Territory *territory,
-                          Map *map);
-    void issueAdvanceOrder(int armies,
-                           Territory *origin,
-                           Territory *dest);
+    void issueDeployOrder(Map *map);
+    void issueAdvanceOrder(Map *map,
+                           string verb,
+                           vector<Territory *> list);
     void captureTerritory(Territory *territory);
     void loseTerritory(Territory *territory);
     bool owns(Territory *territory);

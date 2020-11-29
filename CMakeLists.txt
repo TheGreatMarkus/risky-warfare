@@ -58,15 +58,6 @@ add_executable(
         src/map/Map.cpp
 )
 
-project(GameObservers)
-add_executable(
-        GameObservers
-        src/observers/GameObserversDriver.cpp
-        src/observers/GameObservers.cpp
-        src/utils/Utils.cpp
-)
-
-
 project(GameEngine)
 add_executable(
         GameEngine

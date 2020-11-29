@@ -19,7 +19,7 @@ using cris_utils::pickFromList;
 namespace {
     void pickTerritoriesFromList(vector<Territory *> &available, vector<Territory *> &toFill,
                                  string desc, string prompt) {
-        bool stop;
+        bool stop = false;
         do {
             Territory *choice = pickFromList(desc, prompt, available);
             toFill.push_back(choice);
@@ -82,7 +82,7 @@ Player &Player::operator=(Player other) {
 }
 
 ostream &operator<<(ostream &out, const Player &obj) {
-    out << "Player{ name: \"" << obj.name << "\""
+    out << "Player{ name: " << obj.name << ""
         << ", armies: " << obj.armies
         << ", cardDue: " << obj.cardDue
         << ", ownedTerritories[" << obj.ownedTerritories.size() << "]"
@@ -101,11 +101,12 @@ vector<Territory *> Player::toDefend(Map *map) {
     vector<Territory *> toDefend{};
     vector<Territory *> canDefend{};
 
-    // Filter for enemy territories which can be attacked
+    // Filter for territories which can be defended
     for (auto &ownedTerritory : ownedTerritories) {
         for (const auto &neighbor : map->getNeighbors(ownedTerritory)) {
             if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
                 canDefend.push_back(ownedTerritory);
+                break;
             }
         }
     }
@@ -130,6 +131,7 @@ vector<Territory *> Player::toAttack(Map *map) {
         for (const auto &neighbor : map->getNeighbors(enemyTerritory)) {
             if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
                 canAttack.push_back(enemyTerritory);
+                break;
             }
         }
     }
@@ -140,83 +142,52 @@ vector<Territory *> Player::toAttack(Map *map) {
     return toAttack;
 }
 
+const string ADVANCE_ATTACK_OPTION = "Issue an Advance order to attack";
+const string ADVANCE_DEFEND_OPTION = "Issue an Advance order to defend";
+const string PLAY_CARD_OPTION = "Play a card";
+const string SKIP_OPTION = "Skip my turn";
+
 void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
-    cout << name << " is issuing orders!" << endl << endl;
-    // TODO rework. it should just issue one order
-
-
     // Deploy orders
-    while (armies > 0) {
-        cout << endl;
-        Territory *deployTo = pickFromList(
-                name + " has " + to_string(armies) + " armies.",
-                "Which territory do you want to deploy to?", setToVector(ownedTerritories));
-
-        int armiesToDeploy = getIntInput("How many armies do you want to deploy?", 1, armies);
-        issueDeployOrder(armiesToDeploy, deployTo, map);
+    if (armies > 0) {
+        issueDeployOrder(map);
+        return;
     }
 
     vector<Territory *> attack = toAttack(map);
     vector<Territory *> defend = toDefend(map);
 
-    bool stop = false;
-    do {
-        cout << endl;
-        stop = !getBoolInput("Do you want to issue an advance order?");
-        if (stop) {
-            break;
-        }
-        Territory *origin;
-        Territory *dest;
-        int armies = 0;
-        int action = getIntInput("Do you want to attack (1) or defend (2)?", 1, 2);
-        if (action == 1) {
-            if (attack.empty()) {
-                cout << "you cannot attack" << endl;
-                continue;
-            }
-            dest = pickFromList("Here are the territories you set to attack:",
-                                "Which territory do you want to attack?", attack);
-            vector<Territory *> attackers{};
-            for (auto &neighbor : map->getNeighbors(dest)) {
-                if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
-                    attackers.push_back(neighbor);
-                }
-            }
-            origin = pickFromList("Here are territories you own which neighbor the territory you want to attack:",
-                                  "Which of your territories should perform the attack?", attackers);
+    vector<string> options;
 
-        } else {
-            if (defend.empty()) {
-                cout << "you cannot defend" << endl;
-                continue;
-            }
-            dest = pickFromList("Here are the territories you set to defend:",
-                                "Which territory do you want to defend?", defend);
-
-            vector<Territory *> senders{};
-            for (auto &neighbor : map->getNeighbors(dest)) {
-                if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
-                    senders.push_back(neighbor);
-                }
-            }
-            origin = pickFromList("Here are territories you own which neighbor the territory you want to defend:",
-                                  "Which of your territories should send armies?", senders);
-        }
-        armies = getIntInput("How many armies should be sent?", 1, origin->getArmies());
-        issueAdvanceOrder(armies, origin, dest);
-    } while (true);
-
+    if (!attack.empty()) {
+        options.push_back(ADVANCE_ATTACK_OPTION);
+    }
+    if (!defend.empty()) {
+        options.push_back(ADVANCE_DEFEND_OPTION);
+    }
     if (!hand->empty()) {
-        bool play = getBoolInput("Do you want to play a card?");
-        if (play) {
-            Card *cardToPlay = pickFromList(name + " has the following cards:", "Pick a card to play",
-                                            hand->getCards());
-            cout << "Playing " << *cardToPlay << endl;
-            Order *cardOrder = cardToPlay->play(this, deck, map, activePlayers);
-            cout << name << " issued " << *cardOrder << endl;
-            orders->add(cardOrder);
-        }
+        options.push_back(PLAY_CARD_OPTION);
+    }
+    if (!options.empty()) {
+        options.push_back(SKIP_OPTION);
+    } else {
+        cout << "You have no possible moves right now" << endl;
+        return;
+    }
+    string answer = pickFromList("Given these possible options", "What do you want to do?", options);
+
+    if (answer == ADVANCE_ATTACK_OPTION) {
+        issueAdvanceOrder(map, "attack", attack);
+    } else if (answer == ADVANCE_DEFEND_OPTION) {
+        issueAdvanceOrder(map, "defend", defend);
+    } else if (answer == PLAY_CARD_OPTION) {
+        Card *cardToPlay = pickFromList(name + " has the following cards:", "Pick a card to play",
+                                        hand->getCards());
+        cout << "Playing " << *cardToPlay << endl;
+        Order *cardOrder = cardToPlay->play(this, deck, map, activePlayers);
+        cout << name << " issued " << *cardOrder << endl;
+        orders->add(cardOrder);
+
     }
 
 }
@@ -226,10 +197,14 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
  * @param armies
  * @param territory
  */
-void Player::issueDeployOrder(int armies, Territory *territory, Map *map) {
+void Player::issueDeployOrder(Map *map) {
+    Territory *territory = pickFromList(
+            name + ", here are your territories:",
+            "Which territory do you want to deploy to?", setToVector(ownedTerritories));
+    int armies = getIntInput("How many armies do you want to deploy?", 1, this->armies);
+
     DeployOrder *order = new DeployOrder(armies, territory);
-    cout << name << " issued " << *order << endl;
-    cout << "Executing " << *order << endl;
+    cout << endl << name << " issued " << *order << endl;
     order->execute(map, this);
     orders->add(order);
 }
@@ -239,7 +214,24 @@ void Player::issueDeployOrder(int armies, Territory *territory, Map *map) {
  * @param armies
  * @param territory
  */
-void Player::issueAdvanceOrder(int armies, Territory *origin, Territory *dest) {
+void Player::issueAdvanceOrder(Map *map, string verb, vector<Territory *> list) {
+    Territory *origin = nullptr;
+    Territory *dest = nullptr;
+    int armies = 0;
+
+    dest = pickFromList("Here are the territories you set to " + verb + ":",
+                        "Pick one to " + verb + "", list);
+    vector<Territory *> origins{};
+    for (auto &neighbor : map->getNeighbors(dest)) {
+        if (neighbor->getPlayer() == this && neighbor->getArmies() > 0) {
+            origins.push_back(neighbor);
+        }
+    }
+    origin = pickFromList("Here are territories you own which neighbor the territory you want to " + verb + ":",
+                          "Pick the " + verb + "ing territory", origins);
+
+    armies = getIntInput("How many armies should be sent?", 1, origin->getArmies());
+
     AdvanceOrder *order = new AdvanceOrder(armies, origin, dest);
     cout << name << " issued " << *order << endl;
     orders->add(order);

@@ -133,17 +133,16 @@ void Game::gameStart() {
         deck->addCard(new DiplomacyCard());
     }
 
-    // TODO auto enable observers
-//    cout << endl;
-//    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
-//    if (phaseObserver) {
-    attach(new PhaseObserver(this));
-//    }
-//    cout << endl;
-//    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
-//    if (gameStatsObserver) {
-    attach(new GameStatisticsObserver(this));
-//    }
+    cout << endl;
+    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
+    if (phaseObserver) {
+        attach(new PhaseObserver(this));
+    }
+    cout << endl;
+    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
+    if (gameStatsObserver) {
+        attach(new GameStatisticsObserver(this));
+    }
 }
 
 void Game::startupPhase() {
@@ -163,7 +162,7 @@ void Game::startupPhase() {
     vector<Territory *> shuffledTerritories = map->getTerritories();
     std::shuffle(shuffledTerritories.begin(), shuffledTerritories.end(), rng);
     for (auto &territory : shuffledTerritories) {
-        activePlayers[0]->captureTerritory(territory);
+        activePlayers[currentPlayer]->captureTerritory(territory);
         currentPlayer++;
         if (currentPlayer >= activePlayers.size()) {
             currentPlayer = 0;
@@ -242,48 +241,72 @@ void Game::issueOrderPhase() {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
                 updateGameState(activePlayers[i], IssuingPhase);
-                // TODO commented out temporarily for testing
                 activePlayers[i]->issueOrder(map, deck, activePlayers);
-                ready[i] = getBoolInput("Are you done issuing orders?");
+                if (activePlayers[i]->getArmies() == 0) {
+                    cout << endl;
+                    ready[i] = getBoolInput("Are you done issuing orders?");
+                }
             }
         }
     }
 
 }
 
+bool deployOrdersRemain(vector<Player *> players) {
+    for (auto &player : players) {
+        Order *order = player->getOrders()->getHighestPriorityOrder();
+        if (order != nullptr && order->getType() == OrderType::DEPLOY) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ordersRemain(vector<Player *> players) {
+    for (auto &player : players) {
+        if (!player->getOrders()->empty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Game::executeOrdersPhase() {
-    vector<bool> allExecuted(activePlayers.size());
-    while (contains(allExecuted, false)) {
+    while (ordersRemain(activePlayers)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
-            updateGameState(activePlayers[i], ExecutingPhase);
             OrdersList *ordersList = activePlayers[i]->getOrders();
-            Order *order = ordersList->getHighestPriorityOrder();
-            if (order != nullptr) {
-                if (!order->isExecuted()) {
-                    cout << "Executing " << *order << endl;
-                    order->execute(map, activePlayers[i]);
-                }
-
-                // Remove order after executing
-                ordersList->remove(order);
-                delete order;
-            } else {
-                cout << "No order to execute!" << endl;
-            }
-
             if (ordersList->empty()) {
-                cout << "Player " << activePlayers[i]->getName() << " has executed all their orders" << endl;
-                allExecuted[i] = true;
+                cout << activePlayers[i]->getName() << " has no more orders to execute." << endl;
+                continue;
             }
+
+            updateGameState(activePlayers[i], ExecutingPhase);
+            Order *order = ordersList->getHighestPriorityOrder();
+
+            // If the order returned isn't a deploy, then current player doesn't have any deploy orders left.
+            if (order->getType() != OrderType::DEPLOY && deployOrdersRemain(activePlayers)) {
+                cout << "Cannot execute " << *order << ". Some Deploy orders haven't yet been executed." << endl;
+                continue;
+            }
+            order->execute(map, activePlayers[i]);
+
+            // Remove order after executing
+            ordersList->remove(order);
+            delete order;
+
+            order = ordersList->getHighestPriorityOrder();
+            if (order == nullptr) {
+
+            }
+            cout << endl;
             getContinueInput();
+            cout << endl;
         }
     }
 
 }
 
 void Game::checkGameState() {
-    printSubtitle("Checking the game state!");
-
     for (auto &player : allPlayers) {
         if (contains(activePlayers, player) && player->getOwnedTerritories().empty()) {
             cout << player->getName() << " owns no territories. They will be eliminated" << endl;
@@ -297,7 +320,6 @@ void Game::checkGameState() {
             gameOver = true;
         }
     }
-    notify();
 }
 
 void Game::updateGameState(Player *currentPlayer, GamePhase phase) {
@@ -336,7 +358,7 @@ Player *Game::getCurrentPlayer() const {
 
 Game::~Game() {
     delete map;
-    for (auto &player : activePlayers) {
+    for (auto &player : allPlayers) {
         delete player;
     }
 
@@ -346,11 +368,12 @@ Game::~Game() {
 int main() {
     cout << std::boolalpha;
 
-    Game game{};
+    Game *game = new Game();
 
-    game.gameStart();
-    game.startupPhase();
-    game.mainGameLoop();
+    game->gameStart();
+    game->startupPhase();
+    game->mainGameLoop();
+    delete game;
 }
 
 

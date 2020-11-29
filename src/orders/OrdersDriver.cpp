@@ -16,6 +16,9 @@ int main() {
     Player *player1 = new Player{"p0"};
     Player *player2 = new Player{"p0"};
 
+    player1->addArmies(100);
+    player2->addArmies(100);
+
     map->addContinent("c0", 10);
     map->addTerritory("t0", 0, 10);
     map->addTerritory("t1", 0, 10);
@@ -60,17 +63,16 @@ int main() {
     negotiateOrder->execute(map, player1);
     blockadeOrder->execute(map, player1);
 
-    list.move(0, 2);
-    list.remove(0);
-
     cout << endl << list << endl;
-
     cout << endl << endl << *deployOrder << endl;
     cout << *advanceOrder << endl;
     cout << *bombOrder << endl;
     cout << *blockadeOrder << endl;
     cout << *airliftOrder << endl;
     cout << *negotiateOrder << endl;
+
+    list.move(0, 2);
+    list.remove(0);
 
     delete map;
     delete player1;
