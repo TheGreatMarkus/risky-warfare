@@ -69,4 +69,5 @@ add_executable(
         src/orders/Orders.cpp
         src/cards/Cards.cpp
         src/observers/GameObservers.cpp
+        src/player/PlayerStrategies.cpp
 )

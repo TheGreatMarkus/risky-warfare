@@ -20,7 +20,30 @@ public:
     MapLoader &operator=(MapLoader other);
     friend ostream &operator<<(ostream &out, const MapLoader &obj);
 
-    static Map *readMapFile(string path, string name);
+    virtual Map *readMapFile(string path, string name);
 
     ~MapLoader();
+};
+
+class ConquestFileReader {
+
+public:
+    friend ostream &operator<<(ostream &out, const ConquestFileReader &obj);
+
+    Map *readConquestFile(string path, string name);
+};
+
+class ConquestFileReaderAdapter : public MapLoader {
+private:
+    ConquestFileReader *conquestFileReader;
+public:
+    ConquestFileReaderAdapter();
+    ConquestFileReaderAdapter(const ConquestFileReaderAdapter &other);
+    friend void swap(ConquestFileReaderAdapter &a, ConquestFileReaderAdapter &b);
+    ConquestFileReaderAdapter &operator=(ConquestFileReaderAdapter other);
+    friend ostream &operator<<(ostream &out, const ConquestFileReaderAdapter &obj);
+
+    Map *readMapFile(string path, string name);
+
+    ~ConquestFileReaderAdapter();
 };
