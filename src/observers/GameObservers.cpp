@@ -20,18 +20,10 @@ using std::setprecision;
 // Observer Implementation
 //=============================
 
-Observer::Observer() {}
-
-Observer::Observer(const Observer &other) {}
-
-void swap(Observer &a, Observer &b) {}
-
 ostream &operator<<(ostream &out, const Observer &obj) {
     obj.print(out);
     return out;
 }
-
-Observer::~Observer() {}
 
 //=============================
 // Observable Implementation

@@ -26,24 +26,8 @@ namespace {
 // MapLoader Implementation
 //=============================
 
-MapLoader::MapLoader() = default;
-
-MapLoader::MapLoader(const MapLoader &other) = default;
-
-/**
- * Swap method for copy-and-swap
- * @param a first element
- * @param b second element
- */
-void swap(MapLoader &a, MapLoader &b) {}
-
-MapLoader &MapLoader::operator=(MapLoader other) {
-    swap(*this, other);
-    return *this;
-}
-
 ostream &operator<<(ostream &out, const MapLoader &obj) {
-    out << "This is a MapLoader!";
+    out << "MapLoader";
     return out;
 }
 
@@ -147,6 +131,3 @@ Map *MapLoader::readMapFile(string path, string name) {
     }
     return map;
 }
-
-MapLoader::~MapLoader() = default;
-

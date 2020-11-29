@@ -12,19 +12,11 @@ class Game;
 
 class Observer {
 public:
-    Observer();
-    Observer(const Observer &other);
-    friend void swap(Observer &a, Observer &b);
-    // abstract class, can't overload assignment operator
-    // Observer &operator=(Observer other);
     friend ostream &operator<<(ostream &out, const Observer &obj);
 
     virtual void update() = 0;
     virtual void print(ostream &out) const = 0;
     virtual Observer *clone() = 0;
-
-    virtual ~Observer();
-
 };
 
 class Observable {

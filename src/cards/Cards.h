@@ -41,7 +41,6 @@ public:
 class Hand {
 private:
     vector<Card *> cards;
-
 public:
     Hand();
     Hand(const Hand &other);
@@ -65,18 +64,14 @@ public:
  */
 class Card {
 public:
-    Card();
-    Card(const Card &other);
-    friend void swap(Card &a, Card &b);
-    // abstract class, can't overload assignment operator
-    // Card &operator=(Card other);
     friend ostream &operator<<(ostream &out, const Card &obj);
 
-    virtual Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) = 0;
+    virtual Order *play(Player *cardPlayer,
+                        Deck *deck,
+                        Map *map,
+                        vector<Player *> players) = 0;
     virtual Card *clone() = 0;
     virtual ostream &print(ostream &out) const = 0;
-
-    virtual ~Card() = 0;
 };
 
 /**
@@ -85,16 +80,12 @@ public:
  */
 class BombCard : public Card {
 public:
-    BombCard();
-    BombCard(const BombCard &other);
-    friend void swap(BombCard &a, BombCard &b);
-    BombCard &operator=(BombCard other);
-
-    Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
+    Order *play(Player *cardPlayer,
+                Deck *deck,
+                Map *map,
+                vector<Player *> players) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
-
-    ~BombCard() override;
 };
 
 /**
@@ -103,16 +94,12 @@ public:
  */
 class ReinforcementCard : public Card {
 public:
-    ReinforcementCard();
-    ReinforcementCard(const ReinforcementCard &other);
-    friend void swap(ReinforcementCard &a, ReinforcementCard &b);
-    ReinforcementCard &operator=(ReinforcementCard other);
-
-    Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
+    Order *play(Player *cardPlayer,
+                Deck *deck,
+                Map *map,
+                vector<Player *> players) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
-
-    ~ReinforcementCard() override;
 };
 
 /**
@@ -121,16 +108,12 @@ public:
  */
 class BlockadeCard : public Card {
 public:
-    BlockadeCard();
-    BlockadeCard(const BlockadeCard &other);
-    friend void swap(BlockadeCard &a, BlockadeCard &b);
-    BlockadeCard &operator=(BlockadeCard other);
-
-    Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
+    Order *play(Player *cardPlayer,
+                Deck *deck,
+                Map *map,
+                vector<Player *> players) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
-
-    ~BlockadeCard() override;
 };
 
 /**
@@ -139,16 +122,12 @@ public:
  */
 class AirliftCard : public Card {
 public:
-    AirliftCard();
-    AirliftCard(const AirliftCard &other);
-    friend void swap(AirliftCard &a, AirliftCard &b);
-    AirliftCard &operator=(AirliftCard other);
-
-    Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> players) override;
+    Order *play(Player *cardPlayer,
+                Deck *deck,
+                Map *map,
+                vector<Player *> players) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
-
-    ~AirliftCard() override;
 };
 
 /**
@@ -157,14 +136,10 @@ public:
  */
 class DiplomacyCard : public Card {
 public:
-    DiplomacyCard();
-    DiplomacyCard(const DiplomacyCard &other);
-    friend void swap(DiplomacyCard &a, DiplomacyCard &b);
-    DiplomacyCard &operator=(DiplomacyCard other);
-
-    Order *play(Player *cardPlayer, Deck *deck, Map *map, vector<Player *> activePlayers) override;
+    Order *play(Player *cardPlayer,
+                Deck *deck,
+                Map *map,
+                vector<Player *> activePlayers) override;
     Card *clone() override;
     ostream &print(ostream &out) const override;
-
-    ~DiplomacyCard() override;
 };

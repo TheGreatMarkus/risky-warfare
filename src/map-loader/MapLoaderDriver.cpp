@@ -12,23 +12,25 @@ void evaluateMap(Map &map);
  */
 int main() {
     cout << std::boolalpha;
+    MapLoader *mapLoader = new MapLoader();
 
     // Valid
-    Map *zertina = MapLoader::readMapFile("zertina.map", "Zertina");
+    Map *zertina = mapLoader->readMapFile("zertina.map", "Zertina");
     evaluateMap(*zertina);
 
     // Valid
-    Map *canada = MapLoader::readMapFile("canada.map", "Canada");
+    Map *canada = mapLoader->readMapFile("canada.map", "Canada");
     evaluateMap(*canada);
 
     // Valid
-    Map *usa = MapLoader::readMapFile("usa8regions.map", "USA");
+    Map *usa = mapLoader->readMapFile("usa8regions.map", "USA");
     evaluateMap(*usa);
 
     // Invalid
-    Map *invalid = MapLoader::readMapFile("invalid.map", "Invalid");
+    Map *invalid = mapLoader->readMapFile("invalid.map", "Invalid");
     evaluateMap(*invalid);
 
+    delete mapLoader;
     delete zertina;
     delete canada;
     delete usa;

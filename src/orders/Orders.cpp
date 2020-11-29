@@ -187,22 +187,6 @@ Order::Order(OrderType type)
           effect{""},
           type{type} {}
 
-Order::Order(const Order &other)
-        : executed{other.executed},
-          effect{other.effect},
-          type{other.type} {}
-
-/**
- * Swap method for copy-and-swap
- * @param a first element
- * @param b second element
- */
-void swap(Order &a, Order &b) {
-    using std::swap;
-
-    swap(a.executed, b.executed);
-}
-
 ostream &operator<<(ostream &out, const Order &obj) {
     obj.print(out);
     return out;
@@ -216,6 +200,10 @@ const string &Order::getEffect() const {
     return effect;
 }
 
+OrderType Order::getType() const {
+    return type;
+}
+
 void Order::setExecuted(bool executed_) {
     executed = executed_;
 }
@@ -224,11 +212,9 @@ void Order::setEffect(string effect) {
     this->effect = effect;
 }
 
-OrderType Order::getType() const {
-    return type;
-}
+Order::~Order() {}
 
-Order::~Order() = default;
+
 
 //=============================
 // DeployedOrder Implementation
@@ -238,29 +224,6 @@ DeployOrder::DeployOrder(int armies, Territory *territory)
         : Order(OrderType::DEPLOY),
           armies{armies},
           territory{territory} {}
-
-DeployOrder::DeployOrder(const DeployOrder &other)
-        : Order(other),
-          armies{other.armies},
-          territory{other.territory} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(DeployOrder &a, DeployOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.armies, b.armies);
-    swap(a.territory, b.territory);
-}
-
-DeployOrder &DeployOrder::operator=(DeployOrder other) {
-    swap(*this, other);
-    return *this;
-}
 
 /**
  * Validates current Order
@@ -327,8 +290,6 @@ DeployOrder *DeployOrder::clone() {
     return new DeployOrder(*this);
 }
 
-DeployOrder::~DeployOrder() = default;
-
 //=============================
 // AdvanceOrder Implementation
 //=============================
@@ -338,31 +299,6 @@ AdvanceOrder::AdvanceOrder(int armies, Territory *originTerr, Territory *destTer
           armies{armies},
           origin{originTerr},
           dest{destTerr} {}
-
-AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
-        : Order(other),
-          armies{other.armies},
-          origin{other.origin},
-          dest{other.dest} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(AdvanceOrder &a, AdvanceOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.armies, b.armies);
-    swap(a.origin, b.origin);
-    swap(a.dest, b.dest);
-}
-
-AdvanceOrder &AdvanceOrder::operator=(AdvanceOrder other) {
-    swap(*this, other);
-    return *this;
-}
 
 /**
  * Validates current Order
@@ -442,34 +378,13 @@ AdvanceOrder *AdvanceOrder::clone() {
     return new AdvanceOrder(*this);
 }
 
-AdvanceOrder::~AdvanceOrder() = default;
-
 //=============================
 // BombOrder Implementation
 //=============================
 
-BombOrder::BombOrder(Territory *territory) : Order(OrderType::BOMB), territory{territory} {}
-
-BombOrder::BombOrder(const BombOrder &other)
-        : Order(other),
-          territory{other.territory} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(BombOrder &a, BombOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.territory, b.territory);
-}
-
-BombOrder &BombOrder::operator=(BombOrder other) {
-    swap(*this, other);
-    return *this;
-}
+BombOrder::BombOrder(Territory *territory)
+        : Order(OrderType::BOMB),
+          territory{territory} {}
 
 /**
  * Validates current Order
@@ -546,34 +461,13 @@ BombOrder *BombOrder::clone() {
     return new BombOrder(*this);
 }
 
-BombOrder::~BombOrder() = default;
-
 //=============================
 // BlockadeOrder Implementation
 //=============================
 
-BlockadeOrder::BlockadeOrder(Territory *territory) : Order(OrderType::BLOCKADE), territory{territory} {}
-
-BlockadeOrder::BlockadeOrder(const BlockadeOrder &other)
-        : Order(other),
-          territory{other.territory} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(BlockadeOrder &a, BlockadeOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.territory, b.territory);
-}
-
-BlockadeOrder &BlockadeOrder::operator=(BlockadeOrder other) {
-    swap(*this, other);
-    return *this;
-}
+BlockadeOrder::BlockadeOrder(Territory *territory)
+        : Order(OrderType::BLOCKADE),
+          territory{territory} {}
 
 /**
  * Validates current Order
@@ -637,8 +531,6 @@ BlockadeOrder *BlockadeOrder::clone() {
     return new BlockadeOrder(*this);
 }
 
-BlockadeOrder::~BlockadeOrder() = default;
-
 //=============================
 // AirliftOrder Implementation
 //=============================
@@ -648,31 +540,6 @@ AirliftOrder::AirliftOrder(int armies, Territory *origin, Territory *dest)
           armies{armies},
           origin{origin},
           dest{dest} {}
-
-AirliftOrder::AirliftOrder(const AirliftOrder &other)
-        : Order(other),
-          armies{other.armies},
-          origin{other.origin},
-          dest{other.dest} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(AirliftOrder &a, AirliftOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.armies, b.armies);
-    swap(a.origin, b.origin);
-    swap(a.dest, b.dest);
-}
-
-AirliftOrder &AirliftOrder::operator=(AirliftOrder other) {
-    swap(*this, other);
-    return *this;
-}
 
 /**
  * Validates current Order
@@ -749,8 +616,6 @@ AirliftOrder *AirliftOrder::clone() {
     return new AirliftOrder(*this);
 }
 
-AirliftOrder::~AirliftOrder() = default;
-
 //=============================
 // NegotiateOrder Implementation
 //=============================
@@ -758,27 +623,6 @@ AirliftOrder::~AirliftOrder() = default;
 NegotiateOrder::NegotiateOrder(Player *player)
         : Order(OrderType::NEGOTIATE),
           player{player} {}
-
-NegotiateOrder::NegotiateOrder(const NegotiateOrder &other)
-        : Order(other),
-          player{other.player} {}
-
-/**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
-void swap(NegotiateOrder &a, NegotiateOrder &b) {
-    using std::swap;
-
-    swap(static_cast<Order &>(a), static_cast<Order &>(b));
-    swap(a.player, b.player);
-}
-
-NegotiateOrder &NegotiateOrder::operator=(NegotiateOrder other) {
-    swap(*this, other);
-    return *this;
-}
 
 /**
  * Validates current Order
@@ -839,5 +683,3 @@ ostream &NegotiateOrder::print(ostream &out) const {
 NegotiateOrder *NegotiateOrder::clone() {
     return new NegotiateOrder(*this);
 };
-
-NegotiateOrder::~NegotiateOrder() {}

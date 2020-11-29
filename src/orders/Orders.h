@@ -49,6 +49,8 @@ public:
     ~OrdersList();
 };
 
+// TODO mention that orders don't manage the pointers they have, hence why the lack of copy constructor, destructor, etc.
+
 /**
  * Abstract class for player orders.
  */
@@ -59,10 +61,6 @@ private:
     OrderType type;
 public:
     Order(OrderType type);
-    Order(const Order &other);
-    friend void swap(Order &a, Order &b);
-    // abstract class, can't overload assignment operator
-    // Order &operator=(Order other);
     friend ostream &operator<<(ostream &out, const Order &obj);
 
     virtual bool validate(Map *map, Player *player) = 0;
@@ -90,16 +88,11 @@ private:
 public:
     DeployOrder(int armies,
                 Territory *territory);
-    DeployOrder(const DeployOrder &other);
-    friend void swap(DeployOrder &a, DeployOrder &b);
-    DeployOrder &operator=(DeployOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     DeployOrder *clone() override;
-
-    ~DeployOrder() override;
 };
 
 /**
@@ -114,16 +107,11 @@ public:
     AdvanceOrder(int armies,
                  Territory *originTerr,
                  Territory *destTerr);
-    AdvanceOrder(const AdvanceOrder &other);
-    friend void swap(AdvanceOrder &a, AdvanceOrder &b);
-    AdvanceOrder &operator=(AdvanceOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     AdvanceOrder *clone() override;
-
-    ~AdvanceOrder() override;
 };
 
 /**
@@ -134,16 +122,11 @@ private:
     Territory *territory;
 public:
     BombOrder(Territory *territory);
-    BombOrder(const BombOrder &other);
-    friend void swap(BombOrder &a, BombOrder &b);
-    BombOrder &operator=(BombOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     BombOrder *clone() override;
-
-    ~BombOrder() override;
 };
 
 /**
@@ -154,16 +137,11 @@ private:
     Territory *territory;
 public:
     BlockadeOrder(Territory *territory);
-    BlockadeOrder(const BlockadeOrder &other);
-    friend void swap(BlockadeOrder &a, BlockadeOrder &b);
-    BlockadeOrder &operator=(BlockadeOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     BlockadeOrder *clone() override;
-
-    ~BlockadeOrder() override;
 };
 
 /**
@@ -178,16 +156,11 @@ public:
     AirliftOrder(int armies,
                  Territory *origin,
                  Territory *dest);
-    AirliftOrder(const AirliftOrder &other);
-    friend void swap(AirliftOrder &a, AirliftOrder &b);
-    AirliftOrder &operator=(AirliftOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     AirliftOrder *clone() override;
-
-    ~AirliftOrder() override;
 };
 
 /**
@@ -198,15 +171,10 @@ private:
     Player *player;
 public:
     NegotiateOrder(Player *player);
-    NegotiateOrder(const NegotiateOrder &other);
-    friend void swap(NegotiateOrder &a, NegotiateOrder &b);
-    NegotiateOrder &operator=(NegotiateOrder other);
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     NegotiateOrder *clone() override;
-
-    ~NegotiateOrder() override;
 };
 
