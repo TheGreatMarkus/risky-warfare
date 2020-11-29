@@ -32,7 +32,7 @@ private:
     set<Territory *> ownedTerritories;
     set<Player *> allies;
     Hand *hand;
-    OrdersList *ordersList;
+    OrdersList *orders;
 public:
     Player(string name);
     Player(const Player &other);
@@ -61,7 +61,7 @@ public:
     bool isCardDue() const;
     const set<Territory *> &getOwnedTerritories() const;
     Hand *getHand();
-    OrdersList *getOrdersList() const;
+    OrdersList *getOrders() const;
     const set<Player *> &getAllies() const;
 
     void addArmies(int armies);

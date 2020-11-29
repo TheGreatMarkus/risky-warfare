@@ -11,6 +11,7 @@
 #include "map-loader/MapLoader.h"
 #include "cards/Cards.h"
 #include "orders/Orders.h"
+#include "observers/GameObservers.h"
 
 using std::cout;
 using std::cin;
@@ -30,6 +31,7 @@ using cris_utils::compare;
 using cris_utils::vectorToSet;
 using cris_utils::pickFromList;
 using cris_utils::printList;
+using cris_utils::getContinueInput;
 
 namespace {
     auto rd = std::random_device{};
@@ -44,7 +46,9 @@ Game::Game() : map{nullptr},
                activePlayers{},
                allPlayers{},
                deck{nullptr},
-               gameOver{false} {}
+               gameOver{false},
+               phase{NoPhase},
+               currentPlayer{nullptr} {}
 
 Game::Game(const Game &other) :
         map{new Map(*other.map)},
@@ -73,8 +77,18 @@ ostream &operator<<(ostream &out, const Game &obj) {
     return out;
 }
 
+void Game::print(ostream &out) const {
+
+}
+
+Observable *Game::clone() {
+    return nullptr;
+}
+
 void Game::gameStart() {
-    cout << endl;
+    updateGameState(nullptr, GameStartPhase);
+    phase = GameStartPhase;
+
     printTitle("Welcome to the game Risky Warfare!");
 
     string searchPath = current_path();
@@ -119,13 +133,22 @@ void Game::gameStart() {
         deck->addCard(new DiplomacyCard());
     }
 
-    cout << endl;
-    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
-    cout << endl;
-    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
+    // TODO auto enable observers
+//    cout << endl;
+//    bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
+//    if (phaseObserver) {
+    attach(new PhaseObserver(this));
+//    }
+//    cout << endl;
+//    bool gameStatsObserver = getBoolInput("Do you want to turn on the game statistics observer?");
+//    if (gameStatsObserver) {
+    attach(new GameStatisticsObserver(this));
+//    }
 }
 
 void Game::startupPhase() {
+    updateGameState(nullptr, StartupPhase);
+
     cout << endl;
     printTitle("Entering the startup phase!");
 
@@ -140,28 +163,14 @@ void Game::startupPhase() {
     vector<Territory *> shuffledTerritories = map->getTerritories();
     std::shuffle(shuffledTerritories.begin(), shuffledTerritories.end(), rng);
     for (auto &territory : shuffledTerritories) {
-        activePlayers[currentPlayer]->captureTerritory(territory);
+        activePlayers[0]->captureTerritory(territory);
         currentPlayer++;
         if (currentPlayer >= activePlayers.size()) {
             currentPlayer = 0;
         }
     }
     // Give initial armies to players
-    int initialArmies = 0;
-    switch (activePlayers.size()) {
-        case 2:
-            initialArmies = INITIAL_ARMIES_2P;
-            break;
-        case 3:
-            initialArmies = INITIAL_ARMIES_3P;
-            break;
-        case 4:
-            initialArmies = INITIAL_ARMIES_4P;
-            break;
-        case 5:
-            initialArmies = INITIAL_ARMIES_5P;
-            break;
-    }
+    int initialArmies = INITIAL_ARMIES[activePlayers.size() - 2];
 
     cout << "Giving each player " << initialArmies << " armies at the start of the game!" << endl;
     for (auto &player : activePlayers) {
@@ -172,7 +181,9 @@ void Game::startupPhase() {
 void Game::mainGameLoop() {
     cout << endl;
     printTitle("Entering the main game loop!");
-    int rounds = 0;
+    int round = 0;
+
+    checkGameState();
 
     while (!gameOver) {
         for (auto &player : activePlayers) {
@@ -196,45 +207,43 @@ void Game::mainGameLoop() {
             }
 
         }
-
+        round++;
     }
-
 }
 
 void Game::reinforcementPhase() {
-    printSubtitle("Reinforcement phase");
-
+    updateGameState(nullptr, ReinforcementPhase);
     for (auto &player : activePlayers) {
         int numArmies = 0;
         set<Territory *> ownedTerritories = player->getOwnedTerritories();
         numArmies += ownedTerritories.size() / 3;
         set<Continent *> playerConts = map->getContinentsControlledByPlayer(player);
-        for (auto &continent : playerConts) {
-            numArmies += continent->getArmies();
-        }
-        cout << player->getName() << " owns " << ownedTerritories.size()
-             << " territories, ";
+
+        cout << endl << player->getName() << " owns " << ownedTerritories.size() << " territories, ";
+
         if (playerConts.empty()) {
-            cout << "and control no continents";
+            cout << "and controls no continents. " << endl;
         } else {
             cout << "and controls the following continents: " << endl;
         }
         for (auto &continent : playerConts) {
-            cout << "\t- " << continent->getName() << "" << endl;
+            cout << "\t- " << continent->getName() << ": +" << continent->getArmies() << " armies" << endl;
+            numArmies += continent->getArmies();
         }
-        cout << endl << "They will receive " << numArmies << " armies" << endl << endl;
+        cout << player->getName() << " armies: " << player->getArmies()
+             << " -> " << player->getArmies() + numArmies << " (+" << numArmies << ")" << endl;
         player->addArmies(numArmies);
     }
 }
 
 void Game::issueOrderPhase() {
-    printSubtitle("Order issuing phase");
     vector<bool> ready(activePlayers.size());
     while (contains(ready, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
-                cout << *activePlayers[i] << endl;
-//                activePlayers[i]->issueOrder(map, deck, activePlayers);
+                updateGameState(activePlayers[i], IssuingPhase);
+                // TODO commented out temporarily for testing
+                activePlayers[i]->issueOrder(map, deck, activePlayers);
                 ready[i] = getBoolInput("Are you done issuing orders?");
             }
         }
@@ -243,12 +252,11 @@ void Game::issueOrderPhase() {
 }
 
 void Game::executeOrdersPhase() {
-    cout << endl;
-    printSubtitle("Order execution Phase");
     vector<bool> allExecuted(activePlayers.size());
     while (contains(allExecuted, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
-            OrdersList *ordersList = activePlayers[i]->getOrdersList();
+            updateGameState(activePlayers[i], ExecutingPhase);
+            OrdersList *ordersList = activePlayers[i]->getOrders();
             Order *order = ordersList->getHighestPriorityOrder();
             if (order != nullptr) {
                 if (!order->isExecuted()) {
@@ -259,19 +267,22 @@ void Game::executeOrdersPhase() {
                 // Remove order after executing
                 ordersList->remove(order);
                 delete order;
-                order = nullptr;
+            } else {
+                cout << "No order to execute!" << endl;
             }
 
             if (ordersList->empty()) {
+                cout << "Player " << activePlayers[i]->getName() << " has executed all their orders" << endl;
                 allExecuted[i] = true;
             }
+            getContinueInput();
         }
     }
 
 }
 
 void Game::checkGameState() {
-    printSubtitle("Round over! Checking the game state!");
+    printSubtitle("Checking the game state!");
 
     for (auto &player : allPlayers) {
         if (contains(activePlayers, player) && player->getOwnedTerritories().empty()) {
@@ -282,10 +293,45 @@ void Game::checkGameState() {
 
     for (auto &player : activePlayers) {
         if (vectorToSet(map->getTerritories()) == player->getOwnedTerritories()) {
-            cout << *player << " won the game!";
+            cout << player->getName() << " won the game!";
             gameOver = true;
         }
     }
+    notify();
+}
+
+void Game::updateGameState(Player *currentPlayer, GamePhase phase) {
+    this->currentPlayer = currentPlayer;
+    this->phase = phase;
+    notify();
+}
+
+Map *Game::getMap() const {
+    return map;
+}
+
+const vector<Player *> &Game::getActivePlayers() const {
+    return activePlayers;
+}
+
+const vector<Player *> &Game::getAllPlayers() const {
+    return allPlayers;
+}
+
+Deck *Game::getDeck() const {
+    return deck;
+}
+
+bool Game::isGameOver() const {
+    return gameOver;
+}
+
+GamePhase Game::getPhase() const {
+    return phase;
+}
+
+Player *Game::getCurrentPlayer() const {
+    return currentPlayer;
 }
 
 Game::~Game() {

@@ -358,7 +358,7 @@ Continent::~Continent() = default;
 Territory::Territory(string name, Continent *continent, int armies)
         : name{name},
           continent{continent},
-          armies{0},
+          armies{armies},
           player{nullptr} {}
 
 Territory::Territory(const Territory &other)

@@ -93,6 +93,7 @@ namespace cris_utils {
 
     int getIntInput(string prompt, int min, int max);
     int getBoolInput(string prompt);
+    void getContinueInput();
 
     void printTitle(string title);
     void printSubtitle(string title);

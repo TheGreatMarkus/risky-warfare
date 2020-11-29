@@ -48,7 +48,7 @@ Player::Player(string name)
           ownedTerritories{set<Territory *>()},
           allies{set<Player *>()},
           hand{new Hand()},
-          ordersList{new OrdersList()} {}
+          orders{new OrdersList()} {}
 
 Player::Player(const Player &other)
         : name{other.name},
@@ -57,7 +57,7 @@ Player::Player(const Player &other)
           ownedTerritories{set<Territory *>(other.ownedTerritories)},
           allies{set<Player *>(other.allies)},
           hand{new Hand(*other.hand)},
-          ordersList{new OrdersList()} {}
+          orders{new OrdersList()} {}
 
 /**
  * Swap method for copy-and-swap
@@ -73,7 +73,7 @@ void swap(Player &a, Player &b) {
     swap(a.ownedTerritories, b.ownedTerritories);
     swap(a.allies, b.allies);
     swap(a.hand, b.hand);
-    swap(a.ordersList, b.ordersList);
+    swap(a.orders, b.orders);
 }
 
 Player &Player::operator=(Player other) {
@@ -88,7 +88,7 @@ ostream &operator<<(ostream &out, const Player &obj) {
         << ", ownedTerritories[" << obj.ownedTerritories.size() << "]"
         << ", allies[" << obj.allies.size() << "]"
         << ", hand[" << obj.hand->size() << "]"
-        << ", orders[" << obj.ordersList->size() << "]"
+        << ", orders[" << obj.orders->size() << "]"
         << " }";
     return out;
 }
@@ -142,6 +142,7 @@ vector<Territory *> Player::toAttack(Map *map) {
 
 void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << name << " is issuing orders!" << endl << endl;
+    // TODO rework. it should just issue one order
 
 
     // Deploy orders
@@ -214,7 +215,7 @@ void Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
             cout << "Playing " << *cardToPlay << endl;
             Order *cardOrder = cardToPlay->play(this, deck, map, activePlayers);
             cout << name << " issued " << *cardOrder << endl;
-            ordersList->add(cardOrder);
+            orders->add(cardOrder);
         }
     }
 
@@ -230,7 +231,7 @@ void Player::issueDeployOrder(int armies, Territory *territory, Map *map) {
     cout << name << " issued " << *order << endl;
     cout << "Executing " << *order << endl;
     order->execute(map, this);
-    ordersList->add(order);
+    orders->add(order);
 }
 
 /**
@@ -241,7 +242,7 @@ void Player::issueDeployOrder(int armies, Territory *territory, Map *map) {
 void Player::issueAdvanceOrder(int armies, Territory *origin, Territory *dest) {
     AdvanceOrder *order = new AdvanceOrder(armies, origin, dest);
     cout << name << " issued " << *order << endl;
-    ordersList->add(order);
+    orders->add(order);
 }
 
 void Player::captureTerritory(Territory *territory) {
@@ -315,8 +316,8 @@ Hand *Player::getHand() {
     return hand;
 }
 
-OrdersList *Player::getOrdersList() const {
-    return ordersList;
+OrdersList *Player::getOrders() const {
+    return orders;
 }
 
 const set<Player *> &Player::getAllies() const {
@@ -342,8 +343,8 @@ Player::~Player() {
     delete hand;
     hand = nullptr;
 
-    delete ordersList;
-    ordersList = nullptr;
+    delete orders;
+    orders = nullptr;
 }
 
 

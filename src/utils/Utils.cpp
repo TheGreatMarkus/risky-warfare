@@ -118,14 +118,23 @@ int cris_utils::getBoolInput(string prompt) {
     }
 }
 
+void cris_utils::getContinueInput() {
+    cout << "Press Enter to continue: ";
+    string answer;
+    getline(cin, answer);
+    cin.clear();
+}
+
 void cris_utils::printTitle(string title) {
-    cout << "==========================================================" << endl
+    cout << endl
+         << "==========================================================" << endl
          << title << endl
          << "==========================================================" << endl << endl;
 }
 
 void cris_utils::printSubtitle(string title) {
-    cout << "============== " <<
+    cout << endl
+         << "============== " <<
          title
          << " ==============" << endl << endl;
 }

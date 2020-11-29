@@ -18,14 +18,21 @@ int main() {
 
     Deck *deck = new Deck{};
 
-    Player *player1 = new Player{"p0"};
-    Player *player2 = new Player{"p0"};
+    vector<Player *> players;
+    players.push_back(new Player("Player 1"));
+    players.push_back(new Player("Player 2"));
 
-    Hand *hand = player1->getHand();
+    Map *map = new Map("test map");
+    map->addContinent("c0", 1);
+    map->addTerritory("t0", 0, 10);
+    map->addTerritory("t1", 0, 10);
+    map->addTerritory("t2", 0, 10);
+    map->addConnection(0, 1);
+    map->addConnection(1, 2);
 
-    Continent *c0 = new Continent{"c0", 1};
-    Territory *t0 = new Territory{"t0", c0, 10};
-    Territory *t1 = new Territory{"t1", c0, 10};
+    players[0]->captureTerritory(map->getTerritories()[0]);
+    players[0]->captureTerritory(map->getTerritories()[1]);
+    players[1]->captureTerritory(map->getTerritories()[2]);
 
     deck->addCard(new BombCard());
     deck->addCard(new ReinforcementCard());
@@ -33,25 +40,34 @@ int main() {
     deck->addCard(new AirliftCard());
     deck->addCard(new DiplomacyCard());
 
+    Hand *hand = players[0]->getHand();
     deck->draw(hand);
     deck->draw(hand);
     deck->draw(hand);
     deck->draw(hand);
     deck->draw(hand);
 
-    auto order1 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
-    auto order2 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
-    auto order3 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
-    auto order4 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
-    auto order5 = hand->getCard(0)->play(nullptr, deck, nullptr, vector<Player*>());
+    auto order1 = hand->getCard(0)->play(players[0], deck, map, players);
+    auto order2 = hand->getCard(0)->play(players[0], deck, map, players);
+    auto order3 = hand->getCard(0)->play(players[0], deck, map, players);
+    auto order4 = hand->getCard(0)->play(players[0], deck, map, players);
+    auto order5 = hand->getCard(0)->play(players[0], deck, map, players);
 
+    cout << endl;
     cout << *deck << endl;
     cout << *hand << endl;
 
+    cout << *order1 << endl;
+    cout << *order2 << endl;
+    cout << *order3 << endl;
+    cout << *order4 << endl;
+    cout << *order5 << endl;
+
     delete deck;
 
-    delete player1;
-    delete player2;
+    for (auto &player : players) {
+        delete player;
+    }
 
     delete order1;
     delete order2;

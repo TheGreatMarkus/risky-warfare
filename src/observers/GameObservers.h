@@ -27,26 +27,26 @@ public:
 
 };
 
-class Subject {
+class Observable {
 private:
     vector<Observer *> observers;
 public:
-    Subject();
-    Subject(const Subject &other);
-    friend void swap(Subject &a, Subject &b);
+    Observable();
+    Observable(const Observable &other);
+    friend void swap(Observable &a, Observable &b);
     // abstract class, can't overload assignment operator
-    // Subject &operator=(Subject other);
-    friend ostream &operator<<(ostream &out, const Subject &obj);
+    // Observable &operator=(Observable other);
+    friend ostream &operator<<(ostream &out, const Observable &obj);
 
     void attach(Observer *observer);
     void detach(Observer *observer);
     void notify();
 
     virtual void print(ostream &out) const = 0;
-    virtual Subject *clone() = 0;
+    virtual Observable *clone() = 0;
 
-
-    virtual ~Subject();
+    const vector<Observer *> &getObservers() const;
+    virtual ~Observable();
 };
 
 class PhaseObserver : public Observer {
@@ -61,7 +61,6 @@ public:
     void update() override;
     void print(ostream &out) const override;
     Observer *clone() override;
-
 
     virtual ~PhaseObserver();
 };

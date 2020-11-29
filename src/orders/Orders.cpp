@@ -87,12 +87,11 @@ OrdersList &OrdersList::operator=(OrdersList other) {
 }
 
 ostream &operator<<(ostream &out, const OrdersList &obj) {
-    out << "OrdersList{" << endl
-        << "orders: [" << endl;
+    out << "OrdersList{" << endl;
     for (auto order : obj.orders) {
         out << *order << endl;
     }
-    out << "]";
+    out << "}";
     return out;
 }
 
@@ -295,11 +294,15 @@ void DeployOrder::execute(Map *map, Player *player) {
  */
 ostream &DeployOrder::print(ostream &out) const {
     out << "DeployOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", armies: " << armies
-        << ", territory: " << territory->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", armies: " << armies
+            << ", territory: " << territory->getName()
+            << " }";
+    }
+
     return out;
 }
 
@@ -394,12 +397,16 @@ void AdvanceOrder::execute(Map *map, Player *player) {
  */
 ostream &AdvanceOrder::print(ostream &out) const {
     out << "AdvanceOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", armies: " << armies
-        << ", origin: " << origin->getName()
-        << ", dest: " << dest->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", armies: " << armies
+            << ", origin: " << origin->getName()
+            << ", dest: " << dest->getName()
+            << " }";
+    }
+
     return out;
 }
 
@@ -485,10 +492,14 @@ void BombOrder::execute(Map *map, Player *player) {
  */
 ostream &BombOrder::print(ostream &out) const {
     out << "BombOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", territory: " << territory->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", territory: " << territory->getName()
+            << " }";
+    }
+
     return out;
 }
 
@@ -562,10 +573,14 @@ void BlockadeOrder::execute(Map *map, Player *player) {
  */
 ostream &BlockadeOrder::print(ostream &out) const {
     out << "BlockadeOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", territory: " << territory->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", territory: " << territory->getName()
+            << " }";
+    }
+
     return out;
 }
 
@@ -659,12 +674,16 @@ void AirliftOrder::execute(Map *map, Player *player) {
  */
 ostream &AirliftOrder::print(ostream &out) const {
     out << "AirliftOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", armies: " << armies
-        << ", origin: " << origin->getName()
-        << ", dest: " << dest->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", armies: " << armies
+            << ", origin: " << origin->getName()
+            << ", dest: " << dest->getName()
+            << " }";
+    }
+
     return out;
 }
 
@@ -738,10 +757,14 @@ void NegotiateOrder::execute(Map *map, Player *player) {
  */
 ostream &NegotiateOrder::print(ostream &out) const {
     out << "NegotiateOrder{ "
-        << "executed: " << isExecuted()
-        << ", effect: \"" << getEffect()
-        << "\", player: " << player->getName()
-        << " }";
+        << "executed: " << isExecuted();
+    if (isExecuted()) {
+        out << ", effect: " << getEffect();
+    } else {
+        out << ", player: " << player->getName()
+            << " }";
+    }
+
     return out;
 }
 

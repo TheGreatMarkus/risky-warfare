@@ -58,11 +58,11 @@ add_executable(
         src/map/Map.cpp
 )
 
-project(GameStatistics)
+project(GameObservers)
 add_executable(
-        GameStatistics
-        src/game-stats/GameObserversDriver.cpp
-        src/game-stats/GameObservers.cpp
+        GameObservers
+        src/observers/GameObserversDriver.cpp
+        src/observers/GameObservers.cpp
         src/utils/Utils.cpp
 )
 
@@ -77,4 +77,5 @@ add_executable(
         src/player/Player.cpp
         src/orders/Orders.cpp
         src/cards/Cards.cpp
+        src/observers/GameObservers.cpp
 )

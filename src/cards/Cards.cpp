@@ -53,12 +53,11 @@ Deck &Deck::operator=(Deck other) {
 }
 
 ostream &operator<<(ostream &out, const Deck &obj) {
-    out << "Deck{ " << endl
-        << "cards[" << obj.cards.size() << "][" << endl;
+    out << "Deck{ ";
     for (auto card : obj.cards) {
-        out << *card << endl;
+        out << *card << ", ";
     }
-    out << "]" << endl << "}" << endl;
+    out  << "}" << endl;
 
     return out;
 }
@@ -121,12 +120,11 @@ Hand &Hand::operator=(Hand other) {
 }
 
 ostream &operator<<(ostream &out, const Hand &obj) {
-    out << "Hand{ " << endl
-        << "cards[" << obj.cards.size() << "][" << endl;
+    out << "Hand{ ";
     for (auto card : obj.cards) {
-        out << *card << endl;
+        out << *card << ", ";
     }
-    out << "]" << endl << "}" << endl;
+    out  << "}" << endl;
 
     return out;
 }
@@ -238,7 +236,7 @@ Card *BombCard::clone() {
 }
 
 ostream &BombCard::print(ostream &out) const {
-    out << "BombCard{}";
+    out << "BombCard";
     return out;
 }
 
@@ -295,7 +293,7 @@ Card *ReinforcementCard::clone() {
 }
 
 ostream &ReinforcementCard::print(ostream &out) const {
-    out << "ReinforcementCard{}";
+    out << "ReinforcementCard";
     return out;
 }
 
@@ -352,7 +350,7 @@ Card *BlockadeCard::clone() {
 }
 
 ostream &BlockadeCard::print(ostream &out) const {
-    out << "BlockadeCard{}";
+    out << "BlockadeCard";
     return out;
 }
 
@@ -420,7 +418,7 @@ Card *AirliftCard::clone() {
 }
 
 ostream &AirliftCard::print(ostream &out) const {
-    out << "AirliftCard{}";
+    out << "AirliftCard";
     return out;
 }
 
@@ -478,7 +476,7 @@ Card *DiplomacyCard::clone() {
 }
 
 ostream &DiplomacyCard::print(ostream &out) const {
-    out << "DiplomacyCard{}";
+    out << "DiplomacyCard";
     return out;
 }
 

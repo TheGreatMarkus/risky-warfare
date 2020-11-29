@@ -1,9 +1,20 @@
 #include "GameObservers.h"
 
+#include <iomanip>
+
 #include "../utils/Utils.h"
 #include "../GameEngine.h"
+#include "../player/Player.h"
+#include "../orders/Orders.h"
 
 using cris_utils::removeElement;
+using cris_utils::printSubtitle;
+using cris_utils::contains;
+
+using std::fixed;
+using std::setprecision;
+
+
 
 //=============================
 // Observer Implementation
@@ -23,43 +34,47 @@ ostream &operator<<(ostream &out, const Observer &obj) {
 Observer::~Observer() {}
 
 //=============================
-// Subject Implementation
+// Observable Implementation
 //=============================
 
-Subject::Subject() : observers{} {}
+Observable::Observable() : observers{} {}
 
-Subject::Subject(const Subject &other) : observers{} {
+Observable::Observable(const Observable &other) : observers{} {
     for (auto &observer : other.observers) {
         observers.push_back(observer->clone());
     }
 }
 
-void swap(Subject &a, Subject &b) {
+void swap(Observable &a, Observable &b) {
     using std::swap;
     swap(a.observers, b.observers);
 }
 
-ostream &operator<<(ostream &out, const Subject &obj) {
+ostream &operator<<(ostream &out, const Observable &obj) {
     obj.print(out);
     return out;
 }
 
-void Subject::attach(Observer *observer) {
+void Observable::attach(Observer *observer) {
     observers.push_back(observer);
 }
 
-void Subject::detach(Observer *observer) {
+void Observable::detach(Observer *observer) {
     removeElement(observers, observer);
 }
 
-void Subject::notify() {
+void Observable::notify() {
     for (auto &observer : observers) {
         observer->update();
     }
 }
 
-Subject::~Subject() {
-    // Subject is responsible for its observers
+const vector<Observer *> &Observable::getObservers() const {
+    return observers;
+}
+
+Observable::~Observable() {
+    // Observable is responsible for its observers
     for (auto &observer : observers) {
         delete observer;
     }
@@ -68,6 +83,7 @@ Subject::~Subject() {
 //=============================
 // PhaseObserver Implementation
 //=============================
+
 
 PhaseObserver::PhaseObserver(Game *game) : game{game} {}
 
@@ -85,7 +101,27 @@ PhaseObserver &PhaseObserver::operator=(PhaseObserver other) {
 }
 
 void PhaseObserver::update() {
-    // TODO implement
+    string title;
+    title = "[PhaseObserver]: " + GamePhaseString[game->getPhase()];
+    if (game->getCurrentPlayer() != nullptr) {
+        title = title + ", " + game->getCurrentPlayer()->getName();
+    }
+    printSubtitle(title);
+    cout << "Game phase overview:" << endl;
+
+    if (game->getPhase() == ReinforcementPhase || game->getPhase() == IssuingPhase) {
+        for (auto &player : game->getActivePlayers()) {
+            cout << "\t" << player->getName() << ": " << player->getArmies() << " armies" << endl;
+        }
+    }
+    if (game->getPhase() == IssuingPhase || game->getPhase() == ExecutingPhase) {
+        for (auto &player : game->getActivePlayers()) {
+            cout << "\tCurrent Orders for " << player->getName() << ":" << endl;
+            for (int i = 0; i < player->getOrders()->size(); ++i) {
+                cout << "\t\t- " << *(*player->getOrders())[i] << endl;
+            }
+        }
+    }
 }
 
 void PhaseObserver::print(ostream &out) const {
@@ -119,8 +155,31 @@ GameStatisticsObserver &GameStatisticsObserver::operator=(GameStatisticsObserver
     return *this;
 }
 
+const int BAR_WIDTH = 40;
+
 void GameStatisticsObserver::update() {
     // TODO implement
+    cout << fixed << setprecision(0);
+    printSubtitle("[GameStatisticsObserver]: World Domination Overview");
+    Player *victor = nullptr;
+    for (auto &player : game->getActivePlayers()) {
+        double playerTerritories = player->getOwnedTerritories().size();
+        double allTerritories = game->getMap()->getTerritories().size();
+        double percentage = playerTerritories / allTerritories;
+        int fill = BAR_WIDTH * percentage;
+        int empty = BAR_WIDTH - fill;
+
+        cout << "\t- " << player->getName() << ": "
+             << string(fill, '#') << string(empty, '-') << " " << percentage * 100.0 << "%" << endl;
+        if (percentage == 1) {
+            victor = player;
+        }
+    }
+    if (victor != nullptr) {
+        cout << victor->getName() << " has won the game!" << endl;
+    }
+    cout << endl;
+
 }
 
 void GameStatisticsObserver::print(ostream &out) const {
