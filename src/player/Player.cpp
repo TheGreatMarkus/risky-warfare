@@ -16,6 +16,7 @@ using cris_utils::getBoolInput;
 using cris_utils::setToVector;
 using cris_utils::pickFromList;
 
+// Neutral player. Available globally
 Player *neutralPlayer = new Player("Neutral Player");
 
 //=============================
@@ -44,7 +45,8 @@ Player::Player(const Player &other)
 }
 
 /**
- * Swap method for copy-and-swap
+ * Swap method. Used for the copy-and-swap idiom
+ *
  * @param a first element
  * @param b second element
  */
@@ -101,6 +103,14 @@ vector<Territory *> Player::toAttack(Map *map) {
     return strategy->toAttack(map);
 }
 
+/**
+ * Issue order
+ *
+ * @param map
+ * @param deck
+ * @param activePlayers
+ * @return If the player is done with their turn and doesn't want to issue more orders for this round
+ */
 bool Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     if (strategy == nullptr) {
         cout << name << " - issueOrder: strategy not set!" << endl;
@@ -112,7 +122,6 @@ bool Player::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
 /**
  * Issue DeployOrder
  *
- * Assumes that player has enough armies
  * @param armies
  * @param territory
  */
@@ -131,6 +140,7 @@ void Player::issueDeployOrder(Territory *territory, int armies) {
 
 /**
  * Issue AdvanceOrder
+ *
  * @param armies
  * @param territory
  */
@@ -149,6 +159,14 @@ void Player::issueAdvanceOrder(Territory *origin, Territory *dest, int armies) {
     orders->add(order);
 }
 
+/**
+ * Capture a territory, both setting the territory's player pointer to the current player, and
+ * add the territory to the current player's ownedTerritories
+ *
+ * If the territory was owned by another player, remove it from their ownedTerritories
+ *
+ * @param territory
+ */
 void Player::captureTerritory(Territory *territory) {
     // If territory belonged to a player, remove from their ownedTerritories
     if (territory->getPlayer() != nullptr) {
@@ -158,9 +176,16 @@ void Player::captureTerritory(Territory *territory) {
     territory->setPlayer(this);
 
     ownedTerritories.insert(territory);
+    // If the player captures a territory, they are due a card at the end of the round
     cardDue = true;
 }
 
+/**
+ * Lose territory, setting the territory's player pointer to the neutral player,
+ * and removing it from the current player's ownedTerritories
+ *
+ * @param territory
+ */
 void Player::loseTerritory(Territory *territory) {
     removeElement(ownedTerritories, territory);
 
@@ -170,7 +195,8 @@ void Player::loseTerritory(Territory *territory) {
 }
 
 /**
- * Checks whether player own a territory
+ * Checks whether player own a given territory
+ *
  * @param territory
  * @return
  */
@@ -179,17 +205,28 @@ bool Player::owns(Territory *territory) {
 }
 
 /**
- * Add ally after negotiation
+ * Add ally due to negotiation
+ *
  * @param otherPlayer
+ * @see NegotiateOrder
  */
 void Player::addAlly(Player *otherPlayer) {
     allies.insert(otherPlayer);
 }
 
+/**
+ * Remove all allies
+ */
 void Player::resetAllies() {
     allies.clear();
 }
 
+/**
+ * Get all territories which are owned by enemy players and which one of the current player's territories
+ *
+ * @param map
+ * @return a list of neighboring enemy territories
+ */
 const vector<Territory *> Player::getNeighboringTerritories(Map *map) const {
     vector<Territory *> neighbors{};
     for (auto &territory : map->getTerritories()) {
@@ -257,6 +294,7 @@ void Player::setStrategy(PlayerStrategy *strategy) {
 }
 
 Player::~Player() {
+    // Player doesn't manage the memory for the territories or other players
     delete hand;
     delete orders;
     delete strategy;

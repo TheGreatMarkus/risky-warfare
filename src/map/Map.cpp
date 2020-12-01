@@ -1,7 +1,6 @@
 #include "Map.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <algorithm>
 
 #include "../utils/Utils.h"
@@ -25,12 +24,11 @@ namespace {
     /**
      * Perform Depth-first-search on a graph.
      *
-     * When encountering a vertex, sets the bool flag for that vertex to true.
+     * Keeps track of which vertices were encountered by using the "found" bool flags.
      *
-     * @param current Current territory index
-     * @param territories
+     * @param current Current territory
      * @param adj
-     * @param found List of bool flag for each territory on the map.
+     * @param found set of bool flag for each territory on the map.
      */
     void dfs(Territory *current,
              map<Territory *, set<Territory *>> &adj,
@@ -76,12 +74,6 @@ Map::Map(string name)
           territories{},
           continents{} {}
 
-/**
- * Copy constructor for Map.
- *
- * Copies all territories and continents to a new list.
- * @param other
- */
 Map::Map(const Map &other)
         : name{other.name},
           territories{},
@@ -96,7 +88,8 @@ Map::Map(const Map &other)
 }
 
 /**
- * Swap method for copy-and-swap
+ * Swap method. Used for the copy-and-swap idiom
+ *
  * @param a first element
  * @param b second element
  */
@@ -141,6 +134,12 @@ ostream &operator<<(ostream &out, const Map &obj) {
     return out;
 }
 
+/**
+ * Add territory to map
+ * @param name name of territory
+ * @param continent index of the continent
+ * @param armies number of armies
+ */
 void Map::addTerritory(
         string name,
         int continent,
@@ -152,6 +151,11 @@ void Map::addTerritory(
     }
 }
 
+/**
+ * Add continent to map
+ * @param name name of continent
+ * @param armyValue army value of continent
+ */
 void Map::addContinent(
         string name,
         int armyValue) {
@@ -160,7 +164,7 @@ void Map::addContinent(
 }
 
 /**
- * Adds a new edge between two territories.
+ * Adds a new connection between two territories.
  * @param t1 The index of the first territory
  * @param t2 The index of the second territory
  */
@@ -176,7 +180,7 @@ void Map::addConnection(int t1, int t2) {
 
 /**
  * Validates the current map
- * @return Whether the map is valid.
+ * @return Whether the map is valid or not
  */
 bool Map::validate() {
     // Validate that map contains territories anc continents.
@@ -243,23 +247,24 @@ const vector<Territory *> &Map::getTerritories() const {
 
 /**
    * Returns all territories that belong to a given continent
-   * @param territories
+   *
    * @param continent
-   * @return list of territories
+   * @return list of territories which are part of continent
    */
 const set<Territory *> Map::getTerritoriesByContinent(Continent *continent) const {
-    set<Territory *> tempSet{};
+    set<Territory *> contTerritories{};
 
     for (Territory *territory : territories) {
         if (territory->getContinent() == continent) {
-            tempSet.insert(territory);
+            contTerritories.insert(territory);
         }
     }
-    return tempSet;
+    return contTerritories;
 }
 
 /**
- * Returns whether two territories are adjacent.
+ * Returns whether two territories are adjacent
+ *
  * @param t1 The index of the first territory
  * @param t2 The index of the second territory
  * @return Whether the two territories are adjacent
@@ -268,6 +273,12 @@ bool Map::areAdjacent(Territory *t1, Territory *t2) {
     return adj[t1].find(t2) != adj[t1].end();
 }
 
+/**
+ * Returns the set of continents which are currently controlled by a given player
+ *
+ * @param player
+ * @return the set of continents which are currently controlled by a given player
+ */
 set<Continent *> Map::getContinentsControlledByPlayer(Player *player) {
     set<Continent *> controlledContinents{};
     for (auto &continent : continents) {
@@ -283,6 +294,12 @@ set<Continent *> Map::getContinentsControlledByPlayer(Player *player) {
     return controlledContinents;
 }
 
+/**
+ * Returns the neighbors of a given territory
+ *
+ * @param territory
+ * @return the neighbors of a given territory
+ */
 const set<Territory *> Map::getNeighbors(Territory *territory) {
     return adj[territory];
 }
@@ -312,10 +329,11 @@ Continent::Continent(const Continent &other)
           armies{other.armies} {}
 
 /**
-* Swap method for copy-and-swap
-* @param a first element
-* @param b second element
-*/
+ * Swap method. Used for the copy-and-swap idiom
+ *
+ * @param a first element
+ * @param b second element
+ */
 void swap(Continent &a, Continent &b) {
     using std::swap;
 
@@ -370,7 +388,8 @@ Territory &Territory::operator=(Territory other) {
 }
 
 /**
- * Swap method for copy-and-swap
+ * Swap method. Used for the copy-and-swap idiom
+ *
  * @param a first element
  * @param b second element
  */
@@ -395,10 +414,20 @@ ostream &operator<<(ostream &out, const Territory &obj) {
     return out;
 }
 
+/**
+ * Add armies to current territory
+ *
+ * @param armies
+ */
 void Territory::addArmies(int armies) {
     this->armies += armies;
 }
 
+/**
+ * Remove armies from current territory
+ *
+ * @param armies
+ */
 void Territory::removeArmies(int armies) {
     this->armies -= armies;
     if (this->armies < 0) {
@@ -406,10 +435,20 @@ void Territory::removeArmies(int armies) {
     }
 }
 
+/**
+ * Reserve armies for AdvanceOrders or AirliftOrders
+ *
+ * @param armies
+ */
 void Territory::reserveArmies(int armies) {
     reservedArmies += armies;
 }
 
+/**
+ * Free the given number of armies from reservations from AdvanceOrders or AirliftOrders
+ *
+ * @param armies
+ */
 void Territory::freeArmies(int armies) {
     reservedArmies -= armies;
     if (reservedArmies < 0) {
@@ -417,10 +456,18 @@ void Territory::freeArmies(int armies) {
     }
 }
 
+/**
+ * Free all armies from reservations from AdvanceOrders or AirliftOrders
+ */
 void Territory::freeArmies() {
     reservedArmies = 0;
 }
 
+/**
+ * Get armies available for AdvanceOrders or AirliftOrders
+ *
+ * @return armies available for AdvanceOrders or AirliftOrders
+ */
 int Territory::getAvailableArmies() const {
     if (armies - reservedArmies < 0) {
         return 0;
@@ -430,6 +477,7 @@ int Territory::getAvailableArmies() const {
 
 /**
  * Bombs the current territory
+ *
  * @see BombOrder
  */
 void Territory::bomb() {
@@ -438,12 +486,22 @@ void Territory::bomb() {
 
 /**
  * Blockades the current territory
+ *
  * @see BlockadeOrder
  */
 void Territory::blockade() {
     this->armies *= 3;
 }
 
+/**
+ * Returns whether the current territory can attack
+ *
+ * This is determined by checking the territories neighbors. If the territory has a neighbor which
+ * isn't owned by the same player, it can attack.
+ *
+ * @param map
+ * @return whether the current territory can attack
+ */
 bool Territory::canAttack(Map *map) {
     for (auto &neighbor : map->getNeighbors(this)) {
         if (player != neighbor->getPlayer()) {

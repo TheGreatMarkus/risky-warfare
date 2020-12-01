@@ -10,6 +10,9 @@ using std::vector;
 
 class Game;
 
+/**
+ * Abstract class for the Observer component of the Observer pattern
+ */
 class Observer {
 public:
     friend ostream &operator<<(ostream &out, const Observer &obj);
@@ -17,8 +20,13 @@ public:
     virtual void update() = 0;
     virtual void print(ostream &out) const = 0;
     virtual Observer *clone() = 0;
+
+    virtual ~Observer();
 };
 
+/**
+ * Abstract class for the Observable/Subject component of the Observer pattern
+ */
 class Observable {
 private:
     vector<Observer *> observers;
@@ -37,10 +45,13 @@ public:
     virtual void print(ostream &out) const = 0;
     virtual Observable *clone() = 0;
 
-    const vector<Observer *> &getObservers() const;
     virtual ~Observable();
 };
 
+/**
+ * Observer implementation which gives additional
+ * information depending on the phase of the game
+ */
 class PhaseObserver : public Observer {
 private:
     Game *game;
@@ -57,6 +68,10 @@ public:
     virtual ~PhaseObserver();
 };
 
+/**
+ * Observer implementation which gives statistics
+ * on the current state of the game
+ */
 class GameStatisticsObserver : public Observer {
 private:
     Game *game;

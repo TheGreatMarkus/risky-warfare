@@ -2,7 +2,6 @@
 #include "Player.h"
 #include "../orders/Orders.h"
 #include "../cards/Cards.h"
-#include "../map/Map.h"
 
 using std::cout;
 using std::endl;

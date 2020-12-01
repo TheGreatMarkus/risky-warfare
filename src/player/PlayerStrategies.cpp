@@ -1,7 +1,6 @@
 #include "PlayerStrategies.h"
 
 #include <set>
-#include <vector>
 #include <algorithm>
 
 #include "../utils/Utils.h"
@@ -22,6 +21,14 @@ using cris_utils::getContinueInput;
 using cris_utils::printList;
 
 namespace {
+    /**
+     * Picks a number of territories from a list from user input
+     *
+     * @param available
+     * @param toFill Reference to populate with territories
+     * @param desc
+     * @param prompt
+     */
     void pickTerritoriesFromList(vector<Territory *> &available, vector<Territory *> &toFill,
                                  string desc, string prompt) {
         bool stop = false;
@@ -41,14 +48,37 @@ namespace {
         } while (!stop);
     }
 
+    /**
+     * Comparator function to sort territories from low to high armies
+     *
+     * @param t0
+     * @param t1
+     * @return if t0 comes before t1
+     */
     bool lowToHigh(Territory *t0, Territory *t1) {
         return t0->getArmies() < t1->getArmies();
     }
 
+    /**
+     * Comparator function to sort territories from high to low armies
+     *
+     * @param t0
+     * @param t1
+     * @return if t0 comes after t1
+     */
     bool highToLow(Territory *t0, Territory *t1) {
         return t0->getArmies() > t1->getArmies();
     }
 
+    /**
+     * Sort territories by army value.
+     *
+     * The sorting defaults from low to high, but can be reversed.
+     *
+     * @param territories
+     * @param reverse
+     * @return Sorted vector of Territories
+     */
     vector<Territory *> sortTerritoriesByArmies(vector<Territory *> territories, bool reverse = false) {
         if (reverse) {
             sort(territories.begin(), territories.end(), highToLow);
@@ -72,7 +102,7 @@ ostream &operator<<(ostream &out, const PlayerStrategy &obj) {
     return out;
 }
 
-// PlayerStrategy isn't responsible for managing Player pointers
+// PlayerStrategy isn't responsible for managing Player memory
 PlayerStrategy::~PlayerStrategy() {}
 
 //=============================
@@ -84,6 +114,16 @@ const string ADVANCE_DEFEND_OPTION = "Issue an Advance order to defend";
 const string PLAY_CARD_OPTION = "Play a card";
 const string SKIP_OPTION = "Skip my turn";
 
+/**
+ * Asks user to give information for issuing an AdvanceOrder
+ *
+ * @param map
+ * @param origin
+ * @param dest
+ * @param armies
+ * @param verb "attack" or "defend"
+ * @param list
+ */
 void HumanPlayerStrategy::fillInAdvanceOrder(Map *map, Territory *&origin, Territory *&dest, int &armies, string verb,
                                              vector<Territory *> list) {
     dest = pickFromList("Here are the territories you set to " + verb + ":",
@@ -103,6 +143,14 @@ void HumanPlayerStrategy::fillInAdvanceOrder(Map *map, Territory *&origin, Terri
 
 HumanPlayerStrategy::HumanPlayerStrategy(Player *player) : PlayerStrategy(player) {}
 
+/**
+ * Issue order using the Human Strategy
+ *
+ * @param map
+ * @param deck
+ * @param activePlayers
+ * @return if the player is done issue orders
+ */
 bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << "Employing [HumanPlayerStrategy] to issue orders" << endl;
     // Deploy orders
@@ -144,7 +192,7 @@ bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> acti
         Territory *origin = nullptr;
         Territory *dest = nullptr;
         int armies = 0;
-        string verb = "";
+        string verb;
         vector<Territory *> list;
         if (answer == ADVANCE_ATTACK_OPTION) {
             verb = "attack";
@@ -168,6 +216,12 @@ bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> acti
     return getBoolInput("Are you done issuing orders?");
 }
 
+/**
+ * Return the territories to attack using the Human Strategy
+ *
+ * @param map
+ * @return territories to attack
+ */
 vector<Territory *> HumanPlayerStrategy::toAttack(Map *map) {
     vector<Territory *> enemyTerritories = player->getNeighboringTerritories(map);
     vector<Territory *> toAttack{};
@@ -189,6 +243,12 @@ vector<Territory *> HumanPlayerStrategy::toAttack(Map *map) {
     return toAttack;
 }
 
+/**
+ * Return the territories to defend using the Human Strategy
+ *
+ * @param map
+ * @return territories to defend
+ */
 vector<Territory *> HumanPlayerStrategy::toDefend(Map *map) {
     vector<Territory *> available = setToVector(player->getOwnedTerritories());
     vector<Territory *> toDefend{};
@@ -211,13 +271,20 @@ vector<Territory *> HumanPlayerStrategy::toDefend(Map *map) {
     return toDefend;
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 PlayerStrategy *HumanPlayerStrategy::clone() {
     return new HumanPlayerStrategy(*this);
 }
 
-ostream &HumanPlayerStrategy::print(ostream &out) const {
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
+void HumanPlayerStrategy::print(ostream &out) const {
     out << "HumanPlayerStrategy";
-    return out;
 }
 
 //=============================
@@ -225,6 +292,14 @@ ostream &HumanPlayerStrategy::print(ostream &out) const {
 //=============================
 AggressivePlayerStrategy::AggressivePlayerStrategy(Player *player) : PlayerStrategy(player) {}
 
+/**
+ * Issue order using the Aggressive Strategy
+ *
+ * @param map
+ * @param deck
+ * @param activePlayers
+ * @return if the player is done issue orders
+ */
 bool AggressivePlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << "Employing [AggressivePlayerStrategy] to issue orders" << endl;
     vector<Territory *> targets = toAttack(map);
@@ -255,6 +330,12 @@ bool AggressivePlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *>
 
 }
 
+/**
+ * Return the territories to attack using the Aggressive Strategy
+ *
+ * @param map
+ * @return territories to attack
+ */
 vector<Territory *> AggressivePlayerStrategy::toAttack(Map *map) {
     Territory *attacker = toDefend(map)[0];
     vector<Territory *> targets;
@@ -282,6 +363,12 @@ vector<Territory *> AggressivePlayerStrategy::toAttack(Map *map) {
     return sortTerritoriesByArmies(targets);
 }
 
+/**
+ * Return the territories to defend using the Aggressive Strategy
+ *
+ * @param map
+ * @return territories to defend
+ */
 vector<Territory *> AggressivePlayerStrategy::toDefend(Map *map) {
     vector<Territory *> sortedTerritories = sortTerritoriesByArmies(
             setToVector(player->getOwnedTerritories()), true);
@@ -296,13 +383,20 @@ vector<Territory *> AggressivePlayerStrategy::toDefend(Map *map) {
     return vector<Territory *>();
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 PlayerStrategy *AggressivePlayerStrategy::clone() {
     return new AggressivePlayerStrategy(*this);
 }
 
-ostream &AggressivePlayerStrategy::print(ostream &out) const {
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
+void AggressivePlayerStrategy::print(ostream &out) const {
     out << "AggressivePlayerStrategy";
-    return out;
 }
 
 //=============================
@@ -311,6 +405,14 @@ ostream &AggressivePlayerStrategy::print(ostream &out) const {
 
 BenevolentPlayerStrategy::BenevolentPlayerStrategy(Player *player) : PlayerStrategy(player) {}
 
+/**
+ * Issue order using the Benevolent Strategy
+ *
+ * @param map
+ * @param deck
+ * @param activePlayers
+ * @return if the player is done issue orders
+ */
 bool BenevolentPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     cout << "Employing [BenevolentPlayerStrategy] to issue orders" << endl;
     vector<Territory *> defend = toDefend(map);
@@ -345,22 +447,41 @@ bool BenevolentPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *>
     return true;
 }
 
+/**
+ * Return the territories to attack using the Benevolent Strategy
+ *
+ * @param map
+ * @return territories to attack
+ */
 vector<Territory *> BenevolentPlayerStrategy::toAttack(Map *map) {
     // Never attacks
     return vector<Territory *>();
 }
 
+/**
+ * Return the territories to defend using the Benevolent Strategy
+ *
+ * @param map
+ * @return territories to defend
+ */
 vector<Territory *> BenevolentPlayerStrategy::toDefend(Map *map) {
     return sortTerritoriesByArmies(setToVector(player->getOwnedTerritories()));
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 PlayerStrategy *BenevolentPlayerStrategy::clone() {
     return new BenevolentPlayerStrategy(*this);
 }
 
-ostream &BenevolentPlayerStrategy::print(ostream &out) const {
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
+void BenevolentPlayerStrategy::print(ostream &out) const {
     out << "BenevolentPlayerStrategy";
-    return out;
 }
 
 //=============================
@@ -369,6 +490,14 @@ ostream &BenevolentPlayerStrategy::print(ostream &out) const {
 
 NeutralPlayerStrategy::NeutralPlayerStrategy(Player *player) : PlayerStrategy(player) {}
 
+/**
+ * Issue order using the Neutral Strategy
+ *
+ * @param map
+ * @param deck
+ * @param activePlayers
+ * @return if the player is done issue orders
+ */
 bool NeutralPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     // Never issues orders
     cout << "Employing [NeutralPlayerStrategy] to issue orders" << endl;
@@ -376,21 +505,40 @@ bool NeutralPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> ac
     return true;
 }
 
+/**
+ * Return the territories to attack using the Neutral Strategy
+ *
+ * @param map
+ * @return territories to attack
+ */
 vector<Territory *> NeutralPlayerStrategy::toAttack(Map *map) {
     // Never issues orders
     return vector<Territory *>();
 }
 
+/**
+ * Return the territories to defend using the Neutral Strategy
+ *
+ * @param map
+ * @return territories to defend
+ */
 vector<Territory *> NeutralPlayerStrategy::toDefend(Map *map) {
     // Never issues orders
     return vector<Territory *>();
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 PlayerStrategy *NeutralPlayerStrategy::clone() {
     return new NeutralPlayerStrategy(*this);
 }
 
-ostream &NeutralPlayerStrategy::print(ostream &out) const {
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
+void NeutralPlayerStrategy::print(ostream &out) const {
     out << "NeutralPlayerStrategy";
-    return out;
 }

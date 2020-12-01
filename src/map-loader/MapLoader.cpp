@@ -2,10 +2,7 @@
 
 #include <map>
 #include <fstream>
-#include <iostream>
 #include <vector>
-#include <iostream>
-#include <string>
 
 #include "../map/Map.h"
 #include "../utils/Utils.h"
@@ -21,10 +18,19 @@ using cris_utils::trim;
 using cris_utils::isNumber;
 
 namespace {
+    /**
+     * Prints an error message, and the line in the .map file where the error occurred
+     *
+     * @param message
+     * @param lineNum
+     */
     void printError(string message, int lineNum) {
         cout << "ERROR: \"" << message << "\" IN MAP FILE AT LINE " << lineNum << endl;
-    };
+    }
 
+    /**
+     * Describes the section of the .map file currently being read
+     */
     enum class Section {
         continents,
         territories,
@@ -43,9 +49,11 @@ ostream &operator<<(ostream &out, const MapLoader &obj) {
 }
 
 /**
- * Reads a given .map file and return the equivalent Map object
- * @param filePath The path to the .map file
- * @return a Map object
+ * Reads a given WarZone .map file and return the equivalent Map object
+ *
+ * @param path The path to the .map file
+ * @param name Name of the map
+ * @return a Map pointer
  */
 Map *MapLoader::readMapFile(string path, string name) {
     Section currentSection(Section::none);
@@ -135,6 +143,13 @@ ostream &operator<<(ostream &out, const ConquestFileReader &obj) {
     return out;
 }
 
+/**
+ * Reads a given Conquest .map file and return the equivalent Map object
+ *
+ * @param path The path to the .map file
+ * @param name Name of the map
+ * @return a Map pointer
+ */
 Map *ConquestFileReader::readConquestFile(string path, string name) {
     Section currentSection(Section::none);
     ifstream mapFile(path);
@@ -168,8 +183,6 @@ Map *ConquestFileReader::readConquestFile(string path, string name) {
             continue;
         }
 
-        // Get tokens for the current line
-
         switch (currentSection) {
             case Section::continents: {
                 vector<string> tokens = strSplit(line, "=");
@@ -185,7 +198,7 @@ Map *ConquestFileReader::readConquestFile(string path, string name) {
 
             case Section::territories: {
                 vector<string> tokens = strSplit(line, ",");
-                // Expected format of line: "TerritoryName,x,y,ContinentName,neighbor1, neighbor2,..."
+                // Expected format of line: "TerritoryName,x,y,ContinentName,neighbor1,neighbor2,..."
                 if (tokens.size() < 5) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
                     return newMap;
@@ -202,6 +215,7 @@ Map *ConquestFileReader::readConquestFile(string path, string name) {
                 break;
         }
     }
+    // Build connections after getting all territories and their indices
     for (auto &pair : connections) {
         for (auto &neighbor : pair.second) {
             newMap->addConnection(territories[pair.first], territories[neighbor]);
@@ -217,6 +231,15 @@ ostream &operator<<(ostream &out, const ConquestFileReaderAdapter &obj) {
     return out;
 }
 
+/**
+ * Reads a given Conquest .map file using the MapLoader interface
+ *
+ * Delegates map loading to ConquestFileReader
+ *
+ * @param path The path to the .map file
+ * @param name Name of the map
+ * @return a Map pointer
+ */
 Map *ConquestFileReaderAdapter::readMapFile(string path, string name) {
     return conquestFileReader->readConquestFile(path, name);
 }

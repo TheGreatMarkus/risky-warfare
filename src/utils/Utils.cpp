@@ -1,11 +1,7 @@
 #include "Utils.h"
 
-#include <algorithm>
-#include <iostream>
-
 using std::find;
 using std::vector;
-using std::sort;
 using std::string;
 using std::cin;
 using std::cout;
@@ -33,13 +29,14 @@ namespace {
  *
  * Implementation taken from
  * https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+ *
  * @param str
  * @param delimiter
  * @return vector of tokens
  */
 vector<string> cris_utils::strSplit(string str, const string &delimiter) {
     vector<string> result;
-    size_t pos = 0;
+    size_t pos;
     while ((pos = str.find(delimiter)) != string::npos) {
         result.push_back(str.substr(0, pos));
         str.erase(0, pos + delimiter.length());
@@ -53,6 +50,7 @@ vector<string> cris_utils::strSplit(string str, const string &delimiter) {
  *
  * Implementation taken from
  * https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+ *
  * @param s string to trim
  */
 void cris_utils::trim(string &s) {
@@ -65,6 +63,7 @@ void cris_utils::trim(string &s) {
  *
  * Implementation for isNumber taken from
  * https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c
+ *
  * @param str
  * @return whether string can be converted to a number
  */
@@ -75,8 +74,15 @@ bool cris_utils::isNumber(const string &str) {
     return !str.empty() && it == str.end();
 }
 
+/**
+ * Prompts the user for a number
+ * @param prompt
+ * @param min
+ * @param max
+ * @return the int given by the user
+ */
 int cris_utils::getIntInput(string prompt, int min, int max) {
-    int answer;
+    int answer = 0;
     bool error = false;
 
     do {
@@ -95,8 +101,13 @@ int cris_utils::getIntInput(string prompt, int min, int max) {
     return answer;
 }
 
-int cris_utils::getBoolInput(string prompt) {
-    int answer;
+/**
+ * Prompts the user for a boolean
+ * @param prompt
+ * @return the boolean given by the user
+ */
+bool cris_utils::getBoolInput(string prompt) {
+    int answer = 0;
     bool error = false;
 
     do {
@@ -119,6 +130,9 @@ int cris_utils::getBoolInput(string prompt) {
     }
 }
 
+/**
+ * Wait for user key press
+ */
 void cris_utils::getContinueInput() {
     cout << endl << "Press Enter to continue: ";
     getchar();
@@ -138,6 +152,9 @@ void cris_utils::printSubtitle(string title) {
          << " ==============" << endl << endl;
 }
 
+/**
+ * Generate random number between min and max
+ */
 int cris_utils::randInt(int min, int max) {
     if (!seedSet) {
         srand((unsigned int) time(nullptr));

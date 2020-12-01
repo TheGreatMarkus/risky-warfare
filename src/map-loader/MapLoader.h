@@ -9,7 +9,7 @@ using std::string;
 class Map;
 
 /**
- * Class for loading .map files and transforming them to Map objects.
+ * Class for loading WarZone map files and transforming them to Map objects.
  */
 class MapLoader {
 public:
@@ -20,6 +20,9 @@ public:
     virtual ~MapLoader();
 };
 
+/**
+ * Class for loading Conquest map files and transforming them to Map objects.
+ */
 class ConquestFileReader {
 
 public:
@@ -28,6 +31,9 @@ public:
     Map *readConquestFile(string path, string name);
 };
 
+/**
+ * Adapter for loading Conquest map files with a MapLoader interface
+ */
 class ConquestFileReaderAdapter : public MapLoader {
 private:
     ConquestFileReader *conquestFileReader;

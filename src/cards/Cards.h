@@ -7,7 +7,6 @@
 using std::vector;
 using std::ostream;
 
-class Deck;
 class Card;
 class Player;
 class Hand;
@@ -36,7 +35,7 @@ public:
 };
 
 /**
- * A player's hand which contains a finite set of cards.
+ * A player's hand which contains a finite list of cards.
  */
 class Hand {
 private:
@@ -61,6 +60,9 @@ public:
 
 /**
  * An abstract class representing a card a player can play to create special orders.
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
  */
 class Card {
 public:
@@ -71,11 +73,17 @@ public:
                         Map *map,
                         vector<Player *> players) = 0;
     virtual Card *clone() = 0;
-    virtual ostream &print(ostream &out) const = 0;
+    virtual void print(ostream &out) const = 0;
+
+    virtual ~Card();
 };
 
 /**
  * Card for creating a BombOrder
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
+ *
  * @see BombOrder
  */
 class BombCard : public Card {
@@ -85,11 +93,15 @@ public:
                 Map *map,
                 vector<Player *> players) override;
     Card *clone() override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
 };
 
 /**
  * Card for creating a DeployOrder
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
+ *
  * @see DeployOrder
  */
 class ReinforcementCard : public Card {
@@ -99,11 +111,15 @@ public:
                 Map *map,
                 vector<Player *> players) override;
     Card *clone() override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
 };
 
 /**
  * Card for creating a BlockadeOrder
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
+ *
  * @see BlockadeOrder
  */
 class BlockadeCard : public Card {
@@ -113,11 +129,15 @@ public:
                 Map *map,
                 vector<Player *> players) override;
     Card *clone() override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
 };
 
 /**
  * Card for creating a AirliftOrder
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
+ *
  * @see AirliftOrder
  */
 class AirliftCard : public Card {
@@ -127,11 +147,15 @@ public:
                 Map *map,
                 vector<Player *> players) override;
     Card *clone() override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
 };
 
 /**
  * Card for creating a NegotiateOrder
+ *
+ * Note that since this class doesn't have pointer attributes, the default
+ * copy constructor, assignment operator and destructor are used
+ *
  * @see NegotiateOrder
  */
 class DiplomacyCard : public Card {
@@ -141,5 +165,5 @@ public:
                 Map *map,
                 vector<Player *> activePlayers) override;
     Card *clone() override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
 };

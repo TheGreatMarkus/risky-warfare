@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <algorithm>
 #include <random>
-#include <iostream>
 
 #include "utils/Utils.h"
 #include "map/Map.h"
@@ -11,7 +10,6 @@
 #include "map-loader/MapLoader.h"
 #include "cards/Cards.h"
 #include "orders/Orders.h"
-#include "observers/GameObservers.h"
 #include "player/PlayerStrategies.h"
 
 using std::cout;
@@ -61,6 +59,12 @@ Game::Game(const Game &other) :
     }
 }
 
+/**
+ * Swap method. Used for the copy-and-swap idiom
+ *
+ * @param a first element
+ * @param b second element
+ */
 void swap(Game &a, Game &b) {
     using std::swap;
 
@@ -73,20 +77,25 @@ Game &Game::operator=(Game other) {
     return *this;
 }
 
-ostream &operator<<(ostream &out, const Game &obj) {
-    out << obj.map << endl;
-
-    return out;
-}
-
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
 void Game::print(ostream &out) const {
-
+    out << "Game";
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 Observable *Game::clone() {
-    return nullptr;
+    return new Game(*this);
 }
 
+/**
+ * Prompts the user for configuration for a new game
+ */
 void Game::gameStart() {
     updateGameState(nullptr, GameStartPhase);
     phase = GameStartPhase;
@@ -120,6 +129,7 @@ void Game::gameStart() {
                                       "Which map file do you want to load?", maps);
         string choice = pickFromList("Among the following loaders:",
                                      "Which loader should be used for the map you chose?", availableLoaders);
+        // Pick loader for map
         if (choice == warzoneOption) {
             mapLoader = new MapLoader();
         } else {
@@ -132,7 +142,7 @@ void Game::gameStart() {
     } while (!mapValid);
 
 
-    // Create players
+    // user picks number of players
     cout << endl;
     int numPlayers = getIntInput("How many players are there?", 2, 5);
 
@@ -145,6 +155,7 @@ void Game::gameStart() {
                                       "Neutral Strategy"};
     for (auto &player : allPlayers) {
         cout << endl;
+        // User picks strategy for each player
         string chosenStrategy = pickFromList("Among these possible player strategies:",
                                              "which strategy should " + player->getName() + " use?",
                                              possibleStrategies);
@@ -170,6 +181,7 @@ void Game::gameStart() {
         deck->addCard(new DiplomacyCard());
     }
 
+    // User chooses to enable observers
     cout << endl;
     bool phaseObserver = getBoolInput("Do you want to turn on the phase observer?");
     if (phaseObserver) {
@@ -182,6 +194,9 @@ void Game::gameStart() {
     }
 }
 
+/**
+ * Handles the initial setup of the game
+ */
 void Game::startupPhase() {
     updateGameState(nullptr, StartupPhase);
 
@@ -203,7 +218,7 @@ void Game::startupPhase() {
         }
     }
     // Give initial armies to players
-    int initialArmies = INITIAL_ARMIES[activePlayers.size() - 2];
+    int initialArmies = INITIAL_ARMIES[activePlayers.size()];
 
     cout << "Giving each player " << initialArmies << " armies at the start of the game!" << endl;
     for (auto &player : activePlayers) {
@@ -237,6 +252,7 @@ void Game::mainGameLoop() {
 void Game::reinforcementPhase() {
     updateGameState(nullptr, ReinforcementPhase);
     for (auto &player : activePlayers) {
+        // Calculate armies to give to each player
         int numArmies = 0;
         set<Territory *> ownedTerritories = player->getOwnedTerritories();
         numArmies += ownedTerritories.size() / 3;
@@ -265,6 +281,7 @@ void Game::issueOrderPhase() {
     vector<bool> ready(activePlayers.size());
     while (contains(ready, false)) {
         for (int i = 0; i < activePlayers.size(); ++i) {
+            // Ask each player to issue order, round-robin style
             if (!ready[i]) {
                 updateGameState(activePlayers[i], IssuingPhase);
                 ready[i] = activePlayers[i]->issueOrder(map, deck, activePlayers);
@@ -274,6 +291,9 @@ void Game::issueOrderPhase() {
 
 }
 
+/**
+ * Checks if deploy orders remain to executel
+ */
 bool deployOrdersRemain(vector<Player *> players) {
     for (auto &player : players) {
         Order *order = player->getOrders()->getHighestPriorityOrder();
@@ -284,6 +304,9 @@ bool deployOrdersRemain(vector<Player *> players) {
     return false;
 }
 
+/**
+ * Check if players still have orders to execute
+ */
 bool ordersRemain(vector<Player *> players) {
     for (auto &player : players) {
         if (!player->getOrders()->empty()) {
@@ -317,10 +340,6 @@ void Game::executeOrdersPhase() {
             ordersList->remove(order);
             delete order;
 
-            order = ordersList->getHighestPriorityOrder();
-            if (order == nullptr) {
-
-            }
             getContinueInput();
         }
     }
@@ -328,6 +347,7 @@ void Game::executeOrdersPhase() {
 }
 
 void Game::checkGameState() {
+    // Check if a player was eliminated
     for (auto &player : allPlayers) {
         if (contains(activePlayers, player) && player->getOwnedTerritories().empty()) {
             cout << player->getName() << " owns no territories. They will be eliminated" << endl;
@@ -335,6 +355,7 @@ void Game::checkGameState() {
         }
     }
 
+    // Check if a player won the game
     for (auto &player : activePlayers) {
         if (vectorToSet(map->getTerritories()) == player->getOwnedTerritories()) {
             cout << player->getName() << " won the game!" << endl;
@@ -343,7 +364,11 @@ void Game::checkGameState() {
     }
 }
 
+/*
+ * Reset game state in preparation for next round
+ */
 void Game::prepareNextRound() {
+    // Reset reservations on armies made by advance and airlift orders
     for (auto &territory : map->getTerritories()) {
         territory->freeArmies();
     }
@@ -363,6 +388,9 @@ void Game::prepareNextRound() {
     getContinueInput();
 }
 
+/**
+ * Updates game state and phase, and notifies observers
+ */
 void Game::updateGameState(Player *currentPlayer, GamePhase phase) {
     this->currentPlayer = currentPlayer;
     this->phase = phase;
@@ -375,18 +403,6 @@ Map *Game::getMap() const {
 
 const vector<Player *> &Game::getActivePlayers() const {
     return activePlayers;
-}
-
-const vector<Player *> &Game::getAllPlayers() const {
-    return allPlayers;
-}
-
-Deck *Game::getDeck() const {
-    return deck;
-}
-
-bool Game::isGameOver() const {
-    return gameOver;
 }
 
 GamePhase Game::getPhase() const {

@@ -27,6 +27,8 @@ ostream &operator<<(ostream &out, const Observer &obj) {
     return out;
 }
 
+Observer::~Observer() {}
+
 //=============================
 // Observable Implementation
 //=============================
@@ -39,6 +41,12 @@ Observable::Observable(const Observable &other) : observers{} {
     }
 }
 
+/**
+ * Swap method. Used for the copy-and-swap idiom
+ *
+ * @param a first element
+ * @param b second element
+ */
 void swap(Observable &a, Observable &b) {
     using std::swap;
     swap(a.observers, b.observers);
@@ -49,22 +57,31 @@ ostream &operator<<(ostream &out, const Observable &obj) {
     return out;
 }
 
+/**
+ * Attach observer to current Observable
+ *
+ * @param observer
+ */
 void Observable::attach(Observer *observer) {
     observers.push_back(observer);
 }
 
+/**
+ * Detach observer from current Observable
+ *
+ * @param observer
+ */
 void Observable::detach(Observer *observer) {
     removeElement(observers, observer);
 }
 
+/**
+ * Notify all Observers
+ */
 void Observable::notify() {
     for (auto &observer : observers) {
         observer->update();
     }
-}
-
-const vector<Observer *> &Observable::getObservers() const {
-    return observers;
 }
 
 Observable::~Observable() {
@@ -81,9 +98,15 @@ Observable::~Observable() {
 
 PhaseObserver::PhaseObserver(Game *game) : game{game} {}
 
-// Since observer isn't responsible for managing the memory of the game, it won't clone it
+// This observer is not responsible for managing the game's memory, so it won't perform deep cloning
 PhaseObserver::PhaseObserver(const PhaseObserver &other) : game{other.game} {}
 
+/**
+ * Swap method. Used for the copy-and-swap idiom
+ *
+ * @param a first element
+ * @param b second element
+ */
 void swap(PhaseObserver &a, PhaseObserver &b) {
     using std::swap;
     swap(a.game, b.game);
@@ -94,6 +117,9 @@ PhaseObserver &PhaseObserver::operator=(PhaseObserver other) {
     return *this;
 }
 
+/**
+ * Print out additional information about the game state depending on the game phase
+ */
 void PhaseObserver::update() {
     string title;
     title = "[PhaseObserver]: " + GamePhaseString[game->getPhase()];
@@ -130,15 +156,23 @@ void PhaseObserver::update() {
 
 }
 
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
 void PhaseObserver::print(ostream &out) const {
     out << "PhaseObserver{ game:" << game << " }";
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 Observer *PhaseObserver::clone() {
     return new PhaseObserver(*this);
 }
 
-// This observer is not responsible for managing the game's memory, so it won't delete it
+// This observer is not responsible for managing the game's memory, so it won't perform deep cloning
 PhaseObserver::~PhaseObserver() {}
 
 //=============================
@@ -147,10 +181,16 @@ PhaseObserver::~PhaseObserver() {}
 
 GameStatisticsObserver::GameStatisticsObserver(Game *game) : game{game} {}
 
-// Since observer isn't responsible for managing the memory of the game, it won't clone it
+// This observer is not responsible for managing the game's memory
 GameStatisticsObserver::GameStatisticsObserver(const GameStatisticsObserver &other)
         : game{other.game} {}
 
+/**
+* Swap method. Used for the copy-and-swap idiom
+*
+* @param a first element
+* @param b second element
+*/
 void swap(GameStatisticsObserver &a, GameStatisticsObserver &b) {
     using std::swap;
     swap(a.game, b.game);
@@ -161,8 +201,12 @@ GameStatisticsObserver &GameStatisticsObserver::operator=(GameStatisticsObserver
     return *this;
 }
 
+// Width of the percentage bar on the stats screen
 const int BAR_WIDTH = 40;
 
+/**
+ * Prints statistics about the current game state.
+ */
 void GameStatisticsObserver::update() {
     cout << fixed << setprecision(0);
     printSubtitle("[GameStatisticsObserver]: World Domination Overview");
@@ -187,13 +231,21 @@ void GameStatisticsObserver::update() {
 
 }
 
+/**
+ * Helper print function for polymorphic stream insertion
+ *
+ * @param out
+ */
 void GameStatisticsObserver::print(ostream &out) const {
     out << "GameStatisticsObserver{ game:" << game << " }";
 }
 
+/**
+ * Helper function for polymorphic cloning
+ */
 Observer *GameStatisticsObserver::clone() {
     return new GameStatisticsObserver(*this);
 }
 
-// This observer is not responsible for managing the game's memory, so it won't delete it
+// This observer is not responsible for managing the game's memory
 GameStatisticsObserver::~GameStatisticsObserver() {}

@@ -13,6 +13,9 @@ class Player;
 class Deck;
 class MapLoader;
 
+/**
+ * Describes the current phase of the game
+ */
 enum GamePhase {
     NoPhase,
     GameStartPhase,
@@ -23,6 +26,9 @@ enum GamePhase {
     PrepareNextRoundPhase,
 };
 
+/**
+ * God class containing the state to play a game
+ */
 class Game : public Observable {
     Map *map;
     vector<Player *> activePlayers;
@@ -38,7 +44,6 @@ public:
     Game(const Game &other);
     friend void swap(Game &a, Game &b);
     Game &operator=(Game other);
-    friend ostream &operator<<(ostream &out, const Game &obj);
 
     void print(ostream &out) const override;
     Observable *clone() override;
@@ -55,17 +60,23 @@ public:
 
     Map *getMap() const;
     const vector<Player *> &getActivePlayers() const;
-    const vector<Player *> &getAllPlayers() const;
-    Deck *getDeck() const;
-    bool isGameOver() const;
     GamePhase getPhase() const;
     Player *getCurrentPlayer() const;
 
     ~Game();
 };
 
-const int INITIAL_ARMIES[4] = {40, 35, 30, 25};
+/**
+ * Describes the number of armies to give depending on the
+ * number of players.
+ *
+ * Ex: INITIAL_ARMIES[2] = 40
+ */
+const int INITIAL_ARMIES[6] = {0, 0, 40, 35, 30, 25};
 
+/**
+ * String representation of each phase
+ */
 const vector<string> GamePhaseString = {
         "Not current in a Phase",
         "Game Start Phase",

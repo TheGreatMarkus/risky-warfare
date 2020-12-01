@@ -1,10 +1,7 @@
 #include "Cards.h"
 
-#include <iostream>
-
 #include "../player/Player.h"
 #include "../orders/Orders.h"
-#include "../map/Map.h"
 
 using std::cout;
 using std::endl;

@@ -17,7 +17,7 @@ class Continent;
 class Player;
 
 /**
- * Class which represents a connected graph of territories.
+ * Class which represent the map on which the game takes place
  */
 class Map {
 private:
@@ -49,7 +49,7 @@ public:
 };
 
 /**
- * Class for representing a Continent, which is associated with a subset of the territories
+ * Class for representing a Continent, which is a subset of the territories
  */
 class Continent {
 private:

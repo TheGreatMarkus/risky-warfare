@@ -16,6 +16,7 @@ using std::cout;
 using std::find;
 using std::endl;
 using std::is_pointer;
+using std::sort;
 
 /**
  * Utilities used throughout the program
@@ -26,38 +27,47 @@ using std::is_pointer;
  */
 namespace cris_utils {
     /**
-     * Checks if a vector contains an element.
-     *
-     * @return whether vector contains the element
+     * Checks if a vector contains an element
      */
     template<typename T>
     bool contains(vector<T> v, T element) {
         return find(v.begin(), v.end(), element) != v.end();
     }
 
+    /**
+     * Checks if a set contains an element
+     */
     template<typename T>
     bool contains(set<T> s, T element) {
         return s.find(element) != s.end();
     }
 
+    /**
+     * Checks if a map contains an element
+     */
     template<typename T, typename S>
     bool contains(map<T, S> s, T element) {
         return s.find(element) != s.end();
     }
 
+    /**
+     * Converts a vector to a set
+     */
     template<typename T>
     set<T> vectorToSet(vector<T> v) {
         return set<T>(v.begin(), v.end());
     }
 
+    /**
+     * Converts a set to a vector
+     */
     template<typename T>
     vector<T> setToVector(set<T> s) {
         return vector<T>(s.begin(), s.end());
     }
 
     /**
-     * Compares two vectors and returns whether they have the same elements.
-     * @return Whether they have the same elements
+     * Compares two vectors and returns whether they have the same elements
      */
     template<typename T>
     bool compare(std::vector<T> &v1, std::vector<T> &v2) {
@@ -66,12 +76,15 @@ namespace cris_utils {
         return v1 == v2;
     }
 
+    /**
+     * Compares two sets and returns whether they have the same elements
+     */
     template<typename T>
     bool compare(std::set<T> &s1, std::set<T> &s2) {
         return s1 == s2;
     }
 
-    vector<string> strSplit(string str, const string &delim);
+    vector<string> strSplit(string str, const string &delimiter);
     void trim(std::string &s);
     bool isNumber(const string &str);
 
@@ -92,7 +105,7 @@ namespace cris_utils {
     }
 
     int getIntInput(string prompt, int min, int max);
-    int getBoolInput(string prompt);
+    bool getBoolInput(string prompt);
     void getContinueInput();
 
     void printTitle(string title);

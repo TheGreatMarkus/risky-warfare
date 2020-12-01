@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 /**
- * Driver for Orders.
+ * Driver for Orders
  */
 int main() {
     cout << std::boolalpha;

@@ -49,8 +49,12 @@ public:
     ~OrdersList();
 };
 
-// TODO mention that orders don't manage the pointers they have, hence why the lack of copy constructor, destructor, etc.
-
+/*
+ * Note that Order and its subclasses aren't responsible for managing the
+ * memory of the game state. Therefore, the default copy constructor,
+ * assignment operator and destructor are used, despite the presence of
+ * pointer attributes
+ */
 /**
  * Abstract class for player orders.
  */
@@ -65,7 +69,7 @@ public:
 
     virtual bool validate(Map *map, Player *player) = 0;
     virtual void execute(Map *map, Player *player) = 0;
-    virtual ostream &print(ostream &out) const = 0;
+    virtual void print(ostream &out) const = 0;
     virtual Order *clone() = 0;
 
     const bool &isExecuted() const;
@@ -91,7 +95,7 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     DeployOrder *clone() override;
 };
 
@@ -110,7 +114,7 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     AdvanceOrder *clone() override;
 
     Territory *getDest() const;
@@ -127,7 +131,7 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     BombOrder *clone() override;
 };
 
@@ -142,12 +146,12 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     BlockadeOrder *clone() override;
 };
 
 /**
- * Order for moving troops long distances
+ * Order for moving troops to any territory
  */
 class AirliftOrder : public Order {
 private:
@@ -161,7 +165,7 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     AirliftOrder *clone() override;
 };
 
@@ -176,7 +180,7 @@ public:
 
     bool validate(Map *map, Player *player) override;
     void execute(Map *map, Player *player) override;
-    ostream &print(ostream &out) const override;
+    void print(ostream &out) const override;
     NegotiateOrder *clone() override;
 };
 
