@@ -161,7 +161,6 @@ void Game::gameStart() {
                                              possibleStrategies);
         if (chosenStrategy == possibleStrategies[0]) {
             player->setStrategy(new HumanPlayerStrategy(player));
-            player->getHand()->addCard(new BombCard());
         } else if (chosenStrategy == possibleStrategies[1]) {
             player->setStrategy(new AggressivePlayerStrategy(player));
         } else if (chosenStrategy == possibleStrategies[2]) {

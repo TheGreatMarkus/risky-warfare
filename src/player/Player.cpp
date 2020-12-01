@@ -290,7 +290,11 @@ void Player::setCardDue(bool cardDue) {
 }
 
 void Player::setStrategy(PlayerStrategy *strategy) {
-    Player::strategy = strategy;
+    if (this->strategy != nullptr) {
+        delete this->strategy;
+        this->strategy = nullptr;
+    }
+    this->strategy = strategy;
 }
 
 Player::~Player() {
