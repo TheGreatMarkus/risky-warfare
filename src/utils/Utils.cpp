@@ -112,7 +112,7 @@ bool cris_utils::getBoolInput(string prompt) {
 
     do {
         if (error) {
-            cout << prompt << " (Please answer with either \"1 (yes)\" or \"2 (no)\"): ";
+            cout << prompt << " (Please answer with either \"1\" (yes) or \"2\" (no)): ";
         } else {
             cout << prompt << " (1 = yes, 2 = no): ";
         }

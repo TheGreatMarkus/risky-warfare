@@ -17,6 +17,7 @@ using std::find;
 using std::endl;
 using std::is_pointer;
 using std::sort;
+using std::remove;
 
 /**
  * Utilities used throughout the program

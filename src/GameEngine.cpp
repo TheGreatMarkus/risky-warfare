@@ -114,9 +114,9 @@ void Game::gameStart() {
 
     // User picks a map. Map must be valid
     bool mapValid = true;
-    string warzoneOption = "Warzone Loader";
+    string warZoneOption = "WarZone Loader";
     string conquestOption = "Conquest Loader";
-    vector<string> availableLoaders = {warzoneOption, conquestOption};
+    vector<string> availableLoaders = {warZoneOption, conquestOption};
     do {
         if (!mapValid) {
             cout << "Map is invalid! Please pick another." << endl;
@@ -130,7 +130,7 @@ void Game::gameStart() {
         string choice = pickFromList("Among the following loaders:",
                                      "Which loader should be used for the map you chose?", availableLoaders);
         // Pick loader for map
-        if (choice == warzoneOption) {
+        if (choice == warZoneOption) {
             mapLoader = new MapLoader();
         } else {
             mapLoader = new ConquestFileReaderAdapter();
@@ -256,17 +256,17 @@ void Game::reinforcementPhase() {
         int numArmies = 0;
         set<Territory *> ownedTerritories = player->getOwnedTerritories();
         numArmies += ownedTerritories.size() / 3;
-        set<Continent *> playerConts = map->getContinentsControlledByPlayer(player);
+        set<Continent *> playerContinents = map->getContinentsControlledByPlayer(player);
 
         cout << endl << player->getName() << " owns " << ownedTerritories.size()
              << " territories (+" << numArmies << "), ";
 
-        if (playerConts.empty()) {
+        if (playerContinents.empty()) {
             cout << "and controls no continents. " << endl;
         } else {
             cout << "and controls the following continents: " << endl;
         }
-        for (auto &continent : playerConts) {
+        for (auto &continent : playerContinents) {
             cout << "\t- " << continent->getName() << ": +" << continent->getArmies() << " armies" << endl;
             numArmies += continent->getArmies();
         }
@@ -292,7 +292,7 @@ void Game::issueOrderPhase() {
 }
 
 /**
- * Checks if deploy orders remain to executel
+ * Checks if deploy orders remain to execute
  */
 bool deployOrdersRemain(vector<Player *> players) {
     for (auto &player : players) {
