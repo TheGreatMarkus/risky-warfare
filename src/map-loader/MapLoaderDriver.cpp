@@ -30,7 +30,13 @@ int main() {
     Map *invalid = mapLoader->readMapFile("invalid.map", "Invalid");
     evaluateMap(*invalid);
 
+    MapLoader *conquestMapLoader = new ConquestFileReaderAdapter();
+
+    Map *conquestMap = conquestMapLoader->readMapFile("Earth.map", "Earth");
+    evaluateMap(*conquestMap);
+
     delete mapLoader;
+    delete conquestMapLoader;
     delete zertina;
     delete canada;
     delete usa;

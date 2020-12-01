@@ -27,6 +27,7 @@ namespace {
         if (contains(origin->getPlayer()->getAllies(), dest->getPlayer())) {
             cout << origin->getPlayer()->getName() << " and " << dest->getPlayer()->getName()
                  << " are allies! Skipping attack." << endl;
+            origin->addArmies(attackingArmies);
             return;
         }
 

@@ -107,7 +107,8 @@ void PhaseObserver::update() {
         if (game->getPhase() == ReinforcementPhase || game->getPhase() == IssuingPhase) {
             cout << "\tArmies: " << player->getArmies() << endl;
         }
-        if (game->getPhase() == IssuingPhase || game->getPhase() == ExecutingPhase) {
+        if (game->getPhase() == IssuingPhase || game->getPhase() == ExecutingPhase ||
+            game->getPhase() == PrepareNextRoundPhase) {
             if (player->getOwnedTerritories().size() < 8) {
                 cout << "\tTerritories:" << endl;
                 for (auto &territory : player->getOwnedTerritories()) {
@@ -118,6 +119,12 @@ void PhaseObserver::update() {
             for (int i = 0; i < player->getOrders()->size(); ++i) {
                 cout << "\t\t- " << *(*player->getOrders())[i] << endl;
             }
+        }
+    }
+    if (!neutralPlayer->getOwnedTerritories().empty()) {
+        cout << "Territories owned by the neutral player:" << endl;
+        for (auto &territory : neutralPlayer->getOwnedTerritories()) {
+            cout << "\t" << *territory << endl;
         }
     }
 

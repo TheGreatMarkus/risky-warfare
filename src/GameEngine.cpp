@@ -47,6 +47,7 @@ Game::Game() : map{nullptr},
                activePlayers{},
                allPlayers{},
                deck{nullptr},
+               mapLoader{nullptr},
                gameOver{false},
                phase{NoPhase},
                currentPlayer{nullptr} {}
@@ -104,13 +105,28 @@ void Game::gameStart() {
 
     // User picks a map. Map must be valid
     bool mapValid = true;
+    string warzoneOption = "Warzone Loader";
+    string conquestOption = "Conquest Loader";
+    vector<string> availableLoaders = {warzoneOption, conquestOption};
     do {
         if (!mapValid) {
             cout << "Map is invalid! Please pick another." << endl;
+            delete mapLoader;
+            delete map;
+            mapLoader = nullptr;
+            map = nullptr;
         }
-        string mapPath = pickFromList("Maps available under" + searchPath, "Which map file do you want to load?", maps);
-        MapLoader mapLoader;
-        map = mapLoader.readMapFile(mapPath, path(mapPath).filename());
+        string mapPath = pickFromList("Maps available under" + searchPath,
+                                      "Which map file do you want to load?", maps);
+        string choice = pickFromList("Among the following loaders:",
+                                     "Which loader should be used for the map you chose?", availableLoaders);
+        if (choice == warzoneOption) {
+            mapLoader = new MapLoader();
+        } else {
+            mapLoader = new ConquestFileReaderAdapter();
+        }
+
+        map = mapLoader->readMapFile(mapPath, path(mapPath).filename());
         mapValid = map->validate();
 
     } while (!mapValid);
@@ -134,6 +150,7 @@ void Game::gameStart() {
                                              possibleStrategies);
         if (chosenStrategy == possibleStrategies[0]) {
             player->setStrategy(new HumanPlayerStrategy(player));
+            player->getHand()->addCard(new BombCard());
         } else if (chosenStrategy == possibleStrategies[1]) {
             player->setStrategy(new AggressivePlayerStrategy(player));
         } else if (chosenStrategy == possibleStrategies[2]) {
@@ -387,6 +404,7 @@ Game::~Game() {
     }
 
     delete deck;
+    delete mapLoader;
 }
 
 int main() {

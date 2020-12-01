@@ -19,6 +19,7 @@ using cris_utils::removeElement;
 using cris_utils::getBoolInput;
 using cris_utils::getIntInput;
 using cris_utils::getContinueInput;
+using cris_utils::printList;
 
 namespace {
     void pickTerritoriesFromList(vector<Territory *> &available, vector<Territory *> &toFill,
@@ -127,6 +128,9 @@ bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> acti
     }
     if (!player->getHand()->empty()) {
         options.push_back(PLAY_CARD_OPTION);
+        cout << endl << "You have the following cards in your hand:" << endl;
+        printList(player->getHand()->getCards());
+        cout << endl;
     }
     if (!options.empty()) {
         options.push_back(SKIP_OPTION);
@@ -134,7 +138,7 @@ bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> acti
         cout << "You have no possible moves right now" << endl;
         return true;
     }
-    string answer = pickFromList("Given these possible options", "What do you want to do?", options);
+    string answer = pickFromList("Given the valid options below:", "What do you want to do?", options);
 
     if (answer == ADVANCE_ATTACK_OPTION || answer == ADVANCE_DEFEND_OPTION) {
         Territory *origin = nullptr;
@@ -158,7 +162,7 @@ bool HumanPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> acti
                                         player->getHand()->getCards());
         cout << "Playing " << *cardToPlay << endl;
         Order *cardOrder = cardToPlay->play(player, deck, map, activePlayers);
-        cout << player->getHand() << " issued " << *cardOrder << endl;
+        cout << player->getName() << " issued " << *cardOrder << endl;
         player->getOrders()->add(cardOrder);
     }
     return getBoolInput("Are you done issuing orders?");
@@ -367,7 +371,7 @@ NeutralPlayerStrategy::NeutralPlayerStrategy(Player *player) : PlayerStrategy(pl
 
 bool NeutralPlayerStrategy::issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers) {
     // Never issues orders
-    cout << "Employing [BenevolentPlayerStrategy] to issue orders" << endl;
+    cout << "Employing [NeutralPlayerStrategy] to issue orders" << endl;
     getContinueInput();
     return true;
 }

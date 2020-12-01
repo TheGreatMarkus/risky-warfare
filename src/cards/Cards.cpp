@@ -233,6 +233,8 @@ ReinforcementCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player 
     Territory *target = pickFromList("Among these territories you own:", "Which should be reinforced?",
                                      ownedTerritories);
 
+    target->addArmies(5);
+
     return new DeployOrder(5, target);
 }
 
@@ -310,9 +312,10 @@ Order *AirliftCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player
     Territory *origin = pickFromList("From the territories you own that have armies:",
                                      "Which territory do you want to airlift from?",
                                      validOrigins);
-
+    vector<Territory *> validDests = vector(map->getTerritories().begin(), map->getTerritories().end());
+    removeElement(validDests, origin);
     Territory *dest = pickFromList("From all territories on the map:", "Which territory do you want to airlift to?",
-                                   map->getTerritories());
+                                   validDests);
 
     int armies = getIntInput("How many armies do you want to send?", 1, origin->getAvailableArmies());
 

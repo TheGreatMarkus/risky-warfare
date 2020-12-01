@@ -1,13 +1,17 @@
 #include "MapLoader.h"
 
+#include <map>
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <iostream>
 #include <string>
 
 #include "../map/Map.h"
 #include "../utils/Utils.h"
 
+using std::map;
+using std::string;
 using std::cout;
 using std::endl;
 using std::ifstream;
@@ -19,6 +23,13 @@ using cris_utils::isNumber;
 namespace {
     void printError(string message, int lineNum) {
         cout << "ERROR: \"" << message << "\" IN MAP FILE AT LINE " << lineNum << endl;
+    };
+
+    enum class Section {
+        continents,
+        territories,
+        borders,
+        none,
     };
 }
 
@@ -37,14 +48,6 @@ ostream &operator<<(ostream &out, const MapLoader &obj) {
  * @return a Map object
  */
 Map *MapLoader::readMapFile(string path, string name) {
-    enum class Section {
-        files,
-        continents,
-        countries,
-        borders,
-        none,
-    };
-
     Section currentSection(Section::none);
     ifstream mapFile(path);
     string line;
@@ -57,41 +60,29 @@ Map *MapLoader::readMapFile(string path, string name) {
         // Clean line to avoid issues with special characters (line carriage, etc.)
         trim(line);
 
-        // Skip empty for comment lines
+        // Skip empty or comment lines
         if (line.empty() || line[0] == ';') {
             continue;
         }
 
         // If current line is a header for a section, set currentSection accordingly
-        if (line == "[continents]") {
+        if (line == "[files]") {
+            currentSection = Section::none;
+            continue;
+        } else if (line == "[continents]") {
             currentSection = Section::continents;
             continue;
         } else if (line == "[countries]") {
-            currentSection = Section::countries;
+            currentSection = Section::territories;
             continue;
         } else if (line == "[borders]") {
             currentSection = Section::borders;
             continue;
-        } else if (line == "[files]") {
-            currentSection = Section::files;
-            continue;
         }
 
-        // Skip files and none sections
-        if (currentSection == Section::files || currentSection == Section::none) {
-            continue;
-        }
-
-        // Get tokens for the current line
-        vector<string> tokens = strSplit(line, " ");
         switch (currentSection) {
-            case Section::files: {
-                continue;
-            }
-            case Section::none: {
-                continue;
-            }
             case Section::continents: {
+                vector<string> tokens = strSplit(line, " ");
                 // Expected format of line: "ContinentName ArmyValue"
                 if (tokens.size() < 2 || !isNumber(tokens[1])) {
                     printError("INVALID CONTINENT", lineNum);
@@ -100,7 +91,9 @@ Map *MapLoader::readMapFile(string path, string name) {
                 map->addContinent(tokens[0], stoi(tokens[1]));
                 break;
             }
-            case Section::countries: {
+
+            case Section::territories: {
+                vector<string> tokens = strSplit(line, " ");
                 // Expected format of line: "TerritoryId TerritoryName ContinentId"
                 if (tokens.size() < 3 || !isNumber(tokens[0]) || !isNumber(tokens[2])) {
                     printError("INVALID COUNTRY/TERRITORY", lineNum);
@@ -111,6 +104,7 @@ Map *MapLoader::readMapFile(string path, string name) {
                 break;
             }
             case Section::borders: {
+                vector<string> tokens = strSplit(line, " ");
                 // Expected format of line: "TerritoryId Neighbor1 Neighbor2 ..."
                 if (tokens.size() < 2) {
                     printError("INVALID BORDERS", lineNum);
@@ -127,7 +121,108 @@ Map *MapLoader::readMapFile(string path, string name) {
                 }
                 break;
             }
+            case Section::none:
+                break;
         }
     }
     return map;
 }
+
+MapLoader::~MapLoader() {}
+
+ostream &operator<<(ostream &out, const ConquestFileReader &obj) {
+    out << "ConquestFileReader";
+    return out;
+}
+
+Map *ConquestFileReader::readConquestFile(string path, string name) {
+    Section currentSection(Section::none);
+    ifstream mapFile(path);
+    string line;
+
+    Map *newMap = new Map(name);
+    int lineNum = 0;
+    map<string, int> territories;
+    map<string, int> continents;
+    map<string, vector<string>> connections;
+
+    while (getline(mapFile, line)) {
+        lineNum++;
+        // Clean line to avoid issues with special characters (line carriage, etc.)
+        trim(line);
+
+        // Skip empty or comment lines
+        if (line.empty() || line[0] == ';') {
+            continue;
+        }
+
+        // If current line is a header for a section, set currentSection accordingly
+        if (line == "[Map]") {
+            currentSection = Section::none;
+            continue;
+        } else if (line == "[Continents]") {
+            currentSection = Section::continents;
+            continue;
+        } else if (line == "[Territories]") {
+            currentSection = Section::territories;
+            continue;
+        }
+
+        // Get tokens for the current line
+
+        switch (currentSection) {
+            case Section::continents: {
+                vector<string> tokens = strSplit(line, "=");
+                // Expected format of line: "ContinentName=ArmyValue"
+                if (tokens.size() < 2 || !isNumber(tokens[1])) {
+                    printError("INVALID CONTINENT", lineNum);
+                    return newMap;
+                }
+                continents[tokens[0]] = continents.size();
+                newMap->addContinent(tokens[0], stoi(tokens[1]));
+                break;
+            }
+
+            case Section::territories: {
+                vector<string> tokens = strSplit(line, ",");
+                // Expected format of line: "TerritoryName,x,y,ContinentName,neighbor1, neighbor2,..."
+                if (tokens.size() < 5) {
+                    printError("INVALID COUNTRY/TERRITORY", lineNum);
+                    return newMap;
+                }
+                territories[tokens[0]] = territories.size();
+                for (int i = 4; i < tokens.size(); ++i) {
+                    connections[tokens[0]].push_back(tokens[i]);
+                }
+                newMap->addTerritory(tokens[0], continents[tokens[3]], 0);
+                break;
+            }
+            case Section::borders:
+            case Section::none:
+                break;
+        }
+    }
+    for (auto &pair : connections) {
+        for (auto &neighbor : pair.second) {
+            newMap->addConnection(territories[pair.first], territories[neighbor]);
+        }
+    }
+    return newMap;
+}
+
+ConquestFileReaderAdapter::ConquestFileReaderAdapter() : conquestFileReader{new ConquestFileReader()} {}
+
+ostream &operator<<(ostream &out, const ConquestFileReaderAdapter &obj) {
+    out << "ConquestFileReaderAdapter";
+    return out;
+}
+
+Map *ConquestFileReaderAdapter::readMapFile(string path, string name) {
+    return conquestFileReader->readConquestFile(path, name);
+}
+
+ConquestFileReaderAdapter::~ConquestFileReaderAdapter() {
+    delete conquestFileReader;
+}
+
+

@@ -16,7 +16,7 @@ using cris_utils::getBoolInput;
 using cris_utils::setToVector;
 using cris_utils::pickFromList;
 
-
+Player *neutralPlayer = new Player("Neutral Player");
 
 //=============================
 // Player Implementation
@@ -151,17 +151,22 @@ void Player::issueAdvanceOrder(Territory *origin, Territory *dest, int armies) {
 
 void Player::captureTerritory(Territory *territory) {
     // If territory belonged to a player, remove from their ownedTerritories
-    ownedTerritories.insert(territory);
     if (territory->getPlayer() != nullptr) {
-        territory->getPlayer()->loseTerritory(territory);
+        removeElement(territory->getPlayer()->ownedTerritories, territory);
     }
+
     territory->setPlayer(this);
+
+    ownedTerritories.insert(territory);
     cardDue = true;
 }
 
 void Player::loseTerritory(Territory *territory) {
     removeElement(ownedTerritories, territory);
-    territory->setPlayer(nullptr);
+
+    territory->setPlayer(neutralPlayer);
+
+    neutralPlayer->ownedTerritories.insert(territory);
 }
 
 /**

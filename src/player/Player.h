@@ -71,3 +71,5 @@ public:
     ~Player();
 
 };
+
+extern Player *neutralPlayer;

@@ -11,6 +11,7 @@ using std::vector;
 class Map;
 class Player;
 class Deck;
+class MapLoader;
 
 enum GamePhase {
     NoPhase,
@@ -27,6 +28,7 @@ class Game : public Observable {
     vector<Player *> activePlayers;
     vector<Player *> allPlayers;
     Deck *deck;
+    MapLoader *mapLoader;
 
     bool gameOver;
     GamePhase phase;
