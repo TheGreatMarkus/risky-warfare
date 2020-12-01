@@ -19,6 +19,7 @@ enum GamePhase {
     ReinforcementPhase,
     IssuingPhase,
     ExecutingPhase,
+    PrepareNextRoundPhase,
 };
 
 class Game : public Observable {
@@ -47,6 +48,7 @@ public:
     void issueOrderPhase();
     void executeOrdersPhase();
     void checkGameState();
+    void prepareNextRound();
     void updateGameState(Player *currentPlayer, GamePhase phase);
 
     Map *getMap() const;
@@ -68,5 +70,6 @@ const vector<string> GamePhaseString = {
         "Game Startup Phase",
         "Reinforcement Phase",
         "Issuing Orders Phase",
-        "Order Execution Phase"
+        "Order Execution Phase",
+        "Preparing for next round",
 };

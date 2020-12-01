@@ -11,7 +11,6 @@ using std::cin;
 using std::cout;
 using std::end;
 using std::endl;
-using std::getline;
 
 namespace {
     bool seedSet = false;
@@ -86,6 +85,7 @@ int cris_utils::getIntInput(string prompt, int min, int max) {
         } else {
             cout << prompt << " (" << min << "-" << max << "): ";
         }
+
         cin >> answer;
         cin.clear();
         cin.ignore(1000, '\n');
@@ -96,22 +96,23 @@ int cris_utils::getIntInput(string prompt, int min, int max) {
 }
 
 int cris_utils::getBoolInput(string prompt) {
-    string answer = "";
+    int answer;
     bool error = false;
 
     do {
         if (error) {
-            cout << prompt << " (Please answer with either \"y\" or \"n\"): ";
+            cout << prompt << " (Please answer with either \"1 (yes)\" or \"2 (no)\"): ";
         } else {
-            cout << prompt << " (y/n): ";
+            cout << prompt << " (1 = yes, 2 = no): ";
         }
 
-        getline(cin, answer);
+        cin >> answer;
         cin.clear();
-        error = answer != "y" && answer != "n" && answer != "yes" && answer != "no";
+        cin.ignore(1000, '\n');
+        error = !cin || (answer != 1 && answer != 2);
     } while (error);
 
-    if (answer == "y" || answer == "yes") {
+    if (answer == 1) {
         return true;
     } else {
         return false;
@@ -119,10 +120,8 @@ int cris_utils::getBoolInput(string prompt) {
 }
 
 void cris_utils::getContinueInput() {
-    cout << "Press Enter to continue: ";
-    string answer;
-    getline(cin, answer);
-    cin.clear();
+    cout << endl << "Press Enter to continue: ";
+    getchar();
 }
 
 void cris_utils::printTitle(string title) {

@@ -12,6 +12,7 @@
 #include "cards/Cards.h"
 #include "orders/Orders.h"
 #include "observers/GameObservers.h"
+#include "player/PlayerStrategies.h"
 
 using std::cout;
 using std::cin;
@@ -108,7 +109,8 @@ void Game::gameStart() {
             cout << "Map is invalid! Please pick another." << endl;
         }
         string mapPath = pickFromList("Maps available under" + searchPath, "Which map file do you want to load?", maps);
-        map = MapLoader::readMapFile(mapPath, path(mapPath).filename());
+        MapLoader mapLoader;
+        map = mapLoader.readMapFile(mapPath, path(mapPath).filename());
         mapValid = map->validate();
 
     } while (!mapValid);
@@ -122,6 +124,24 @@ void Game::gameStart() {
         allPlayers.push_back(new Player("Player " + std::to_string(i)));
     }
     activePlayers.insert(activePlayers.begin(), allPlayers.begin(), allPlayers.end());
+
+    vector<string> possibleStrategies{"Human Strategy", "Aggressive Strategy", "Benevolent Strategy",
+                                      "Neutral Strategy"};
+    for (auto &player : allPlayers) {
+        cout << endl;
+        string chosenStrategy = pickFromList("Among these possible player strategies:",
+                                             "which strategy should " + player->getName() + " use?",
+                                             possibleStrategies);
+        if (chosenStrategy == possibleStrategies[0]) {
+            player->setStrategy(new HumanPlayerStrategy(player));
+        } else if (chosenStrategy == possibleStrategies[1]) {
+            player->setStrategy(new AggressivePlayerStrategy(player));
+        } else if (chosenStrategy == possibleStrategies[2]) {
+            player->setStrategy(new BenevolentPlayerStrategy(player));
+        } else if (chosenStrategy == possibleStrategies[3]) {
+            player->setStrategy(new NeutralPlayerStrategy(player));
+        }
+    }
 
     // Create deck of cards
     deck = new Deck();
@@ -147,9 +167,6 @@ void Game::gameStart() {
 
 void Game::startupPhase() {
     updateGameState(nullptr, StartupPhase);
-
-    cout << endl;
-    printTitle("Entering the startup phase!");
 
     // Determine order of play for players
     std::shuffle(activePlayers.begin(), activePlayers.end(), rng);
@@ -195,17 +212,7 @@ void Game::mainGameLoop() {
 
         checkGameState();
 
-        for (auto &player : activePlayers) {
-            // Reset allies
-            player->resetAllies();
-
-            // Give card if captured territory.
-            if (player->isCardDue()) {
-                cout << player->getName() << " captured a territory this round! They will get a card" << endl;
-                deck->draw(player->getHand());
-            }
-
-        }
+        prepareNextRound();
         round++;
     }
 }
@@ -218,7 +225,8 @@ void Game::reinforcementPhase() {
         numArmies += ownedTerritories.size() / 3;
         set<Continent *> playerConts = map->getContinentsControlledByPlayer(player);
 
-        cout << endl << player->getName() << " owns " << ownedTerritories.size() << " territories, ";
+        cout << endl << player->getName() << " owns " << ownedTerritories.size()
+             << " territories (+" << numArmies << "), ";
 
         if (playerConts.empty()) {
             cout << "and controls no continents. " << endl;
@@ -233,6 +241,7 @@ void Game::reinforcementPhase() {
              << " -> " << player->getArmies() + numArmies << " (+" << numArmies << ")" << endl;
         player->addArmies(numArmies);
     }
+    getContinueInput();
 }
 
 void Game::issueOrderPhase() {
@@ -241,11 +250,7 @@ void Game::issueOrderPhase() {
         for (int i = 0; i < activePlayers.size(); ++i) {
             if (!ready[i]) {
                 updateGameState(activePlayers[i], IssuingPhase);
-                activePlayers[i]->issueOrder(map, deck, activePlayers);
-                if (activePlayers[i]->getArmies() == 0) {
-                    cout << endl;
-                    ready[i] = getBoolInput("Are you done issuing orders?");
-                }
+                ready[i] = activePlayers[i]->issueOrder(map, deck, activePlayers);
             }
         }
     }
@@ -286,6 +291,7 @@ void Game::executeOrdersPhase() {
             // If the order returned isn't a deploy, then current player doesn't have any deploy orders left.
             if (order->getType() != OrderType::DEPLOY && deployOrdersRemain(activePlayers)) {
                 cout << "Cannot execute " << *order << ". Some Deploy orders haven't yet been executed." << endl;
+                getContinueInput();
                 continue;
             }
             order->execute(map, activePlayers[i]);
@@ -298,9 +304,7 @@ void Game::executeOrdersPhase() {
             if (order == nullptr) {
 
             }
-            cout << endl;
             getContinueInput();
-            cout << endl;
         }
     }
 
@@ -316,10 +320,30 @@ void Game::checkGameState() {
 
     for (auto &player : activePlayers) {
         if (vectorToSet(map->getTerritories()) == player->getOwnedTerritories()) {
-            cout << player->getName() << " won the game!";
+            cout << player->getName() << " won the game!" << endl;
             gameOver = true;
         }
     }
+}
+
+void Game::prepareNextRound() {
+    for (auto &territory : map->getTerritories()) {
+        territory->freeArmies();
+    }
+
+    updateGameState(nullptr, PrepareNextRoundPhase);
+
+    for (auto &player : activePlayers) {
+        // Reset allies
+        player->resetAllies();
+
+        // Give card if captured territory.
+        if (player->isCardDue()) {
+            cout << player->getName() << " captured a territory this round! They will get a card" << endl;
+            deck->draw(player->getHand());
+        }
+    }
+    getContinueInput();
 }
 
 void Game::updateGameState(Player *currentPlayer, GamePhase phase) {

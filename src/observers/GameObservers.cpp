@@ -6,6 +6,8 @@
 #include "../GameEngine.h"
 #include "../player/Player.h"
 #include "../orders/Orders.h"
+#include "../map/Map.h"
+#include "../player/PlayerStrategies.h"
 
 using cris_utils::removeElement;
 using cris_utils::printSubtitle;
@@ -100,20 +102,25 @@ void PhaseObserver::update() {
     }
     printSubtitle(title);
     cout << "Game phase overview:" << endl;
-
-    if (game->getPhase() == ReinforcementPhase || game->getPhase() == IssuingPhase) {
-        for (auto &player : game->getActivePlayers()) {
-            cout << "\t" << player->getName() << ": " << player->getArmies() << " armies" << endl;
+    for (auto &player : game->getActivePlayers()) {
+        cout << player->getName() << " [" << *(player->getStrategy()) << "] : " << endl;
+        if (game->getPhase() == ReinforcementPhase || game->getPhase() == IssuingPhase) {
+            cout << "\tArmies: " << player->getArmies() << endl;
         }
-    }
-    if (game->getPhase() == IssuingPhase || game->getPhase() == ExecutingPhase) {
-        for (auto &player : game->getActivePlayers()) {
-            cout << "\tCurrent Orders for " << player->getName() << ":" << endl;
+        if (game->getPhase() == IssuingPhase || game->getPhase() == ExecutingPhase) {
+            if (player->getOwnedTerritories().size() < 8) {
+                cout << "\tTerritories:" << endl;
+                for (auto &territory : player->getOwnedTerritories()) {
+                    cout << "\t\t" << *territory << endl;
+                }
+            }
+            cout << "\tOrders Orders:" << endl;
             for (int i = 0; i < player->getOrders()->size(); ++i) {
                 cout << "\t\t- " << *(*player->getOrders())[i] << endl;
             }
         }
     }
+
 }
 
 void PhaseObserver::print(ostream &out) const {

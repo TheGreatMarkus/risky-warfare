@@ -354,12 +354,14 @@ Territory::Territory(string name, Continent *continent, int armies)
         : name{name},
           continent{continent},
           armies{armies},
+          reservedArmies{0},
           player{nullptr} {}
 
 Territory::Territory(const Territory &other)
         : name{other.name},
           continent{other.continent},
           armies{other.armies},
+          reservedArmies{other.reservedArmies},
           player{nullptr} {}
 
 Territory &Territory::operator=(Territory other) {
@@ -376,20 +378,19 @@ void swap(Territory &a, Territory &b) {
     using std::swap;
 
     swap(a.name, b.name);
-    swap(a.continent, b.continent);
     swap(a.armies, b.armies);
+    swap(a.reservedArmies, b.reservedArmies);
+    swap(a.continent, b.continent);
     swap(a.player, b.player);
 }
 
 ostream &operator<<(ostream &out, const Territory &obj) {
-    out << "Territory{ "
-        << "name: " << obj.name
+    out << "Territory{"
+        << " name: " << obj.name
         << ", continent: " << obj.continent->getName()
-        << ", armies: " << obj.armies;
-    if (obj.player != nullptr) {
-        out << ", player: " << obj.player->getName();
-    }
-    out << " }";
+        << ", armies: " << obj.armies
+        << ", availableArmies: " << obj.getAvailableArmies()
+        << " }";
 
     return out;
 }
@@ -403,6 +404,28 @@ void Territory::removeArmies(int armies) {
     if (this->armies < 0) {
         this->armies = 0;
     }
+}
+
+void Territory::reserveArmies(int armies) {
+    reservedArmies += armies;
+}
+
+void Territory::freeArmies(int armies) {
+    reservedArmies -= armies;
+    if (reservedArmies < 0) {
+        reservedArmies = 0;
+    }
+}
+
+void Territory::freeArmies() {
+    reservedArmies = 0;
+}
+
+int Territory::getAvailableArmies() const {
+    if (armies - reservedArmies < 0) {
+        return 0;
+    }
+    return armies - reservedArmies;
 }
 
 /**
@@ -421,11 +444,20 @@ void Territory::blockade() {
     this->armies *= 3;
 }
 
-const string &Territory::getName() const {
+bool Territory::canAttack(Map *map) {
+    for (auto &neighbor : map->getNeighbors(this)) {
+        if (player != neighbor->getPlayer()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const string &Territory::getName() {
     return name;
 }
 
-const int &Territory::getArmies() const {
+int Territory::getArmies() const {
     return armies;
 }
 
@@ -445,9 +477,20 @@ void Territory::setPlayer(Player *player) {
     this->player = player;
 }
 
-void Territory::setArmies(int armies) {
-    Territory::armies = armies;
-}
-
 Territory::~Territory() {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

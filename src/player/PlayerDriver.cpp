@@ -40,7 +40,7 @@ int main() {
     deck->addCard(bombCard);
     deck->draw(player1->getHand());
 
-    player1->issueDeployOrder(map);
+    player1->issueDeployOrder(map, t0, 10);
 
     vector<Territory *> toDefend = player1->toDefend(map);
     vector<Territory *> toAttack = player1->toAttack(map);

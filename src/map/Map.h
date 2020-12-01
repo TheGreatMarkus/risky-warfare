@@ -11,7 +11,6 @@ using std::set;
 using std::string;
 using std::vector;
 
-
 class Map;
 class Territory;
 class Continent;
@@ -77,6 +76,7 @@ class Territory {
 private:
     string name;
     int armies;
+    int reservedArmies;
     Continent *continent;
     Player *player;
 
@@ -91,17 +91,21 @@ public:
 
     void addArmies(int armies);
     void removeArmies(int armies);
+    void reserveArmies(int armies);
+    void freeArmies(int armies);
+    void freeArmies();
+    int getAvailableArmies() const;
     void bomb();
     void blockade();
+    bool canAttack(Map *map);
 
-    const string &getName() const;
-    const int &getArmies() const;
+    const string &getName();
+    int getArmies() const;
     Continent *getContinent() const;
     Player *getPlayer();
 
     void setContinent(Continent *continent);
     void setPlayer(Player *player);
-    void setArmies(int armies);
 
     ~Territory();
 };

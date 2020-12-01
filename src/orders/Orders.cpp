@@ -18,12 +18,15 @@ namespace {
     const int ATTACK_CHANCE = 60;
     const int DEFEND_CHANCE = 70;
 
-    void attackTerritory(Territory *attacker, int attackingArmies, Territory *defender) {
-        cout << attacker->getName() << " (" << attacker->getPlayer()->getName() << ") is attacking "
-             << defender->getName() << " (" << defender->getPlayer()->getName() << ")" << endl;
-        if (contains(attacker->getPlayer()->getAllies(), defender->getPlayer())) {
-            cout << attacker->getPlayer()->getName() << " and " << defender->getPlayer()->getName()
-                 << " are allies! Skipping attack" << endl;
+    void attackTerritory(Territory *origin, int attackingArmies, Territory *dest) {
+        Player *attacker = origin->getPlayer();
+        Player *defender = dest->getPlayer();
+        cout << attacker->getName() << " (" << origin->getName()
+             << ") is attacking "
+             << defender->getName() << " (" << dest->getName() << ")" << endl;
+        if (contains(origin->getPlayer()->getAllies(), dest->getPlayer())) {
+            cout << origin->getPlayer()->getName() << " and " << dest->getPlayer()->getName()
+                 << " are allies! Skipping attack." << endl;
             return;
         }
 
@@ -36,33 +39,38 @@ namespace {
             }
         }
 
-        for (int i = 0; i < defender->getArmies(); ++i) {
+        for (int i = 0; i < dest->getArmies(); ++i) {
             int roll = randInt(1, 100);
             if (roll < DEFEND_CHANCE) {
                 defenderKills++;
             }
         }
+        cout << "Attacker kills: " << attackerKills << endl;
+        cout << "Defender kills: " << defenderKills << endl;
 
-        defender->removeArmies(attackerKills);
+        dest->removeArmies(attackerKills);
         attackingArmies -= defenderKills;
         if (attackingArmies < 0) {
             attackingArmies = 0;
         }
 
-        if (defender->getArmies() == 0 && attackingArmies > 0) {
+        if (dest->getArmies() == 0 && attackingArmies > 0) {
             // Attack successful
-            attacker->getPlayer()->captureTerritory(defender);
-            defender->setArmies(attackingArmies);
-            cout << "Attack was successful! " << attacker->getPlayer()->getName() << " captured "
-                 << defender->getName() << endl;
-        } else if (defender->getArmies() > 0 && attackingArmies > 0) {
-            // Attack failed, attacker has some armies left alive
-            attacker->addArmies(attackingArmies);
+            origin->getPlayer()->captureTerritory(dest);
+            dest->removeArmies(dest->getArmies());
+            dest->addArmies(attackingArmies);
+            cout << "Attack was successful! " << origin->getPlayer()->getName() << " captured "
+                 << dest->getName() << endl;
+        } else if (dest->getArmies() > 0 && attackingArmies > 0) {
+            // Attack failed, origin has some armies left alive
+            origin->addArmies(attackingArmies);
             cout << "Attack failed!" << endl;
         } else {
-            // Attack failed, attacker has no armies left alive, nothing additional happens
+            // Attack failed, origin has no armies left alive, nothing additional happens
             cout << "Attack failed!" << endl;
         }
+        cout << "Origin: " << *origin << endl;
+        cout << "Destination: " << *dest << endl;
     }
 }
 
@@ -234,10 +242,8 @@ DeployOrder::DeployOrder(int armies, Territory *territory)
 bool DeployOrder::validate(Map *map, Player *player) {
     // Territory must exist
     // Territory must be owned by the player
-    // Player must have enough armies
     if (!contains(map->getTerritories(), territory)
-        || !player->owns(territory)
-        || player->getArmies() < armies) {
+        || !player->owns(territory)) {
         return false;
     }
     return true;
@@ -259,8 +265,6 @@ void DeployOrder::execute(Map *map, Player *player) {
     }
     cout << "Executing " << *this << endl;
 
-    territory->addArmies(armies);
-    player->removeArmies(armies);
     setEffect("Added " + to_string(armies) + " armies to territory " + territory->getName());
 
     setExecuted(true);
@@ -310,7 +314,7 @@ bool AdvanceOrder::validate(Map *map, Player *player) {
     // both territories must exist
     // Player must own origin territory
     // origin and dest territory must be adjacent
-    // origin must have enough troops
+    // origin must have enough armies
     if (!contains(map->getTerritories(), origin)
         || !contains(map->getTerritories(), dest)
         || !player->owns(origin)
@@ -332,6 +336,7 @@ void AdvanceOrder::execute(Map *map, Player *player) {
         cout << *this << " was already executed. Not executing." << endl;
         return;
     }
+
     if (!validate(map, player)) {
         cout << *this << " is invalid. Not executing." << endl;
         return;
@@ -339,13 +344,15 @@ void AdvanceOrder::execute(Map *map, Player *player) {
     cout << "Executing " << *this << endl;
 
     origin->removeArmies(armies);
+    origin->freeArmies(armies);
+
     if (dest->getPlayer() == player) {
         dest->addArmies(armies);
         setEffect("Moved " + to_string(armies) + " armies from territory "
                   + origin->getName() + " to territory " + dest->getName());
     } else {
         attackTerritory(origin, armies, dest);
-        setEffect("Moved " + to_string(armies) + " armies from territory "
+        setEffect("Used " + to_string(armies) + " armies from territory "
                   + origin->getName() + " to attack territory " + dest->getName());
     }
 
@@ -376,6 +383,10 @@ ostream &AdvanceOrder::print(ostream &out) const {
 
 AdvanceOrder *AdvanceOrder::clone() {
     return new AdvanceOrder(*this);
+}
+
+Territory *AdvanceOrder::getDest() const {
+    return dest;
 }
 
 //=============================
@@ -578,6 +589,8 @@ void AirliftOrder::execute(Map *map, Player *player) {
     cout << "Executing " << *this << endl;
 
     origin->removeArmies(armies);
+    origin->freeArmies(armies);
+
     if (dest->getPlayer() == player) {
         dest->addArmies(armies);
         setEffect("Airlift " + to_string(armies) + " armies from territory "

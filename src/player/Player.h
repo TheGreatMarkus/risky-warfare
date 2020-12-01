@@ -4,8 +4,6 @@
 #include <string>
 #include <iostream>
 #include <set>
-#include "../map/Map.h"
-#include "../GameEngine.h"
 
 using std::ostream;
 using std::string;
@@ -18,7 +16,8 @@ class Order;
 class OrdersList;
 class Card;
 class Deck;
-
+class Map;
+class PlayerStrategy;
 enum class OrderType;
 
 /**
@@ -33,6 +32,7 @@ private:
     set<Player *> allies;
     Hand *hand;
     OrdersList *orders;
+    PlayerStrategy *strategy;
 public:
     Player(string name);
     Player(const Player &other);
@@ -42,11 +42,11 @@ public:
 
     vector<Territory *> toDefend(Map *map);
     vector<Territory *> toAttack(Map *map);
-    void issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
-    void issueDeployOrder(Map *map);
-    void issueAdvanceOrder(Map *map,
-                           string verb,
-                           vector<Territory *> list);
+    bool issueOrder(Map *map, Deck *deck, vector<Player *> activePlayers);
+    void issueDeployOrder(Territory *territory, int armies);
+    void issueAdvanceOrder(Territory *origin,
+                           Territory *dest,
+                           int armies);
     void captureTerritory(Territory *territory);
     void loseTerritory(Territory *territory);
     bool owns(Territory *territory);
@@ -61,10 +61,12 @@ public:
     Hand *getHand();
     OrdersList *getOrders() const;
     const set<Player *> &getAllies() const;
+    PlayerStrategy *getStrategy() const;
 
     void addArmies(int armies);
     void removeArmies(int armies);
     void setCardDue(bool cardDue);
+    void setStrategy(PlayerStrategy *strategy);
 
     ~Player();
 

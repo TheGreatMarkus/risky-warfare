@@ -112,6 +112,8 @@ public:
     void execute(Map *map, Player *player) override;
     ostream &print(ostream &out) const override;
     AdvanceOrder *clone() override;
+
+    Territory *getDest() const;
 };
 
 /**

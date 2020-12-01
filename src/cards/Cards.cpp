@@ -302,7 +302,7 @@ Order *AirliftCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player
 
     vector<Territory *> validOrigins{};
     for (auto &territory : cardPlayer->getOwnedTerritories()) {
-        if (territory->getArmies() > 0) {
+        if (territory->getAvailableArmies() > 0) {
             validOrigins.push_back(territory);
         }
     }
@@ -314,8 +314,9 @@ Order *AirliftCard::play(Player *cardPlayer, Deck *deck, Map *map, vector<Player
     Territory *dest = pickFromList("From all territories on the map:", "Which territory do you want to airlift to?",
                                    map->getTerritories());
 
-    int armies = getIntInput("How many armies do you want to send?", 1, origin->getArmies());
+    int armies = getIntInput("How many armies do you want to send?", 1, origin->getAvailableArmies());
 
+    origin->reserveArmies(armies);
     return new AirliftOrder(armies, origin, dest);
 }
 
