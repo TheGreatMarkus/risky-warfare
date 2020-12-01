@@ -37,10 +37,12 @@ int main() {
 
     delete mapLoader;
     delete conquestMapLoader;
+
     delete zertina;
     delete canada;
     delete usa;
     delete invalid;
+    delete conquestMap;
 }
 
 void evaluateMap(Map &map) {
